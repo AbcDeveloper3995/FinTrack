@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary-fixed":"#40000c","secondary":"#006c4a","on-primary-fixed-variant":"#372abf","on-error":"#ffffff","on-primary-fixed":"#100069","primary":"#2a14b4","on-background":"#131b2e","surface-container-high":"#e2e7ff","on-error-container":"#93000a","surface-dim":"#d2d9f4","primary-fixed-dim":"#c3c0ff","surface-container":"#eaedff","on-surface-variant":"#464554","surface-tint":"#5148d7","on-tertiary-fixed-variant":"#920028","inverse-on-surface":"#eef0ff","surface":"#faf8ff","on-secondary":"#ffffff","primary-fixed":"#e3dfff","error-container":"#ffdad6","tertiary-fixed":"#ffdada","tertiary-container":"#a6002f","tertiary":"#7b0020","inverse-primary":"#c3c0ff","on-primary-container":"#c1beff","on-primary":"#ffffff","surface-container-lowest":"#ffffff","secondary-container":"#82f5c1","outline-variant":"#c7c4d7","outline":"#777586","surface-container-low":"#f2f3ff","error":"#ba1a1a","on-tertiary-container":"#ffb0b4","surface-variant":"#dae2fd","primary-container":"#4338ca","secondary-fixed":"#85f8c4","surface-container-highest":"#dae2fd","surface-bright":"#faf8ff","on-surface":"#131b2e","background":"#faf8ff","on-secondary-fixed-variant":"#005137","on-tertiary":"#ffffff","secondary-fixed-dim":"#68dba9","inverse-surface":"#283044","on-secondary-container":"#00714e","tertiary-fixed-dim":"#ffb3b6","on-secondary-fixed":"#002114"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-sm":"0.5rem","margin-lg":"3rem","space-xl":"2.5rem","space-md":"1rem","margin":"2rem","margin-sm":"1rem","gutter-lg":"2rem","gutter-sm":"1rem","space-xs":"0.25rem","space-lg":"1.5rem","gutter":"1.5rem"},"fontFamily":{"headline-lg":["Inter"],"headline-lg-mobile":["Inter"],"metric-md":["Inter"],"display-lg":["Inter"],"display-lg-mobile":["Inter"],"label-md":["Inter"],"headline-md":["Inter"],"body-lg":["Inter"],"metric-lg":["Inter"],"body-md":["Inter"]},"fontSize":{"headline-lg":["2rem",{"lineHeight":"2.5rem","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-lg-mobile":["1.5rem",{"lineHeight":"2rem","letterSpacing":"-0.015em","fontWeight":"600"}],"metric-md":["1.125rem",{"lineHeight":"1.5rem","letterSpacing":"-0.01em","fontWeight":"500"}],"display-lg":["3rem",{"lineHeight":"3.5rem","letterSpacing":"-0.03em","fontWeight":"700"}],"display-lg-mobile":["2rem",{"lineHeight":"2.5rem","letterSpacing":"-0.025em","fontWeight":"700"}],"label-md":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.04em","fontWeight":"600"}],"headline-md":["1.25rem",{"lineHeight":"1.75rem","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["1rem",{"lineHeight":"1.5rem","letterSpacing":"-0.005em","fontWeight":"400"}],"metric-lg":["1.75rem",{"lineHeight":"2rem","letterSpacing":"-0.02em","fontWeight":"600"}],"body-md":["0.875rem",{"lineHeight":"1.25rem","letterSpacing":"0em","fontWeight":"400"}]}}}}</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-gutter-lg flex items-center justify-between"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm text-primary" data-path="login" href="#"><span class="material-symbols-outlined text-[26px]">account_balance</span><span class="font-headline-md text-headline-md tracking-tight text-on-surface font-semibold">FinTrack</span></a><div class="hidden md:flex items-center gap-space-xs px-space-sm py-1 bg-surface-container rounded-full text-secondary font-label-md text-label-md"><span class="material-symbols-outlined text-[14px]">verified_user</span><span>256-bit Bank Grade Security</span></div></div><div class="flex items-center gap-space-lg"><nav class="hidden sm:flex items-center gap-space-md" data-active-classes="bg-primary-container text-on-primary font-label-md rounded-lg"><a class="px-space-md py-space-xs text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors" data-path="login" href="#">Sign In</a><a aria-current="page" class="px-space-md py-space-xs transition-colors bg-primary-container text-on-primary font-label-md rounded-lg" data-path="register" href="#">Create Account</a><a class="px-space-md py-space-xs text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors" data-path="security-verification" href="#">Security Center</a><a class="px-space-md py-space-xs text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-colors" data-path="help-center" href="#">Support</a></nav><div class="flex items-center gap-space-sm pl-space-sm"><button class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-low text-on-surface-variant hover:text-on-surface text-label-md font-label-md" type="button"><span class="material-symbols-outlined text-[16px]">language</span><span>ES</span><span class="material-symbols-outlined text-[14px]">expand_more</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 bg-background min-h-screen"><div class="flex flex-col w-full">
+<div class="relative w-full overflow-hidden py-space-xl lg:py-margin-lg px-gutter-sm sm:px-gutter md:px-gutter-lg">
+<!-- Ambient financial geometric background aura -->
+<div class="absolute -top-32 -left-24 w-96 h-96 bg-primary-fixed/40 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -right-32 w-80 h-80 bg-secondary-container/30 rounded-full blur-3xl pointer-events-none"></div>
+<div class="max-w-7xl mx-auto w-full relative z-10">
+<!-- Top Dual Action Toggle Tabs -->
+<div class="flex items-center justify-center mb-space-xl">
+<div class="bg-surface-container p-1 rounded-xl flex items-center shadow-sm">
+<a class="px-space-lg py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-space-xs" data-path="login" href="#">
+<span class="material-symbols-outlined text-[16px]">login</span>
+<span>Iniciar Sesión</span>
+</a>
+<a class="px-space-lg py-space-xs rounded-lg font-label-md text-label-md bg-primary-container text-on-primary shadow-sm flex items-center gap-space-xs" data-path="register" href="#">
+<span class="material-symbols-outlined text-[16px]">person_add</span>
+<span>Crear Cuenta</span>
+</a>
+</div>
+</div>
+<!-- Main Asymmetric Dual Grid Container -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- Left: Form Column (7 Columns) -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-space-lg sm:p-space-xl rounded-xl shadow-md">
+<div class="mb-space-lg">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container text-primary font-label-md text-label-md mb-space-sm">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+<span>Acceso Ilimitado • Plan Starter Gratuito</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-space-xs">
+              Comienza a dominar tus finanzas
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+              Únete a FinTrack y toma el control de tus ingresos, gastos y metas de ahorro con precisión bancaria.
+            </p>
+</div>
+<!-- Quick Social Authentication -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm mb-space-lg">
+<button class="w-full h-10 px-space-md bg-surface-container-low hover:bg-surface-container transition-colors rounded-lg flex items-center justify-center gap-space-sm text-on-surface font-label-md text-label-md shadow-sm" type="button">
+<svg class="w-4 h-4" viewbox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17Z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.34 24 12 24Z" fill="#34A853"></path>
+<path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.14 0 9.89 0 12s.45 3.86 1.24 5.42l4.04-3.15Z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" fill="#EA4335"></path>
+</svg>
+<span>Continuar con Google</span>
+</button>
+<button class="w-full h-10 px-space-md bg-surface-container-low hover:bg-surface-container transition-colors rounded-lg flex items-center justify-center gap-space-sm text-on-surface font-label-md text-label-md shadow-sm" type="button">
+<svg class="w-4 h-4 fill-current text-on-surface" viewbox="0 0 170 170">
+<path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.07-7.7-7.85-12.01-14.34-6.3-9.45-11.13-19.86-14.49-31.25-3.37-11.38-5.06-22.39-5.06-33.02 0-14.93 3.68-27.18 11.04-36.75 7.36-9.56 16.59-14.44 27.69-14.63 4.8 0 10.23 1.34 16.3 4.02 6.07 2.68 9.94 4.07 11.61 4.17 1.48-.1 5.46-1.55 11.95-4.35 6.49-2.8 12.06-4.08 16.71-3.84 12.63.78 22.84 5.37 30.64 13.78-10.98 6.64-16.37 15.64-16.16 27 0 9.87 3.82 18.25 11.45 25.13 7.64 6.89 16.89 10.77 27.77 11.66-2.22 7.02-4.87 13.82-7.97 20.4zM119.22 33.15c0-6.9 2.45-13.3 7.35-19.21 4.9-5.91 11.01-9.96 18.33-12.15.54 1.83.81 3.64.81 5.43 0 7.02-2.58 13.56-7.75 19.62-5.17 6.05-11.4 10.15-18.74 12.31-.07-2-.1-3.7-.1-5.1l.1-.9z"></path>
+</svg>
+<span>Continuar con Apple</span>
+</button>
+</div>
+<div class="relative flex py-space-xs items-center mb-space-md">
+<div class="flex-grow bg-surface-container h-[1px]"></div>
+<span class="flex-shrink mx-space-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">o con tu email institucional o personal</span>
+<div class="flex-grow bg-surface-container h-[1px]"></div>
+</div>
+<!-- Registration Form -->
+<form class="space-y-space-md" onsubmit="event.preventDefault();">
+<!-- Full Name -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-space-xs" for="fullname">
+                Nombre Completo
+              </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-[20px] text-on-surface-variant">badge</span>
+<input class="w-full h-10 pl-10 pr-space-md bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md shadow-sm outline-none focus:bg-surface-container-low transition-colors" id="fullname" placeholder="ej. Sofía Ramírez Delgado" type="text" value="Sofía Ramírez Delgado"/>
+</div>
+</div>
+<!-- Email Address -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-space-xs" for="email">
+                Correo Electrónico
+              </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-[20px] text-on-surface-variant">mail</span>
+<input class="w-full h-10 pl-10 pr-space-md bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md shadow-sm outline-none focus:bg-surface-container-low transition-colors" id="email" placeholder="sofia.ramirez@empresa.com" type="email" value="sofia.ramirez@patrimonio.mx"/>
+</div>
+</div>
+<!-- Password Field & Dynamic Strength Meter -->
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<label class="block font-label-md text-label-md text-on-surface" for="password">
+                  Contraseña Maestra
+                </label>
+<span class="font-label-md text-label-md text-secondary font-semibold" id="strength-label">Fuerte (92%)</span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-[20px] text-on-surface-variant">lock</span>
+<input class="w-full h-10 pl-10 pr-10 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md shadow-sm outline-none focus:bg-surface-container-low transition-colors" id="password" type="password" value="FinTrack#2025!"/>
+<button class="absolute right-3 top-2.5 text-on-surface-variant hover:text-on-surface" id="toggle-password" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<!-- Visual Indicator Bars -->
+<div class="grid grid-cols-3 gap-space-xs mt-space-xs">
+<div class="h-1.5 rounded-full bg-secondary transition-colors duration-300" id="bar-1"></div>
+<div class="h-1.5 rounded-full bg-secondary transition-colors duration-300" id="bar-2"></div>
+<div class="h-1.5 rounded-full bg-secondary transition-colors duration-300" id="bar-3"></div>
+</div>
+<!-- Interactive Requirements Checklist -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs mt-space-sm pt-space-xs">
+<div class="flex items-center gap-space-xs text-secondary font-label-md text-label-md" id="rule-length">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Mínimo 8 caracteres</span>
+</div>
+<div class="flex items-center gap-space-xs text-secondary font-label-md text-label-md" id="rule-num-sym">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Al menos un número & símbolo</span>
+</div>
+</div>
+</div>
+<!-- Currency Selection Component -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-space-xs" for="currency">
+                Moneda Principal de la Cuenta
+              </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-[20px] text-on-surface-variant">payments</span>
+<select class="w-full h-10 pl-10 pr-10 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md shadow-sm outline-none appearance-none cursor-pointer focus:bg-surface-container-low transition-colors" id="currency">
+<option selected="" value="MXN">Peso Mexicano — MXN ($) • Moneda Predeterminada</option>
+<option value="USD">Dólar Estadounidense — USD ($)</option>
+<option value="EUR">Euro — EUR (€)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-[20px] text-on-surface-variant">expand_more</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">
+                Tus balances consolidados, presupuestos y proyecciones se calcularán en esta divisa.
+              </p>
+</div>
+<!-- Legal Checkbox -->
+<div class="pt-space-xs">
+<label class="flex items-start gap-space-sm cursor-pointer select-none">
+<input checked="" class="mt-1 w-4 h-4 rounded text-primary-container bg-surface-container-low accent-primary cursor-pointer" id="terms" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant">
+                  Acepto los <a class="text-primary font-semibold hover:underline" data-path="terms-of-service" href="#">Términos de Servicio</a> y la <a class="text-primary font-semibold hover:underline" data-path="privacy-policy" href="#">Política de Privacidad de Datos Financieros</a> de FinTrack.
+                </span>
+</label>
+</div>
+<!-- Primary Action CTA -->
+<div class="pt-space-sm">
+<button class="w-full h-12 bg-primary-container text-on-primary rounded-lg font-headline-md text-headline-md tracking-normal flex items-center justify-center gap-space-sm hover:opacity-95 shadow-md active:scale-[0.99] transition-all" type="submit">
+<span>Crear mi cuenta gratuita</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Security Footer Strip Inside Left Panel -->
+<div class="mt-space-lg pt-space-md flex flex-wrap items-center justify-center gap-x-space-md gap-y-space-xs text-on-surface-variant font-label-md text-label-md bg-surface-container-low p-space-sm rounded-lg text-center">
+<span class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+              Sin comisiones ocultas
+            </span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[16px]">no_encryption</span>
+              Sin almacenamiento de credenciales
+            </span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]">shield</span>
+              Cifrado militar AES-256
+            </span>
+</div>
+<!-- Existing Account Link -->
+<div class="text-center mt-space-md">
+<p class="font-body-md text-body-md text-on-surface-variant">
+              ¿Ya tienes cuenta en FinTrack? 
+              <a class="text-primary font-semibold hover:underline inline-flex items-center gap-0.5 ml-1" data-path="login" href="#">
+                Iniciar Sesión
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</a>
+</p>
+</div>
+</div>
+<!-- Right: Onboarding Sequence & Proof Panel (5 Columns) -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Modern Onboarding 3-Step Walkthrough Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md relative overflow-hidden">
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold">Tu Trayectoria Financiera</span>
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-label-md px-2 py-0.5 rounded-full">3 Pasos Simples</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight mb-space-md">
+              Comienza en minutos, ahorra de por vida
+            </h2>
+<div class="space-y-space-lg relative">
+<!-- Stepper Vertical Bar -->
+<div class="absolute left-4 top-4 bottom-4 w-0.5 bg-surface-container"></div>
+<!-- Step 1 -->
+<div class="relative flex items-start gap-space-md">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0 shadow-sm z-10">
+                  1
+                </div>
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-md text-metric-md text-on-surface font-semibold mb-1">
+                    Conecta tus instituciones
+                  </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-sm">
+                    Vincula o registra tus cuentas bancarias, tarjetas e inversiones mexicanas e internacionales en un panel consolidado.
+                  </p>
+<!-- Mexican Bank Badges Cloud -->
+<div class="flex flex-wrap gap-1.5 pt-1">
+<span class="px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md">BBVA México</span>
+<span class="px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md">Nu Bank</span>
+<span class="px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md">Santander</span>
+<span class="px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md">Cetesdirecto</span>
+</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="relative flex items-start gap-space-md">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0 shadow-sm z-10">
+                  2
+                </div>
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-md text-metric-md text-on-surface font-semibold mb-1">
+                    Clasificación inteligente
+                  </h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    Clasifica tus gastos automáticamente por categorías, comercios y deducciones fiscales sin hojas de cálculo manuales.
+                  </p>
+<!-- Mini Tag Preview Card -->
+<div class="mt-space-sm p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-7 h-7 rounded-md bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">shopping_cart</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Supermercado & Despensa</div>
+<div class="text-[11px] text-on-surface-variant">Regla automática activa</div>
+</div>
+</div>
+<span class="font-metric-md text-body-md text-tertiary font-semibold tabular-nums">-$1,420 MXN</span>
+</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="relative flex items-start gap-space-md">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0 shadow-sm z-10">
+                  3
+                </div>
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-md text-metric-md text-on-surface font-semibold mb-1">
+                    Proyección y metas de ahorro
+                  </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-sm">
+                    Visualiza comparativas mensuales, optimiza flujos de caja y alcanza tu fondo de emergencia con alertas predictivas.
+                  </p>
+<!-- Interactive Micro Progress Bar Example -->
+<div class="p-space-sm bg-surface-container-low rounded-lg">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-md text-label-md text-on-surface">Fondo de Emergencia (6 meses)</span>
+<span class="font-label-md text-label-md text-secondary font-semibold">68%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 68%;"></div>
+</div>
+<div class="flex justify-between text-[11px] text-on-surface-variant mt-1 tabular-nums">
+<span>$81,600 MXN</span>
+<span>Meta: $120,000 MXN</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Proof & Wealth Executive Visual Widget -->
+<div class="bg-surface-container p-space-md rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Editorial portrait of an executive Mexican financial analyst reviewing data on modern tablet, clean natural office lighting, sharp focus, professional and confident attire, muted indigo and white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVvT7f6gdGlFqk0QXToIze-oxytawMN85DJy4Ae5Yp9M6tL2uIRG0GwgeyvyPNG0K_n2Jr6KnTi8AtPdbm5VfxbNZHQuG73kvLli3zSLgY5Ezwo0DndKzVVGPfHLnOsiF4KPhN7BpT7AH1nIoGNNGsr5TUudrQ-zkGHz0T9ZUp1u6OOMzjeOtJ7IW172GkBZwxAuO7p306yuKazwwlk5vTFlygJChjKhybywwYqBHpt7kw9z0hK50o"/>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-0.5 text-secondary mb-0.5">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-label-md text-body-md text-on-surface font-semibold line-clamp-1">
+                "FinTrack centralizó mis cuentas en 4 minutos."
+              </p>
+<p class="font-label-md text-label-md text-on-surface-variant">
+                Carlos Méndez • Director de Inversiones
+              </p>
+</div>
+</div>
+<!-- Trust Architecture Badge Card -->
+<div class="bg-surface-container-low p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Cumplimiento CNBV & GDPR</div>
+<div class="text-[12px] text-on-surface-variant">Auditorías semestrales de ciberseguridad</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[24px]">lock_clock</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Micro-Interactions Client-Side Logic -->
+<script>
+    (function initRegistrationMeter() {
+      const passwordInput = document.getElementById('password');
+      const toggleBtn = document.getElementById('toggle-password');
+      const bar1 = document.getElementById('bar-1');
+      const bar2 = document.getElementById('bar-2');
+      const bar3 = document.getElementById('bar-3');
+      const strengthLabel = document.getElementById('strength-label');
+      const ruleLength = document.getElementById('rule-length');
+      const ruleNumSym = document.getElementById('rule-num-sym');
+
+      if (!passwordInput) return;
+
+      // Toggle Password Visibility
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const isText = passwordInput.getAttribute('type') === 'text';
+          passwordInput.setAttribute('type', isText ? 'password' : 'text');
+          toggleBtn.firstElementChild.textContent = isText ? 'visibility' : 'visibility_off';
+        });
+      }
+
+      function evaluateStrength(val) {
+        const hasLength = val.length >= 8;
+        const hasNumber = /[0-9]/.test(val);
+        const hasSpecial = /[^A-Za-z0-9]/.test(val);
+        const hasUpperLower = /[a-z]/.test(val) && /[A-Z]/.test(val);
+
+        // Update checklist
+        if (ruleLength) {
+          ruleLength.className = hasLength 
+            ? 'flex items-center gap-space-xs text-secondary font-label-md text-label-md' 
+            : 'flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md';
+          ruleLength.firstElementChild.textContent = hasLength ? 'check_circle' : 'radio_button_unchecked';
+        }
+
+        const numSymPassed = hasNumber && hasSpecial;
+        if (ruleNumSym) {
+          ruleNumSym.className = numSymPassed 
+            ? 'flex items-center gap-space-xs text-secondary font-label-md text-label-md' 
+            : 'flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md';
+          ruleNumSym.firstElementChild.textContent = numSymPassed ? 'check_circle' : 'radio_button_unchecked';
+        }
+
+        let score = 0;
+        if (val.length > 0) score += 1;
+        if (hasLength) score += 1;
+        if (hasNumber) score += 1;
+        if (hasSpecial) score += 1;
+        if (hasUpperLower) score += 1;
+
+        if (val.length === 0) {
+          bar1.className = 'h-1.5 rounded-full bg-surface-container transition-colors duration-300';
+          bar2.className = 'h-1.5 rounded-full bg-surface-container transition-colors duration-300';
+          bar3.className = 'h-1.5 rounded-full bg-surface-container transition-colors duration-300';
+          strengthLabel.textContent = 'Pendiente';
+          strengthLabel.className = 'font-label-md text-label-md text-on-surface-variant';
+        } else if (score <= 2) {
+          bar1.className = 'h-1.5 rounded-full bg-error transition-colors duration-300';
+          bar2.className = 'h-1.5 rounded-full bg-surface-container transition-colors duration-300';
+          bar3.className = 'h-1.5 rounded-full bg-surface-container transition-colors duration-300';
+          strengthLabel.textContent = 'Débil';
+          strengthLabel.className = 'font-label-md text-label-md text-error font-semibold';
+        } else if (score <= 4) {
+          bar1.className = 'h-1.5 rounded-full bg-tertiary transition-colors duration-300';
+          bar2.className = 'h-1.5 rounded-full bg-tertiary transition-colors duration-300';
+          bar3.className = 'h-1.5 rounded-full bg-surface-container transition-colors duration-300';
+          strengthLabel.textContent = 'Media';
+          strengthLabel.className = 'font-label-md text-label-md text-tertiary font-semibold';
+        } else {
+          bar1.className = 'h-1.5 rounded-full bg-secondary transition-colors duration-300';
+          bar2.className = 'h-1.5 rounded-full bg-secondary transition-colors duration-300';
+          bar3.className = 'h-1.5 rounded-full bg-secondary transition-colors duration-300';
+          strengthLabel.textContent = 'Fuerte (92%)';
+          strengthLabel.className = 'font-label-md text-label-md text-secondary font-semibold';
+        }
+      }
+
+      passwordInput.addEventListener('input', (e) => evaluateStrength(e.target.value));
+      // Initial evaluation for the pre-populated high security mock value
+      evaluateStrength(passwordInput.value);
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] py-space-lg"><div class="max-w-7xl mx-auto px-gutter-lg flex flex-col sm:flex-row items-center justify-between gap-space-md font-body-md text-body-md text-on-surface-variant"><div class="flex items-center gap-space-sm text-label-md font-label-md"><span>© 2025 FinTrack Precision Wealth Inc.</span><span class="inline-block w-1 h-1 rounded-full bg-outline-variant"></span><span>FDIC Insured Partner Network</span></div><div class="flex items-center gap-space-lg text-label-md font-label-md"><a class="hover:text-on-surface transition-colors" data-path="privacy-policy" href="#">Privacy Policy</a><a class="hover:text-on-surface transition-colors" data-path="terms-of-service" href="#">Terms of Service</a><a class="hover:text-on-surface transition-colors" data-path="regulatory-disclosures" href="#">Disclosures</a></div></div></footer></body></html>

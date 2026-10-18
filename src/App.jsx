@@ -1,0 +1,161 @@
+import React, { useState } from 'react';
+import { Header } from './components/Header';
+import { LoginForm } from './components/LoginForm';
+import { RegisterForm } from './components/RegisterForm';
+import { TrustPanel } from './components/TrustPanel';
+import { AppSidebar } from './components/layout/AppSidebar';
+import { AppHeader } from './components/layout/AppHeader';
+import { DashboardView } from './components/dashboard/DashboardView';
+import { AccountsView } from './components/accounts/AccountsView';
+import { MovementsView } from './components/movements/MovementsView';
+import { BudgetsView } from './components/budgets/BudgetsView';
+import { CategoriesView } from './components/categories/CategoriesView';
+import { AnalyticsView } from './components/analytics/AnalyticsView';
+import { SettingsView } from './components/settings/SettingsView';
+import { NewMovementModal } from './components/modals/NewMovementModal';
+import { FinanceProvider } from './context/FinanceContext';
+
+function MainApp() {
+  const [authView, setAuthView] = useState('login'); // 'login' | 'register'
+  const [currentUser, setCurrentUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'movimientos' | 'cuentas' | 'categorias' | 'analisis' | 'presupuestos' | 'configuracion'
+
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    setActiveTab('dashboard');
+  };
+
+  const handleRegisterSuccess = (user) => {
+    setCurrentUser(user);
+    setActiveTab('dashboard');
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setAuthView('login');
+  };
+
+  // Render Shell Post-Login if Authenticated
+  if (currentUser) {
+    return (
+      <div className="min-h-screen bg-background text-on-surface antialiased flex flex-col selection:bg-primary/20 selection:text-primary">
+        {/* Fixed Left Navigation Sidebar */}
+        <AppSidebar
+          activeTab={activeTab}
+          onNavigate={(tab) => setActiveTab(tab)}
+          onLogout={handleLogout}
+        />
+
+        {/* Content Wrapper (with left padding 64 to account for fixed sidebar) */}
+        <div className="pl-64 flex flex-col min-h-screen">
+          {/* Fixed Interior Header */}
+          <AppHeader
+            activeTab={activeTab}
+            user={currentUser}
+            onLogout={handleLogout}
+          />
+
+          {/* Main Module Content View */}
+          <main className="w-full pt-16 bg-background flex-1 p-6 lg:p-8">
+            {activeTab === 'dashboard' && (
+              <DashboardView onNavigate={(tab) => setActiveTab(tab)} />
+            )}
+
+            {activeTab === 'movimientos' && (
+              <MovementsView />
+            )}
+
+            {activeTab === 'cuentas' && (
+              <AccountsView />
+            )}
+
+            {activeTab === 'categorias' && (
+              <CategoriesView />
+            )}
+
+            {activeTab === 'analisis' && (
+              <AnalyticsView />
+            )}
+
+            {activeTab === 'presupuestos' && (
+              <BudgetsView />
+            )}
+
+            {activeTab === 'configuracion' && (
+              <SettingsView />
+            )}
+          </main>
+        </div>
+
+        {/* Global Modal for New Movement */}
+        <NewMovementModal />
+      </div>
+    );
+  }
+
+  // Render Public Auth Gateway (Login / Register)
+  return (
+    <div className="min-h-screen bg-background text-on-surface antialiased flex flex-col selection:bg-primary/20 selection:text-primary">
+      {/* Public Header */}
+      <Header currentView={authView} onViewChange={(v) => setAuthView(v)} />
+
+      {/* Main Public Gateway */}
+      <main className="flex-1 w-full pt-16 relative overflow-hidden flex flex-col justify-center">
+        {/* Ambient aura lights */}
+        <div className="absolute top-10 left-1/4 -translate-x-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        <div className="absolute top-1/3 right-10 w-[450px] h-[450px] bg-secondary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
+            {/* Form Box (7 cols) */}
+            <div className="lg:col-span-7 flex flex-col justify-center">
+              <div className="bg-surface-container-lowest rounded-2xl shadow-xl p-6 sm:p-10 relative overflow-hidden border border-surface-container-high/60">
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-primary-container to-secondary"></div>
+
+                {authView === 'login' ? (
+                  <LoginForm
+                    onSwitchToRegister={() => setAuthView('register')}
+                    onLoginSuccess={handleLoginSuccess}
+                  />
+                ) : (
+                  <RegisterForm
+                    onSwitchToLogin={() => setAuthView('login')}
+                    onRegisterSuccess={handleRegisterSuccess}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Trust Panel (5 cols) */}
+            <div className="lg:col-span-5 flex flex-col justify-center">
+              <TrustPanel mode={authView} />
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Global Public Footer */}
+      <footer className="py-6 border-t border-surface-container bg-surface/50 backdrop-blur text-center text-xs text-on-surface-variant">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p>© 2026 FinTrack Inc. Todos los derechos reservados. Seguridad e integridad patrimonial.</p>
+          <div className="flex items-center gap-4">
+            <a href="#" className="hover:underline">Privacidad</a>
+            <a href="#" className="hover:underline">Términos</a>
+            <a href="#" className="hover:underline">Auditoría SSL</a>
+            <a href="#" className="hover:underline">Soporte 24/7</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export function App() {
+  return (
+    <FinanceProvider>
+      <MainApp />
+    </FinanceProvider>
+  );
+}
+
+export default App;
