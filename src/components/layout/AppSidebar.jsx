@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { FEATURES } from '../../config/features';
 
 export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
   const { kpis } = useFinance();
@@ -27,13 +28,15 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
               FinTrack
             </span>
           </div>
-          <button
-            type="button"
-            className="flex items-center justify-center w-8 h-8 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-            title="Ocultar barra"
-          >
-            <span className="material-symbols-outlined text-xl">dock_to_right</span>
-          </button>
+          {FEATURES.SIDEBAR_COLLAPSE_BUTTON && (
+            <button
+              type="button"
+              className="flex items-center justify-center w-8 h-8 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+              title="Ocultar barra"
+            >
+              <span className="material-symbols-outlined text-xl">dock_to_right</span>
+            </button>
+          )}
         </div>
 
         {/* Quick Net Worth Summary Card */}
@@ -58,7 +61,7 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 space-y-1 overflow-y-auto mt-2">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -66,22 +69,30 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
                 key={item.id}
                 type="button"
                 onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all text-left ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body-md text-body-md font-medium transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-primary-container text-on-primary font-semibold shadow-sm'
-                    : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                    ? 'bg-primary text-on-primary shadow-sm shadow-primary/20 font-semibold'
+                    : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={`material-symbols-outlined text-xl ${isActive ? 'text-on-primary' : 'text-on-surface-variant'}`}>
+                  <span
+                    className={`material-symbols-outlined text-xl ${
+                      isActive ? 'filled text-on-primary' : 'text-on-surface-variant'
+                    }`}
+                  >
                     {item.icon}
                   </span>
-                  <span className="font-body-md text-body-md">{item.label}</span>
+                  <span>{item.label}</span>
                 </div>
                 {item.isPro && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    isActive ? 'bg-on-primary text-primary' : 'bg-primary-fixed text-on-primary-fixed'
-                  }`}>
+                  <span
+                    className={`font-label-md text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold ${
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-primary/10 text-primary'
+                    }`}
+                  >
                     Pro
                   </span>
                 )}
@@ -93,31 +104,33 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
 
       {/* Cloud Sync Status & Session Footer */}
       <div className="p-3 bg-surface-container-lowest border-t border-surface-container-low">
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low mb-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-2 w-2 rounded-full bg-secondary-fixed-dim ring-2 ring-secondary animate-pulse"></span>
-            <div className="flex flex-col truncate">
-              <span className="font-label-md text-label-md text-on-surface font-semibold truncate">
-                Nube Sincronizada
-              </span>
-              <span className="font-label-md text-label-md text-on-surface-variant truncate text-[10px]">
-                AES-256 Activo
-              </span>
+        {FEATURES.SIDEBAR_CLOUD_SYNC_BADGE && (
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low mb-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="flex h-2 w-2 rounded-full bg-secondary-fixed-dim ring-2 ring-secondary animate-pulse"></span>
+              <div className="flex flex-col truncate">
+                <span className="font-label-md text-label-md text-on-surface font-semibold truncate">
+                  Nube Sincronizada
+                </span>
+                <span className="font-label-md text-label-md text-on-surface-variant truncate text-[10px]">
+                  AES-256 Activo
+                </span>
+              </div>
             </div>
+            <button
+              type="button"
+              className="p-1 text-on-surface-variant hover:text-on-surface transition-transform active:rotate-180 duration-300"
+              title="Sincronizar ahora"
+            >
+              <span className="material-symbols-outlined text-lg">sync</span>
+            </button>
           </div>
-          <button
-            type="button"
-            className="p-1 text-on-surface-variant hover:text-on-surface transition-transform active:rotate-180 duration-300"
-            title="Sincronizar ahora"
-          >
-            <span className="material-symbols-outlined text-lg">sync</span>
-          </button>
-        </div>
+        )}
 
         <button
           type="button"
           onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container/40 text-label-md font-semibold transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container/40 text-label-md font-semibold transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined text-base">logout</span>
           <span>Cerrar Sesión</span>

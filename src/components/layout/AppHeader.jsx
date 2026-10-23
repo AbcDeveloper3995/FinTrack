@@ -1,7 +1,8 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { FEATURES } from '../../config/features';
 
-export const AppHeader = ({ activeTab, user, onLogout }) => {
+export const AppHeader = ({ activeTab, user, onLogout: _onLogout }) => {
   const { currentPeriod, setIsNewMovementModalOpen } = useFinance();
 
   const getBreadcrumbLabel = () => {
@@ -42,7 +43,7 @@ export const AppHeader = ({ activeTab, user, onLogout }) => {
         <div className="inline-flex items-center bg-surface-container-low rounded-lg px-2 py-1 border border-surface-container">
           <button
             type="button"
-            className="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors"
+            className="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-lg">chevron_left</span>
           </button>
@@ -52,24 +53,26 @@ export const AppHeader = ({ activeTab, user, onLogout }) => {
           </div>
           <button
             type="button"
-            className="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors"
+            className="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-lg">chevron_right</span>
           </button>
         </div>
 
-        {/* Global Search Bar */}
-        <div className="relative hidden md:flex items-center">
-          <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-lg">search</span>
-          <input
-            type="text"
-            placeholder="Buscar movimientos, cuentas o comercios..."
-            className="w-72 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-9 pr-12 py-1.5 rounded-lg text-body-md font-body-md border border-transparent focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-          <kbd className="absolute right-2 px-1.5 py-0.5 text-[10px] font-label-md text-label-md font-semibold bg-surface-container-highest text-on-surface-variant rounded">
-            ⌘K
-          </kbd>
-        </div>
+        {/* Global Search Bar (Phase 2 Feature) */}
+        {FEATURES.HEADER_SEARCH_BAR && (
+          <div className="relative hidden md:flex items-center">
+            <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-lg">search</span>
+            <input
+              type="text"
+              placeholder="Buscar movimientos, cuentas o comercios..."
+              className="w-72 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-9 pr-12 py-1.5 rounded-lg text-body-md font-body-md border border-transparent focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            <kbd className="absolute right-2 px-1.5 py-0.5 text-[10px] font-label-md text-label-md font-semibold bg-surface-container-highest text-on-surface-variant rounded">
+              ⌘K
+            </kbd>
+          </div>
+        )}
 
         {/* Global Add Movement Button */}
         <button
@@ -81,38 +84,42 @@ export const AppHeader = ({ activeTab, user, onLogout }) => {
           <span className="hidden sm:inline">Nuevo movimiento</span>
         </button>
 
-        {/* Theme Mode Toggle */}
-        <button
-          type="button"
-          className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-          title="Modo Visual"
-        >
-          <span className="material-symbols-outlined text-xl">light_mode</span>
-        </button>
-
-        {/* Notifications Icon with Alert Dot */}
-        <div className="relative">
+        {/* Theme Mode Toggle (Phase 2 Feature) */}
+        {FEATURES.HEADER_THEME_TOGGLE && (
           <button
             type="button"
-            className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative"
-            title="Notificaciones"
+            className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
+            title="Modo Visual"
           >
-            <span className="material-symbols-outlined text-xl">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span>
+            <span className="material-symbols-outlined text-xl">light_mode</span>
           </button>
-        </div>
+        )}
+
+        {/* Notifications Icon with Alert Dot (Phase 2 Feature) */}
+        {FEATURES.HEADER_NOTIFICATIONS && (
+          <div className="relative">
+            <button
+              type="button"
+              className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative cursor-pointer"
+              title="Notificaciones"
+            >
+              <span className="material-symbols-outlined text-xl">notifications</span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span>
+            </button>
+          </div>
+        )}
 
         {/* Profile Card & Session */}
         <div className="flex items-center gap-2 pl-2 border-l border-surface-container">
           <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm ring-2 ring-primary-fixed">
-            {user?.name ? user.name[0] : 'S'}
+            {user?.name ? user.name[0] : (user?.email ? user.email[0].toUpperCase() : 'U')}
           </div>
           <div className="hidden lg:flex flex-col text-left">
             <span className="font-body-md text-body-md font-semibold text-on-surface leading-tight">
-              {user?.name || 'Sofía R.'}
+              {user?.name || user?.email?.split('@')[0] || 'Usuario'}
             </span>
             <span className="font-label-md text-label-md text-secondary leading-none">
-              Plan Personal
+              FinTrack Pro
             </span>
           </div>
         </div>

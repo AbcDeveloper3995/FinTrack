@@ -1,26 +1,52 @@
 import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
-  const [email, setEmail] = useState('sofia.ramirez@ejemplo.com');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (!email || !password) {
+      setError('Por favor completa tu correo y contraseña.');
+      return;
+    }
+
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      if (email && password) {
-        onLoginSuccess({ email, name: 'Sofía Ramírez' });
-      } else {
-        setError('Por favor completa todos los campos requeridos.');
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (authError) {
+        throw authError;
       }
-    }, 700);
+
+      if (data?.user) {
+        onLoginSuccess({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.full_name || data.user.email.split('@')[0],
+        });
+      }
+    } catch (err) {
+      console.error('Error al iniciar sesión:', err);
+      if (err.message?.includes('Invalid login credentials')) {
+        setError('Correo o contraseña incorrectos. Verifica tus credenciales.');
+      } else {
+        setError(err.message || 'Error al iniciar sesión. Intenta nuevamente.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,7 +56,7 @@ export const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
         <div className="bg-surface-container-low p-1.5 rounded-xl flex items-center gap-1.5 w-full sm:w-auto">
           <button
             type="button"
-            className="flex-1 sm:flex-initial px-5 py-2 rounded-lg font-label-md text-label-md bg-primary-container text-on-primary shadow-sm flex items-center justify-center gap-2 transition-all"
+            className="flex-1 sm:flex-initial px-5 py-2 rounded-lg font-label-md text-label-md bg-primary-container text-on-primary shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">lock</span>
             <span>Iniciar Sesión</span>
@@ -38,7 +64,7 @@ export const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
           <button
             type="button"
             onClick={onSwitchToRegister}
-            className="flex-1 sm:flex-initial px-5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-2 transition-all"
+            className="flex-1 sm:flex-initial px-5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">person_add</span>
             <span>Crear Cuenta</span>
@@ -51,143 +77,131 @@ export const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
         </div>
       </div>
 
-      {/* Headline Header */}
+      {/* Main Title & Lead */}
       <div className="mb-8">
-        <span className="text-secondary font-label-md text-label-md tracking-wider uppercase block mb-1">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="material-symbols-outlined text-primary text-2xl">shield</span>
+          <span className="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold">
+            FinTrack Patrimonial
+          </span>
+        </div>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
           Acceso Patrimonial
-        </span>
-        <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
-          Bienvenido de nuevo a FinTrack
-        </h1>
-        <p className="text-on-surface-variant font-body-md text-body-md mt-1">
+        </h2>
+        <p className="font-body-md text-body-md text-on-surface-variant mt-1">
           Ingresa a tu control financiero patrimonial con auditoría en tiempo real.
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-error-container text-on-error-container text-body-md flex items-center gap-3">
-          <span className="material-symbols-outlined text-[20px] text-error">error</span>
-          <span>{error}</span>
+        <div className="mb-6 p-4 rounded-xl bg-error-container/30 border border-error/20 flex items-start gap-3">
+          <span className="material-symbols-outlined text-error text-xl shrink-0 mt-0.5">error</span>
+          <p className="font-body-md text-body-md text-on-surface">{error}</p>
         </div>
       )}
 
-      {/* Auth Form Body */}
+      {/* Form Fields */}
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Email Field */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="login-email">
-              Correo Electrónico Registrado
-            </label>
-            <span className="text-secondary font-label-md text-label-md flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">verified</span>
-              Verificación 2FA activa
-            </span>
-          </div>
+          <label className="block font-label-md text-label-md text-on-surface font-semibold mb-2">
+            Correo Institucional o Personal
+          </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
-              <span className="material-symbols-outlined text-[20px]">mail</span>
-            </div>
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
+              mail
+            </span>
             <input
-              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu.correo@ejemplo.com"
+              placeholder="tu@correo.com"
               required
-              className="w-full h-11 pl-10 pr-10 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all outline-none"
+              className="w-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-10 pr-4 py-3 rounded-xl border border-surface-container-high/80 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all font-body-md text-body-md"
             />
-            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-secondary">
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
-            </div>
           </div>
         </div>
 
-        {/* Password Field */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="login-password">
-              Contraseña de Acceso
+          <div className="flex items-center justify-between mb-2">
+            <label className="font-label-md text-label-md text-on-surface font-semibold">
+              Contraseña
             </label>
-            <button
-              type="button"
-              className="text-primary hover:text-primary-container text-label-md font-label-md hover:underline"
-            >
+            <a href="#" className="font-label-md text-label-md text-primary hover:underline font-medium">
               ¿Olvidaste tu contraseña?
-            </button>
+            </a>
           </div>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
-              <span className="material-symbols-outlined text-[20px]">key</span>
-            </div>
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
+              key
+            </span>
             <input
-              id="login-password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Introduce tu clave de seguridad"
+              placeholder="Ingresa tu contraseña"
               required
-              className="w-full h-11 pl-10 pr-10 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all outline-none"
+              className="w-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-10 pr-11 py-3 rounded-xl border border-surface-container-high/80 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all font-body-md text-body-md"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-on-surface focus:outline-none"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface p-1 transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">
+              <span className="material-symbols-outlined text-lg">
                 {showPassword ? 'visibility_off' : 'visibility'}
               </span>
             </button>
           </div>
         </div>
 
-        {/* Remember Device & Security Token */}
-        <div className="flex items-center justify-between py-1">
+        {/* Remember me & Trust checkpoint */}
+        <div className="flex items-center justify-between pt-1">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded text-primary focus:ring-primary/30 border-outline-variant"
+              className="w-4 h-4 rounded text-primary focus:ring-primary/30 border-surface-container-high"
             />
-            <span className="text-body-md text-on-surface-variant">Recordar este dispositivo por 30 días</span>
+            <span className="font-body-md text-body-md text-on-surface-variant">
+              Recordar este dispositivo
+            </span>
           </label>
-          <span className="hidden sm:inline-flex items-center gap-1 text-label-md text-on-surface-variant/70">
-            <span className="material-symbols-outlined text-[14px]">shield</span>
-            Hardware Token Ready
-          </span>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-12 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-headline-md text-headline-md tracking-wide shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 focus:ring-4 focus:ring-primary/30 disabled:opacity-70 cursor-pointer"
+          className="w-full py-3.5 px-6 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-body-md text-body-md font-semibold transition-all shadow-md hover:shadow-lg active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
         >
           {loading ? (
-            <span className="inline-block w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <span>Validando credenciales...</span>
+            </>
           ) : (
             <>
-              <span>Ingresar a FinTrack</span>
-              <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+              <span>Iniciar Sesión Patrimonial</span>
+              <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </>
           )}
         </button>
-
-        {/* Footnote */}
-        <div className="pt-4 text-center">
-          <p className="text-body-md text-on-surface-variant">
-            ¿No tienes cuenta patrimonial todavía?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToRegister}
-              className="text-primary font-semibold hover:underline"
-            >
-              Comienza tu registro aquí
-            </button>
-          </p>
-        </div>
       </form>
+
+      {/* Footer Switch */}
+      <div className="mt-8 pt-6 border-t border-surface-container text-center">
+        <p className="font-body-md text-body-md text-on-surface-variant">
+          ¿No tienes cuenta patrimonial todavía?{' '}
+          <button
+            type="button"
+            onClick={onSwitchToRegister}
+            className="text-primary hover:underline font-semibold cursor-pointer"
+          >
+            Crea tu acceso aquí
+          </button>
+        </p>
+      </div>
     </div>
   );
 };

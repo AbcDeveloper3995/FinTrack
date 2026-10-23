@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
@@ -14,11 +14,52 @@ import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { SettingsView } from './components/settings/SettingsView';
 import { NewMovementModal } from './components/modals/NewMovementModal';
 import { FinanceProvider } from './context/FinanceContext';
+import { supabase } from './lib/supabase';
 
 function MainApp() {
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'movimientos' | 'cuentas' | 'categorias' | 'analisis' | 'presupuestos' | 'configuracion'
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Listen to Supabase Auth state changes and persist session on reload
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setCurrentUser({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
+          });
+        }
+      } catch (err) {
+        console.error('Error verificando sesión Supabase:', err);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
+        });
+      } else {
+        setCurrentUser(null);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
@@ -30,10 +71,26 @@ function MainApp() {
     setActiveTab('dashboard');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Error cerrando sesión:', err);
+    }
     setCurrentUser(null);
     setAuthView('login');
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="font-body-md text-body-md text-on-surface-variant font-medium">
+          Cargando entorno FinTrack...
+        </p>
+      </div>
+    );
+  }
 
   // Render Shell Post-Login if Authenticated
   if (currentUser) {
@@ -56,7 +113,7 @@ function MainApp() {
           />
 
           {/* Main Module Content View */}
-          <main className="w-full pt-16 bg-background flex-1 p-6 lg:p-8">
+          <main className="w-full bg-background flex-1 p-6 lg:p-8 main-module-container">
             {activeTab === 'dashboard' && (
               <DashboardView onNavigate={(tab) => setActiveTab(tab)} />
             )}
@@ -141,7 +198,6 @@ function MainApp() {
           <div className="flex items-center gap-4">
             <a href="#" className="hover:underline">Privacidad</a>
             <a href="#" className="hover:underline">Términos</a>
-            <a href="#" className="hover:underline">Auditoría SSL</a>
             <a href="#" className="hover:underline">Soporte 24/7</a>
           </div>
         </div>
