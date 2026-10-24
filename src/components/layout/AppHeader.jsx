@@ -3,7 +3,22 @@ import { useFinance } from '../../context/FinanceContext';
 import { FEATURES } from '../../config/features';
 
 export const AppHeader = ({ activeTab, user, onLogout: _onLogout }) => {
-  const { currentPeriod, setIsNewMovementModalOpen } = useFinance();
+  const { currentPeriod, setIsNewMovementModalOpen, kpis } = useFinance();
+  const [showNotifications, setShowNotifications] = React.useState(false);
+  const notificationsRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const notifications = kpis?.smartNotifications || [];
+  const hasNotifications = notifications.length > 0;
 
   const getBreadcrumbLabel = () => {
     switch (activeTab) {
@@ -95,17 +110,83 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout }) => {
           </button>
         )}
 
-        {/* Notifications Icon with Alert Dot (Phase 2 Feature) */}
+        {/* Notifications Icon with Interactive Alert Dropdown */}
         {FEATURES.HEADER_NOTIFICATIONS && (
-          <div className="relative">
+          <div className="relative" ref={notificationsRef}>
             <button
               type="button"
+              onClick={() => setShowNotifications(!showNotifications)}
               className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative cursor-pointer"
-              title="Notificaciones"
+              title="Notificaciones y Diagnóstico Inteligente"
             >
               <span className="material-symbols-outlined text-xl">notifications</span>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span>
+              {hasNotifications && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-error ring-2 ring-surface-container-lowest animate-pulse"></span>
+              )}
             </button>
+
+            {/* Notifications Dropdown Modal */}
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest rounded-2xl shadow-xl border border-surface-container-high/80 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div className="p-4 bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-xl">notifications_active</span>
+                    <h4 className="font-bold text-on-surface text-sm">Alertas Inteligentes</h4>
+                  </div>
+                  <span className="text-[11px] font-semibold bg-surface-container px-2 py-0.5 rounded-full text-on-surface-variant">
+                    {notifications.length} activa(s)
+                  </span>
+                </div>
+
+                <div className="max-h-80 overflow-y-auto divide-y divide-surface-container/60">
+                  {notifications.length === 0 ? (
+                    <div className="p-6 text-center text-on-surface-variant">
+                      <span className="material-symbols-outlined text-3xl text-secondary mb-1">verified</span>
+                      <p className="text-sm font-medium text-on-surface">Todo bajo control</p>
+                      <p className="text-xs text-on-surface-variant mt-1">No hay alertas de sobregiro ni anomalías en tu ritmo de gasto.</p>
+                    </div>
+                  ) : (
+                    notifications.map((notif) => {
+                      const isDanger = notif.type === 'error';
+                      const isWarning = notif.type === 'warning';
+
+                      const badgeBg = isDanger
+                        ? 'bg-error/10 text-error'
+                        : isWarning
+                        ? 'bg-amber-500/10 text-amber-600'
+                        : 'bg-secondary/10 text-secondary';
+
+                      return (
+                        <div key={notif.id} className="p-3.5 hover:bg-surface-container-low transition-colors">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${badgeBg}`}>
+                              <span className="material-symbols-outlined text-lg">{notif.icon}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-1">
+                                <h5 className="text-xs font-bold text-on-surface truncate">{notif.title}</h5>
+                                <span className="text-[10px] text-on-surface-variant shrink-0">{notif.time}</span>
+                              </div>
+                              <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                                {notif.message}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {hasNotifications && (
+                  <div className="p-2.5 bg-surface-container-low/60 border-t border-surface-container text-center">
+                    <span className="text-[11px] text-on-surface-variant">
+                      Actualizado automáticamente en tiempo real según tus movimientos
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

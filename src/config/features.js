@@ -11,7 +11,7 @@ export const FEATURES = {
   // Header
   HEADER_SEARCH_BAR: false,        // Command+K global quick search
   HEADER_THEME_TOGGLE: false,      // Dark/Light mode switcher toggle
-  HEADER_NOTIFICATIONS: false,     // Notification bell with alert dot
+  HEADER_NOTIFICATIONS: true,      // Notification bell with alert dot and smart notifications dropdown
   
   // Navigation / Modules
   MODULE_BUDGETS: true,            // Presupuestos

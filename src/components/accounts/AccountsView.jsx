@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { EditAccountModal } from '../modals/EditAccountModal';
 
 export const AccountsView = () => {
   const {
@@ -10,12 +11,27 @@ export const AccountsView = () => {
     exchangeRate,
     exchangeRateLastUpdated,
     fetchExchangeRate,
+    deleteAccount,
   } = useFinance();
 
   const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id || null);
   const [refreshingRate, setRefreshingRate] = useState(false);
+  const [accountToEdit, setAccountToEdit] = useState(null);
 
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId) || accounts[0] || null;
+
+  const handleDeleteAccount = async (acc) => {
+    const confirmMsg = `¿Deseas eliminar la cuenta "${acc.name}"? Los movimientos que estaban vinculados a esta cuenta se conservarán en el historial pero quedarán sin cuenta asignada.`;
+    if (!window.confirm(confirmMsg)) return;
+
+    const res = await deleteAccount(acc.id);
+    if (res.error) {
+      alert('Error eliminando cuenta: ' + res.error);
+    } else if (selectedAccountId === acc.id) {
+      const remaining = accounts.filter((a) => a.id !== acc.id);
+      setSelectedAccountId(remaining[0]?.id || null);
+    }
+  };
 
   // Filter transactions belonging to selected account
   const accountTransactions = selectedAccount
@@ -213,7 +229,7 @@ export const AccountsView = () => {
           </div>
           {accounts.length > 0 && (
             <span className="text-on-surface-variant font-label-md text-label-md hidden sm:inline-block">
-              Haz clic en una tarjeta para inspeccionar sus movimientos
+              Haz clic en una tarjeta para inspeccionar sus movimientos o editarla
             </span>
           )}
         </div>
@@ -252,6 +268,28 @@ export const AccountsView = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAccountToEdit(acc);
+                        }}
+                        className="w-7 h-7 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer"
+                        title="Editar datos y saldo"
+                      >
+                        <span className="material-symbols-outlined text-sm">edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteAccount(acc);
+                        }}
+                        className="w-7 h-7 rounded-lg bg-white/20 hover:bg-red-500/80 text-white flex items-center justify-center transition-all cursor-pointer"
+                        title="Eliminar cuenta"
+                      >
+                        <span className="material-symbols-outlined text-sm">delete</span>
+                      </button>
                       <span className="px-2 py-0.5 rounded-full font-label-md text-xs font-bold bg-white/20 text-white flex items-center gap-1">
                         <span>{isUSD ? '🇺🇸 USD' : '🇲🇽 MXN'}</span>
                       </span>
@@ -357,17 +395,40 @@ export const AccountsView = () => {
               </div>
             </div>
 
-            <div className="text-right">
-              <span className="text-xs uppercase text-on-surface-variant font-semibold">Saldo Nominal</span>
-              <div className="font-headline-lg text-headline-lg font-bold text-on-surface tabular-nums">
-                {selectedAccount.currency === 'USD' ? 'US$' : '$'}
-                {Number(selectedAccount.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {selectedAccount.currency || 'MXN'}
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <span className="text-xs uppercase text-on-surface-variant font-semibold">Saldo Nominal</span>
+                <div className="font-headline-lg text-headline-lg font-bold text-on-surface tabular-nums">
+                  {selectedAccount.currency === 'USD' ? 'US$' : '$'}
+                  {Number(selectedAccount.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {selectedAccount.currency || 'MXN'}
+                </div>
+                {selectedAccount.currency === 'USD' && (
+                  <span className="text-xs text-secondary font-medium block">
+                    ≈ ${(Number(selectedAccount.balance) * exchangeRate).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN al tipo de cambio actual
+                  </span>
+                )}
               </div>
-              {selectedAccount.currency === 'USD' && (
-                <span className="text-xs text-secondary font-medium block">
-                  ≈ ${(Number(selectedAccount.balance) * exchangeRate).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN al tipo de cambio actual
-                </span>
-              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAccountToEdit(selectedAccount)}
+                  className="p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center gap-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  title="Editar cuenta y saldo"
+                >
+                  <span className="material-symbols-outlined text-base">edit</span>
+                  <span>Editar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteAccount(selectedAccount)}
+                  className="p-2.5 rounded-xl bg-error-container/40 hover:bg-error-container text-error flex items-center gap-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  title="Eliminar esta cuenta"
+                >
+                  <span className="material-symbols-outlined text-base">delete</span>
+                  <span>Eliminar</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -413,6 +474,14 @@ export const AccountsView = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Account Modal */}
+      <EditAccountModal
+        account={accountToEdit}
+        isOpen={Boolean(accountToEdit)}
+        onClose={() => setAccountToEdit(null)}
+      />
     </div>
   );
 };
+

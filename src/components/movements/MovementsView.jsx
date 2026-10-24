@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
-import { supabase } from '../../lib/supabase';
+import { EditMovementModal } from '../modals/EditMovementModal';
 
 export const MovementsView = () => {
-  const { transactions, tags, kpis, setIsNewMovementModalOpen, refreshFinancialData } = useFinance();
+  const { transactions, tags, kpis, setIsNewMovementModalOpen, deleteTransactions } = useFinance();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all' | 'expense' | 'income'
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterTag, setFilterTag] = useState('all');
   const [selectedIds, setSelectedIds] = useState([]);
+  const [movementToEdit, setMovementToEdit] = useState(null);
 
   // Filter transactions
   const filtered = transactions.filter((m) => {
@@ -48,19 +49,24 @@ export const MovementsView = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) return;
-    if (!window.confirm(`¿Deseas eliminar ${selectedIds.length} movimiento(s)?`)) return;
+    if (!window.confirm(`¿Deseas eliminar ${selectedIds.length} movimiento(s)? Los saldos de las cuentas se actualizarán automáticamente.`)) return;
 
-    try {
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .in('id', selectedIds);
-
-      if (error) throw error;
+    const res = await deleteTransactions(selectedIds, true);
+    if (res.error) {
+      alert('Error eliminando transacciones: ' + res.error);
+    } else {
       setSelectedIds([]);
-      await refreshFinancialData();
-    } catch (err) {
-      alert('Error eliminando transacciones: ' + err.message);
+    }
+  };
+
+  const handleSingleDelete = async (movement) => {
+    if (!window.confirm(`¿Deseas eliminar el movimiento "${movement.concept}"? Su importe se revertirá automáticamente en la cuenta correspondiente.`)) return;
+
+    const res = await deleteTransactions([movement.id], true);
+    if (res.error) {
+      alert('Error eliminando movimiento: ' + res.error);
+    } else {
+      setSelectedIds((prev) => prev.filter((id) => id !== movement.id));
     }
   };
 
@@ -82,7 +88,7 @@ export const MovementsView = () => {
             Historial de Movimientos
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Bitácora unificada con desglose por categoría, subcategoría y etiquetas.
+            Bitácora unificada con desglose por categoría, subcategoría, cuenta y acciones rápidas.
           </p>
         </div>
 
@@ -171,11 +177,11 @@ export const MovementsView = () => {
                 <button
                   type="button"
                   onClick={handleDeleteSelected}
-                  className="p-1 rounded hover:bg-error-container text-error hover:text-on-error-container flex items-center gap-1 text-xs font-semibold"
+                  className="p-1 rounded hover:bg-error-container text-error hover:text-on-error-container flex items-center gap-1 text-xs font-semibold cursor-pointer"
                   title="Eliminar seleccionados"
                 >
                   <span className="material-symbols-outlined text-base">delete</span>
-                  <span>Eliminar</span>
+                  <span>Eliminar selección</span>
                 </button>
               </div>
             )}
@@ -240,7 +246,7 @@ export const MovementsView = () => {
                 setFilterTag('all');
                 setSearchTerm('');
               }}
-              className="text-primary font-semibold text-xs hover:underline ml-2"
+              className="text-primary font-semibold text-xs hover:underline ml-2 cursor-pointer"
             >
               Limpiar filtros
             </button>
@@ -269,7 +275,8 @@ export const MovementsView = () => {
                   <th className="py-3 px-3">Etiquetas</th>
                   <th className="py-3 px-3">Cuenta</th>
                   <th className="py-3 px-3 text-center">Tipo</th>
-                  <th className="py-3 px-4 text-right">Monto (MXN)</th>
+                  <th className="py-3 px-4 text-right">Monto</th>
+                  <th className="py-3 px-3 text-center w-24">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
@@ -279,7 +286,7 @@ export const MovementsView = () => {
                   return (
                     <tr
                       key={m.id}
-                      className={`transition-colors ${
+                      className={`transition-colors group ${
                         isSelected
                           ? 'bg-surface-container-low/80'
                           : 'hover:bg-surface-container-low/50'
@@ -362,7 +369,30 @@ export const MovementsView = () => {
                           }`}
                         >
                           {isPositive ? '+' : ''}${Math.abs(m.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                          <span className="text-[10px] text-on-surface-variant font-normal ml-1">
+                            {m.currency || 'MXN'}
+                          </span>
                         </span>
+                      </td>
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setMovementToEdit(m)}
+                            className="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
+                            title="Editar movimiento"
+                          >
+                            <span className="material-symbols-outlined text-lg">edit</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSingleDelete(m)}
+                            className="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container/40 transition-colors cursor-pointer"
+                            title="Eliminar movimiento directamente"
+                          >
+                            <span className="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -392,6 +422,14 @@ export const MovementsView = () => {
           </div>
         )}
       </div>
+
+      {/* Edit Movement Modal */}
+      <EditMovementModal
+        movement={movementToEdit}
+        isOpen={Boolean(movementToEdit)}
+        onClose={() => setMovementToEdit(null)}
+      />
     </div>
   );
 };
+

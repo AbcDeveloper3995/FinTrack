@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { MonthComparisonBanner } from '../charts/MonthComparisonBanner';
 
 export const DashboardView = ({ onNavigate }) => {
   const {
@@ -16,6 +17,9 @@ export const DashboardView = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
+      {/* 0. Core Diagnosis Banner: ¿Gasté más o ahorré más respecto al mes anterior? */}
+      {hasTransactions && <MonthComparisonBanner kpis={kpis} />}
+
       {/* 1. Empty State Banner de Bienvenida Informativo si es usuario nuevo */}
       {(!hasAccounts || !hasTransactions) && (
         <section className="relative overflow-hidden rounded-2xl bg-surface-container-low border border-primary/20 p-6 shadow-sm">
