@@ -13,6 +13,7 @@ import { CategoriesView } from './components/categories/CategoriesView';
 import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { SettingsView } from './components/settings/SettingsView';
 import { NewMovementModal } from './components/modals/NewMovementModal';
+import { NewAccountModal } from './components/modals/NewAccountModal';
 import { FinanceProvider } from './context/FinanceContext';
 import { supabase } from './lib/supabase';
 
@@ -146,6 +147,8 @@ function MainApp() {
 
         {/* Global Modal for New Movement */}
         <NewMovementModal />
+        {/* Global Modal for New Account */}
+        <NewAccountModal />
       </div>
     );
   }

@@ -1,142 +1,35 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { supabase } from '../../lib/supabase';
 
 export const MovementsView = () => {
-  const { transactions, kpis, setIsNewMovementModalOpen } = useFinance();
+  const { transactions, tags, kpis, setIsNewMovementModalOpen, refreshFinancialData } = useFinance();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all' | 'expense' | 'income'
   const [filterCategory, setFilterCategory] = useState('all');
-  const [selectedIds, setSelectedIds] = useState(['tx-1', 'tx-2']);
+  const [filterTag, setFilterTag] = useState('all');
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  // Extended movements based on fintrack_registro_de_movimientos
-  const allMovements = [
-    {
-      id: 'tx-1',
-      date: '28 Oct, 2026',
-      time: '14:32 hrs',
-      concept: 'Supermercado Walmart',
-      detail: 'Despensa quincenal sucursal insurgentes',
-      category: 'Despensa',
-      subcategory: 'Cárnicos y verduras',
-      tags: ['#Walmart', '#Semanal'],
-      account: 'BBVA ••4829',
-      type: 'expense',
-      amount: -2430.5,
-      icon: 'shopping_cart',
-    },
-    {
-      id: 'tx-2',
-      date: '28 Oct, 2026',
-      time: '09:00 hrs',
-      concept: 'Depósito Nómina Quincena 2',
-      detail: 'Tech Consulting Group S.A.',
-      category: 'Salario',
-      subcategory: 'Honorarios directos',
-      tags: ['#Nomina', '#Trabajo'],
-      account: 'BBVA ••4829',
-      type: 'income',
-      amount: 24125.0,
-      icon: 'work',
-    },
-    {
-      id: 'tx-3',
-      date: '27 Oct, 2026',
-      time: '11:15 hrs',
-      concept: 'Renta Departamento',
-      detail: 'Mensualidad Departamento Nápoles',
-      category: 'Vivienda',
-      subcategory: 'Alquiler',
-      tags: ['#Fijo', '#Hogar'],
-      account: 'BBVA ••4829',
-      type: 'expense',
-      amount: -12500.0,
-      icon: 'home',
-    },
-    {
-      id: 'tx-4',
-      date: '26 Oct, 2026',
-      time: '18:40 hrs',
-      concept: 'Farmacias del Ahorro',
-      detail: 'Antibióticos y analgésicos',
-      category: 'Salud',
-      subcategory: 'Farmacia',
-      tags: ['#Salud', '#Receta'],
-      account: 'Nu ••9102',
-      type: 'expense',
-      amount: -740.0,
-      icon: 'medical_services',
-    },
-    {
-      id: 'tx-5',
-      date: '25 Oct, 2026',
-      time: '12:00 hrs',
-      concept: 'Intereses CETES 28d',
-      detail: 'Rendimiento mensual Bono M',
-      category: 'Inversión',
-      subcategory: 'Renta Fija',
-      tags: ['#Cetes', '#Rendimiento'],
-      account: 'Cetesdirecto',
-      type: 'income',
-      amount: 1032.4,
-      icon: 'trending_up',
-    },
-    {
-      id: 'tx-6',
-      date: '24 Oct, 2026',
-      time: '16:20 hrs',
-      concept: 'Uber Trip Santa Fe',
-      detail: 'Viaje reunión cliente',
-      category: 'Transporte',
-      subcategory: 'Taxis / App',
-      tags: ['#Uber', '#Deducible'],
-      account: 'Nu ••9102',
-      type: 'expense',
-      amount: -185.0,
-      icon: 'local_taxi',
-    },
-    {
-      id: 'tx-7',
-      date: '22 Oct, 2026',
-      time: '20:10 hrs',
-      concept: 'Suscripción Netflix Premium',
-      detail: 'Cargo recurrente mensual',
-      category: 'Entretenimiento',
-      subcategory: 'Streaming',
-      tags: ['#Suscripcion'],
-      account: 'Nu ••9102',
-      type: 'expense',
-      amount: -299.0,
-      icon: 'movie',
-    },
-    {
-      id: 'tx-8',
-      date: '20 Oct, 2026',
-      time: '13:45 hrs',
-      concept: 'Amazon México',
-      detail: 'Teclado mecánico ergonómico',
-      category: 'Trabajo',
-      subcategory: 'Equipo de Cómputo',
-      tags: ['#Amazon', '#Tech'],
-      account: 'Nu ••9102',
-      type: 'expense',
-      amount: -1890.0,
-      icon: 'shopping_bag',
-    },
-  ];
-
-  // Filter logic
-  const filtered = allMovements.filter((m) => {
-    const matchSearch =
-      m.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.detail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    const matchType = filterType === 'all' || m.type === filterType;
-    const matchCategory = filterCategory === 'all' || m.category === filterCategory;
-
-    return matchSearch && matchType && matchCategory;
+  // Filter transactions
+  const filtered = transactions.filter((m) => {
+    if (filterType !== 'all' && m.type !== filterType) return false;
+    if (filterCategory !== 'all' && m.category !== filterCategory) return false;
+    if (filterTag !== 'all') {
+      const hasTag = m.tags && m.tags.some((t) => t.id === filterTag || t.name === filterTag);
+      if (!hasTag) return false;
+    }
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      const matchConcept = m.concept?.toLowerCase().includes(q);
+      const matchCat = m.category?.toLowerCase().includes(q);
+      const matchSub = m.subcategory?.toLowerCase().includes(q);
+      const matchAcc = m.account?.toLowerCase().includes(q);
+      const matchNote = m.notes?.toLowerCase().includes(q);
+      const matchTag = m.tags?.some((t) => t.name.toLowerCase().includes(q));
+      if (!matchConcept && !matchCat && !matchSub && !matchAcc && !matchNote && !matchTag) return false;
+    }
+    return true;
   });
 
   const toggleSelect = (id) => {
@@ -153,22 +46,43 @@ export const MovementsView = () => {
     }
   };
 
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`¿Deseas eliminar ${selectedIds.length} movimiento(s)?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .in('id', selectedIds);
+
+      if (error) throw error;
+      setSelectedIds([]);
+      await refreshFinancialData();
+    } catch (err) {
+      alert('Error eliminando transacciones: ' + err.message);
+    }
+  };
+
+  // Get unique categories for dropdown
+  const uniqueCategories = Array.from(new Set(transactions.map((t) => t.category).filter(Boolean)));
+
   return (
     <div className="space-y-6">
-      {/* Top Header & Stats */}
+      {/* Top Header & Metrics Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
-              Movimientos
-            </h1>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block mr-1.5"></span>
-              142 movimientos en Octubre 2026
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-primary"></span>
+            <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+              Registro Financiero
             </span>
           </div>
+          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mt-1">
+            Historial de Movimientos
+          </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Bitácora unificada de flujos de efectivo, transferencias y dispersión de gasto.
+            Bitácora unificada con desglose por categoría, subcategoría y etiquetas.
           </p>
         </div>
 
@@ -189,14 +103,14 @@ export const MovementsView = () => {
           </div>
 
           <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-lowest shadow-sm border border-surface-container">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-tertiary-fixed text-on-tertiary-fixed">
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-surface-container text-primary">
               <span className="material-symbols-outlined text-sm font-bold">arrow_upward</span>
             </span>
             <div className="flex flex-col">
               <span className="font-label-md text-[10px] text-on-surface-variant uppercase font-semibold">
                 Gastos
               </span>
-              <span className="font-metric-md text-metric-md text-tertiary font-bold tabular-nums">
+              <span className="font-metric-md text-metric-md text-on-surface font-bold tabular-nums">
                 -${kpis.monthlyExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -211,7 +125,7 @@ export const MovementsView = () => {
                 Balance Neto
               </span>
               <span className="font-metric-md text-metric-md text-on-primary font-bold tabular-nums">
-                +${kpis.netBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                {kpis.netBalance >= 0 ? '+' : ''}${kpis.netBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </span>
             </div>
           </div>
@@ -230,7 +144,7 @@ export const MovementsView = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por descripción, comercio, etiqueta o nota..."
+              placeholder="Buscar por concepto, subcategoría, etiqueta (#) o nota..."
               className="w-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-10 pr-20 py-2.5 rounded-xl font-body-md text-body-md border border-transparent focus:border-primary/30 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 outline-none"
             />
             {searchTerm && (
@@ -256,36 +170,20 @@ export const MovementsView = () => {
                 </span>
                 <button
                   type="button"
-                  onClick={() => alert(`Cambiando categoría de ${selectedIds.length} elementos`)}
-                  className="px-2 py-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md"
-                >
-                  Categoría
-                </button>
-                <span className="text-outline-variant">•</span>
-                <button
-                  type="button"
-                  onClick={() => alert(`Eliminando ${selectedIds.length} elementos`)}
-                  className="p-1 rounded hover:bg-error-container text-error hover:text-on-error-container"
+                  onClick={handleDeleteSelected}
+                  className="p-1 rounded hover:bg-error-container text-error hover:text-on-error-container flex items-center gap-1 text-xs font-semibold"
                   title="Eliminar seleccionados"
                 >
                   <span className="material-symbols-outlined text-base">delete</span>
+                  <span>Eliminar</span>
                 </button>
               </div>
             )}
 
             <button
               type="button"
-              onClick={() => alert('Exportando a archivo Excel / CSV...')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-body-md font-medium transition-colors"
-            >
-              <span className="material-symbols-outlined text-lg">file_download</span>
-              <span>Exportar</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setIsNewMovementModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-body-md font-semibold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold transition-all shadow-sm cursor-pointer"
             >
               <span className="material-symbols-outlined text-lg">add</span>
               <span>Nuevo movimiento</span>
@@ -294,7 +192,7 @@ export const MovementsView = () => {
         </div>
 
         {/* Droplist Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-wrap">
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -311,21 +209,35 @@ export const MovementsView = () => {
             className="bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer"
           >
             <option value="all">Categorías: Todas</option>
-            <option value="Despensa">Despensa</option>
-            <option value="Salario">Salario</option>
-            <option value="Vivienda">Vivienda</option>
-            <option value="Transporte">Transporte</option>
-            <option value="Salud">Salud</option>
-            <option value="Inversión">Inversión</option>
-            <option value="Entretenimiento">Entretenimiento</option>
+            {uniqueCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
           </select>
 
-          {(filterType !== 'all' || filterCategory !== 'all' || searchTerm) && (
+          {tags.length > 0 && (
+            <select
+              value={filterTag}
+              onChange={(e) => setFilterTag(e.target.value)}
+              className="bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer"
+            >
+              <option value="all">Etiqueta: Todas</option>
+              {tags.map((t) => (
+                <option key={t.id} value={t.id}>
+                  #{t.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {(filterType !== 'all' || filterCategory !== 'all' || filterTag !== 'all' || searchTerm) && (
             <button
               type="button"
               onClick={() => {
                 setFilterType('all');
                 setFilterCategory('all');
+                setFilterTag('all');
                 setSearchTerm('');
               }}
               className="text-primary font-semibold text-xs hover:underline ml-2"
@@ -338,127 +250,147 @@ export const MovementsView = () => {
 
       {/* Primary Transactions Table */}
       <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-high/60 overflow-hidden flex flex-col">
-        <div className="overflow-x-auto w-full">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
-                <th className="py-3 px-4 w-12 text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.length > 0 && selectedIds.length === filtered.length}
-                    onChange={selectAll}
-                    className="w-4 h-4 rounded bg-surface-container text-primary focus:ring-0 cursor-pointer"
-                  />
-                </th>
-                <th className="py-3 px-3">Fecha & Hora</th>
-                <th className="py-3 px-4 min-w-[200px]">Descripción / Comercio</th>
-                <th className="py-3 px-3">Categoría & Subcat.</th>
-                <th className="py-3 px-3">Etiquetas</th>
-                <th className="py-3 px-3">Cuenta</th>
-                <th className="py-3 px-3 text-center">Tipo</th>
-                <th className="py-3 px-4 text-right">Monto (MXN)</th>
-                <th className="py-3 px-3 text-center w-16">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
-              {filtered.map((m) => {
-                const isSelected = selectedIds.includes(m.id);
-                const isPositive = m.amount > 0;
-                return (
-                  <tr
-                    key={m.id}
-                    className={`transition-colors ${
-                      isSelected
-                        ? 'bg-surface-container-low/80'
-                        : 'hover:bg-surface-container-low/50'
-                    }`}
-                  >
-                    <td className="py-3 px-4 text-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(m.id)}
-                        className="w-4 h-4 rounded bg-surface-container text-primary focus:ring-0 cursor-pointer"
-                      />
-                    </td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <div className="font-semibold text-on-surface">{m.date}</div>
-                      <div className="font-label-md text-label-md text-on-surface-variant">{m.time}</div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-primary">
-                          <span className="material-symbols-outlined text-xl">{m.icon}</span>
+        {filtered.length > 0 ? (
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+                  <th className="py-3 px-4 w-12 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length > 0 && selectedIds.length === filtered.length}
+                      onChange={selectAll}
+                      className="w-4 h-4 rounded bg-surface-container text-primary focus:ring-0 cursor-pointer"
+                    />
+                  </th>
+                  <th className="py-3 px-3">Fecha</th>
+                  <th className="py-3 px-4 min-w-[200px]">Descripción / Concepto</th>
+                  <th className="py-3 px-3">Categoría & Subcat.</th>
+                  <th className="py-3 px-3">Etiquetas</th>
+                  <th className="py-3 px-3">Cuenta</th>
+                  <th className="py-3 px-3 text-center">Tipo</th>
+                  <th className="py-3 px-4 text-right">Monto (MXN)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
+                {filtered.map((m) => {
+                  const isSelected = selectedIds.includes(m.id);
+                  const isPositive = m.amount > 0;
+                  return (
+                    <tr
+                      key={m.id}
+                      className={`transition-colors ${
+                        isSelected
+                          ? 'bg-surface-container-low/80'
+                          : 'hover:bg-surface-container-low/50'
+                      }`}
+                    >
+                      <td className="py-3 px-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(m.id)}
+                          className="w-4 h-4 rounded bg-surface-container text-primary focus:ring-0 cursor-pointer"
+                        />
+                      </td>
+                      <td className="py-3 px-3 whitespace-nowrap text-on-surface-variant tabular-nums">
+                        {m.date}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl ${m.iconBg} flex items-center justify-center shrink-0`}>
+                            <span className="material-symbols-outlined text-xl">{m.icon}</span>
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-on-surface truncate">{m.concept}</span>
+                            {m.notes && (
+                              <span className="font-label-md text-label-md text-on-surface-variant truncate">
+                                {m.notes}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-semibold text-on-surface truncate">{m.concept}</span>
-                          <span className="font-label-md text-label-md text-on-surface-variant truncate">
-                            {m.detail}
-                          </span>
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-on-surface text-sm">{m.category}</span>
+                          {m.subcategory && (
+                            <span className="text-xs text-on-surface-variant">
+                              ↳ {m.subcategory}
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-on-surface">{m.category}</span>
-                        <span className="font-label-md text-label-md text-on-surface-variant">
-                          {m.subcategory}
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {m.tags && m.tags.length > 0 ? (
+                            m.tags.map((tag) => (
+                              <span
+                                key={tag.id}
+                                style={{ backgroundColor: `${tag.color || '#4338ca'}20`, color: tag.color || '#4338ca' }}
+                                className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                              >
+                                #{tag.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-on-surface-variant/50">—</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container font-label-md text-label-md font-semibold text-on-surface">
+                          <span className="w-2 h-2 rounded-full bg-primary"></span>
+                          {m.account}
                         </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {m.tags.map((tag, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-on-surface"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container font-label-md text-label-md font-semibold text-on-surface">
-                        <span className="w-2 h-2 rounded-full bg-primary-container"></span>
-                        {m.account}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-center">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-label-md text-label-md font-bold ${
-                          isPositive
-                            ? 'bg-secondary-container text-on-secondary-container'
-                            : 'bg-tertiary-fixed text-on-tertiary-fixed'
-                        }`}
-                      >
-                        {isPositive ? 'Ingreso' : 'Gasto'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <span
-                        className={`font-bold tabular-nums ${
-                          isPositive ? 'text-secondary' : 'text-on-surface'
-                        }`}
-                      >
-                        {isPositive ? '+' : ''}${Math.abs(m.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => alert(`Opciones para: ${m.concept}`)}
-                        className="p-1 rounded-lg hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-lg">more_vert</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-label-md text-label-md font-bold ${
+                            isPositive
+                              ? 'bg-secondary-fixed text-on-secondary-fixed'
+                              : 'bg-surface-container text-primary'
+                          }`}
+                        >
+                          {isPositive ? 'Ingreso' : 'Gasto'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <span
+                          className={`font-bold tabular-nums ${
+                            isPositive ? 'text-secondary' : 'text-on-surface'
+                          }`}
+                        >
+                          {isPositive ? '+' : ''}${Math.abs(m.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="py-16 flex flex-col items-center justify-center text-center p-6">
+            <div className="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-3">
+              <span className="material-symbols-outlined text-3xl">receipt_long</span>
+            </div>
+            <h3 className="font-headline-md text-headline-md font-bold text-on-surface">
+              Sin movimientos que mostrar
+            </h3>
+            <p className="text-on-surface-variant font-body-md text-body-md mt-1 max-w-md">
+              Aún no tienes movimientos registrados en tu bitácora o los filtros aplicados no arrojaron resultados.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsNewMovementModalOpen(true)}
+              className="mt-5 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-lg">add</span>
+              <span>Registrar primer movimiento</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
