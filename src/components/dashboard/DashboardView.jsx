@@ -176,7 +176,7 @@ export const DashboardView = ({ onNavigate }) => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-                  Patrimonio Consolidado
+                  Tu Dinero Total (Disponible - Tarjetas)
                 </span>
                 <div className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-on-surface tabular-nums tracking-tight mt-1">
                   ${kpis.netWorth.toLocaleString('es-MX', { minimumFractionDigits: 2 })}{' '}
@@ -187,7 +187,7 @@ export const DashboardView = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => setIsNewAccountModalOpen(true)}
-                  className="inline-flex items-center gap-1 font-label-md text-label-md font-semibold text-primary hover:text-on-primary-fixed bg-surface-container px-3 py-2 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-1 font-label-md text-label-md font-semibold text-primary hover:text-on-primary-fixed bg-surface-container px-3 py-2 rounded-lg transition-colors cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-base">add</span>
                   <span>Nueva Cuenta</span>
@@ -195,9 +195,9 @@ export const DashboardView = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => onNavigate('cuentas')}
-                  className="inline-flex items-center gap-1 font-label-md text-label-md font-semibold text-on-surface-variant hover:text-on-surface bg-surface-container-low px-3 py-2 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-1 font-label-md text-label-md font-semibold text-on-surface-variant hover:text-on-surface bg-surface-container-low px-3 py-2 rounded-lg transition-colors cursor-pointer"
                 >
-                  <span>Ver cuentas</span>
+                  <span>Ver todas</span>
                   <span className="material-symbols-outlined text-base">arrow_forward</span>
                 </button>
               </div>
@@ -226,7 +226,7 @@ export const DashboardView = ({ onNavigate }) => {
                             {acc.name}
                           </div>
                           <div className="font-label-md text-label-md text-on-surface-variant font-medium">
-                            {acc.last4 ? `•••• ${acc.last4}` : acc.type}
+                            {acc.last4 ? `•••• ${acc.last4}` : (isCredit ? 'Tarjeta de Crédito' : 'Cuenta / Efectivo')}
                           </div>
                         </div>
                       </div>
@@ -237,7 +237,7 @@ export const DashboardView = ({ onNavigate }) => {
                           {isCredit ? '-' : ''}${bal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                         </div>
                         <div className="font-label-md text-label-md text-on-surface-variant capitalize">
-                          {acc.type}
+                          {isCredit ? 'Por pagar' : acc.currency}
                         </div>
                       </div>
                     </div>
@@ -247,14 +247,14 @@ export const DashboardView = ({ onNavigate }) => {
             ) : (
               <div className="mt-6 p-6 rounded-2xl bg-surface-container-low/70 border border-dashed border-outline-variant flex flex-col items-center justify-center text-center">
                 <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">account_balance_wallet</span>
-                <p className="font-body-md text-body-md font-semibold text-on-surface">No has registrado cuentas aún</p>
+                <p className="font-body-md text-body-md font-semibold text-on-surface">No has agregado cuentas aún</p>
                 <p className="text-xs text-on-surface-variant mt-1 max-w-sm">
-                  Agrega tus cuentas de débito, crédito o efectivo para calcular automáticamente tu patrimonio neto.
+                  Agrega tus cuentas de débito, crédito o efectivo para saber exactamente cuánto dinero tienes.
                 </p>
                 <button
                   type="button"
                   onClick={() => setIsNewAccountModalOpen(true)}
-                  className="mt-3 px-4 py-2 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary-container transition-colors"
+                  className="mt-3 px-4 py-2 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary-container transition-colors cursor-pointer"
                 >
                   + Agregar primera cuenta
                 </button>
@@ -269,10 +269,10 @@ export const DashboardView = ({ onNavigate }) => {
                 <span className="material-symbols-outlined text-error text-xl">credit_card</span>
                 <div>
                   <span className="font-body-md text-body-md font-semibold text-on-error-container">
-                    Deuda Tarjetas de Crédito (Pasivo)
+                    Saldo por pagar en Tarjetas
                   </span>
                   <span className="font-label-md text-label-md text-on-surface-variant ml-2">
-                    {creditDebt.dueDate} • Uso {creditDebt.limitUsage}
+                    {creditDebt.dueDate} • Has usado el {creditDebt.limitUsage} de tu línea
                   </span>
                 </div>
               </div>

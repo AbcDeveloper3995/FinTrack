@@ -14,14 +14,17 @@ import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { SettingsView } from './components/settings/SettingsView';
 import { NewMovementModal } from './components/modals/NewMovementModal';
 import { NewAccountModal } from './components/modals/NewAccountModal';
-import { FinanceProvider } from './context/FinanceContext';
+import { Toast } from './components/common/Toast';
+import { FinanceProvider, useFinance } from './context/FinanceContext';
 import { supabase } from './lib/supabase';
 
 function MainApp() {
+  const { toast, hideToast } = useFinance();
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [authLoading, setAuthLoading] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Listen to Supabase Auth state changes and persist session on reload
   useEffect(() => {
@@ -97,24 +100,30 @@ function MainApp() {
   if (currentUser) {
     return (
       <div className="min-h-screen bg-background text-on-surface antialiased flex flex-col selection:bg-primary/20 selection:text-primary">
-        {/* Fixed Left Navigation Sidebar */}
+        {/* Left Navigation Sidebar (Drawer on mobile, fixed on desktop) */}
         <AppSidebar
           activeTab={activeTab}
-          onNavigate={(tab) => setActiveTab(tab)}
+          onNavigate={(tab) => {
+            setActiveTab(tab);
+            setIsMobileSidebarOpen(false);
+          }}
           onLogout={handleLogout}
+          isOpen={isMobileSidebarOpen}
+          onClose={() => setIsMobileSidebarOpen(false)}
         />
 
-        {/* Content Wrapper (with left padding 64 to account for fixed sidebar) */}
-        <div className="pl-64 flex flex-col min-h-screen">
-          {/* Fixed Interior Header */}
+        {/* Content Wrapper (pl-0 on mobile/tablets, pl-64 on desktop lg) */}
+        <div className="pl-0 lg:pl-64 flex flex-col min-h-screen">
+          {/* Interior Header */}
           <AppHeader
             activeTab={activeTab}
             user={currentUser}
             onLogout={handleLogout}
+            onOpenSidebar={() => setIsMobileSidebarOpen(true)}
           />
 
-          {/* Main Module Content View */}
-          <main className="w-full bg-background flex-1 p-6 lg:p-8 main-module-container">
+          {/* Main Module Content View with responsive padding */}
+          <main className="w-full bg-background flex-1 pt-20 pb-8 px-4 sm:px-6 lg:px-8 main-module-container">
             {activeTab === 'dashboard' && (
               <DashboardView onNavigate={(tab) => setActiveTab(tab)} />
             )}
@@ -149,6 +158,9 @@ function MainApp() {
         <NewMovementModal />
         {/* Global Modal for New Account */}
         <NewAccountModal />
+
+        {/* Global Floating Toast Notifications */}
+        <Toast toast={toast} onClose={hideToast} />
       </div>
     );
   }

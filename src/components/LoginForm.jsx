@@ -73,23 +73,23 @@ export const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
 
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-secondary-container/40 rounded-full text-on-secondary-container font-label-md text-label-md">
           <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-          <span>Portal Seguro SSL</span>
+          <span>Conexión Segura</span>
         </div>
       </div>
 
       {/* Main Title & Lead */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <span className="material-symbols-outlined text-primary text-2xl">shield</span>
+          <span className="material-symbols-outlined text-primary text-2xl">waving_hand</span>
           <span className="font-label-md text-label-md uppercase tracking-wider text-primary font-semibold">
-            FinTrack Patrimonial
+            ¡Hola de nuevo!
           </span>
         </div>
         <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
-          Acceso Patrimonial
+          Entrar a tu cuenta
         </h2>
         <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-          Ingresa a tu control financiero patrimonial con auditoría en tiempo real.
+          Ingresa tus datos para ver y organizar tu dinero al instante.
         </p>
       </div>
 
@@ -178,11 +178,11 @@ export const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
           {loading ? (
             <>
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              <span>Validando credenciales...</span>
+              <span>Entrando...</span>
             </>
           ) : (
             <>
-              <span>Iniciar Sesión Patrimonial</span>
+              <span>Entrar a mi cuenta</span>
               <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </>
           )}
@@ -192,13 +192,13 @@ export const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
       {/* Footer Switch */}
       <div className="mt-8 pt-6 border-t border-surface-container text-center">
         <p className="font-body-md text-body-md text-on-surface-variant">
-          ¿No tienes cuenta patrimonial todavía?{' '}
+          ¿Aún no tienes cuenta?{' '}
           <button
             type="button"
             onClick={onSwitchToRegister}
             className="text-primary hover:underline font-semibold cursor-pointer"
           >
-            Crea tu acceso aquí
+            Regístrate gratis aquí
           </button>
         </p>
       </div>

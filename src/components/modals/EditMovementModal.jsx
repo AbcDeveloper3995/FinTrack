@@ -7,6 +7,7 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
     accounts,
     categories,
     tags,
+    showToast,
   } = useFinance();
 
   const [type, setType] = useState('expense');
@@ -78,6 +79,7 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
       return;
     }
 
+    showToast('Movimiento actualizado correctamente.');
     onClose();
   };
 

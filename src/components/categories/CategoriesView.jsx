@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { supabase } from '../../lib/supabase';
+import { ConfirmModal } from '../common/ConfirmModal';
 
 export const CategoriesView = () => {
-  const { categories, tags, transactions, currentUser, refreshFinancialData } = useFinance();
+  const { categories, tags, transactions, currentUser, refreshFinancialData, showToast } = useFinance();
   
   // Navigation Tabs: 'categories' | 'tags'
   const [activeTab, setActiveTab] = useState('categories');
@@ -31,6 +32,16 @@ export const CategoriesView = () => {
   const [tagColor, setTagColor] = useState('#4338ca');
 
   const [saving, setSaving] = useState(false);
+
+  // Dedicated ConfirmModal state
+  const [deleteConfirm, setDeleteConfirm] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    onConfirm: null,
+    isLoading: false,
+  });
 
   const toggleCategory = (id) => {
     setOpenCategories((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -69,6 +80,7 @@ export const CategoriesView = () => {
           })
           .eq('id', editingCategory.id);
         if (error) throw error;
+        showToast(`Categoría "${catName.trim()}" actualizada con éxito.`);
       } else {
         const { error } = await supabase
           .from('categories')
@@ -82,32 +94,42 @@ export const CategoriesView = () => {
             },
           ]);
         if (error) throw error;
+        showToast(`Categoría "${catName.trim()}" creada con éxito.`);
       }
 
       setCatModalOpen(false);
       await refreshFinancialData();
     } catch (err) {
-      alert('Error guardando categoría: ' + err.message);
+      showToast('Error guardando categoría: ' + err.message, 'error', 'Error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteCategory = async (cat) => {
-    if (!window.confirm(`¿Seguro que deseas eliminar la categoría "${cat.name}"? Se desvinculará de sus movimientos.`)) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', cat.id);
-      if (error) throw error;
-      await refreshFinancialData();
-    } catch (err) {
-      alert('Error eliminando categoría: ' + err.message);
-    }
+  const handleDeleteCategory = (cat) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: '¿Eliminar categoría?',
+      message: `¿Seguro que deseas eliminar la categoría "${cat.name}"? Los movimientos registrados conservarán su registro pero quedarán desvinculados de esta categoría.`,
+      confirmText: 'Sí, eliminar categoría',
+      isLoading: false,
+      onConfirm: async () => {
+        setDeleteConfirm((prev) => ({ ...prev, isLoading: true }));
+        try {
+          const { error } = await supabase
+            .from('categories')
+            .delete()
+            .eq('id', cat.id);
+          if (error) throw error;
+          await refreshFinancialData();
+          showToast(`Categoría "${cat.name}" eliminada.`, 'info');
+          setDeleteConfirm({ isOpen: false, title: '', message: '', confirmText: '', onConfirm: null, isLoading: false });
+        } catch (err) {
+          showToast('Error eliminando categoría: ' + err.message, 'error', 'Error');
+          setDeleteConfirm((prev) => ({ ...prev, isLoading: false }));
+        }
+      },
+    });
   };
 
   // --- SUBCATEGORY CRUD ---
@@ -137,6 +159,7 @@ export const CategoriesView = () => {
           .update({ name: subName.trim() })
           .eq('id', editingSubcategory.id);
         if (error) throw error;
+        showToast(`Subcategoría "${subName.trim()}" actualizada.`);
       } else {
         const { error } = await supabase
           .from('subcategories')
@@ -148,30 +171,42 @@ export const CategoriesView = () => {
             },
           ]);
         if (error) throw error;
+        showToast(`Subcategoría "${subName.trim()}" creada.`);
       }
 
       setSubModalOpen(false);
       await refreshFinancialData();
     } catch (err) {
-      alert('Error guardando subcategoría: ' + err.message);
+      showToast('Error guardando subcategoría: ' + err.message, 'error', 'Error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteSubcategory = async (sub) => {
-    if (!window.confirm(`¿Deseas eliminar la subcategoría "${sub.name}"?`)) return;
-
-    try {
-      const { error } = await supabase
-        .from('subcategories')
-        .delete()
-        .eq('id', sub.id);
-      if (error) throw error;
-      await refreshFinancialData();
-    } catch (err) {
-      alert('Error eliminando subcategoría: ' + err.message);
-    }
+  const handleDeleteSubcategory = (sub) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: '¿Eliminar subcategoría?',
+      message: `¿Deseas eliminar la subcategoría "${sub.name}"? Los movimientos existentes permanecerán asignados a la categoría principal.`,
+      confirmText: 'Sí, eliminar subcategoría',
+      isLoading: false,
+      onConfirm: async () => {
+        setDeleteConfirm((prev) => ({ ...prev, isLoading: true }));
+        try {
+          const { error } = await supabase
+            .from('subcategories')
+            .delete()
+            .eq('id', sub.id);
+          if (error) throw error;
+          await refreshFinancialData();
+          showToast(`Subcategoría "${sub.name}" eliminada.`, 'info');
+          setDeleteConfirm({ isOpen: false, title: '', message: '', confirmText: '', onConfirm: null, isLoading: false });
+        } catch (err) {
+          showToast('Error eliminando subcategoría: ' + err.message, 'error', 'Error');
+          setDeleteConfirm((prev) => ({ ...prev, isLoading: false }));
+        }
+      },
+    });
   };
 
   // --- TAG CRUD ---
@@ -204,6 +239,7 @@ export const CategoriesView = () => {
           })
           .eq('id', editingTag.id);
         if (error) throw error;
+        showToast(`Etiqueta "${tagName.trim()}" actualizada.`);
       } else {
         const { error } = await supabase
           .from('tags')
@@ -215,30 +251,42 @@ export const CategoriesView = () => {
             },
           ]);
         if (error) throw error;
+        showToast(`Etiqueta "${tagName.trim()}" creada con éxito.`);
       }
 
       setTagModalOpen(false);
       await refreshFinancialData();
     } catch (err) {
-      alert('Error guardando etiqueta: ' + err.message);
+      showToast('Error guardando etiqueta: ' + err.message, 'error', 'Error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteTag = async (tag) => {
-    if (!window.confirm(`¿Deseas eliminar la etiqueta "${tag.name}"?`)) return;
-
-    try {
-      const { error } = await supabase
-        .from('tags')
-        .delete()
-        .eq('id', tag.id);
-      if (error) throw error;
-      await refreshFinancialData();
-    } catch (err) {
-      alert('Error eliminando etiqueta: ' + err.message);
-    }
+  const handleDeleteTag = (tag) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: '¿Eliminar etiqueta?',
+      message: `¿Deseas eliminar la etiqueta "${tag.name}"? Los movimientos que la tengan asignada dejarán de mostrarla.`,
+      confirmText: 'Sí, eliminar etiqueta',
+      isLoading: false,
+      onConfirm: async () => {
+        setDeleteConfirm((prev) => ({ ...prev, isLoading: true }));
+        try {
+          const { error } = await supabase
+            .from('tags')
+            .delete()
+            .eq('id', tag.id);
+          if (error) throw error;
+          await refreshFinancialData();
+          showToast(`Etiqueta "${tag.name}" eliminada.`, 'info');
+          setDeleteConfirm({ isOpen: false, title: '', message: '', confirmText: '', onConfirm: null, isLoading: false });
+        } catch (err) {
+          showToast('Error eliminando etiqueta: ' + err.message, 'error', 'Error');
+          setDeleteConfirm((prev) => ({ ...prev, isLoading: false }));
+        }
+      },
+    });
   };
 
   // Filter Categories
@@ -863,6 +911,19 @@ export const CategoriesView = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación para eliminar categorías, subcategorías y etiquetas */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, title: '', message: '', confirmText: '', onConfirm: null, isLoading: false })}
+        onConfirm={deleteConfirm.onConfirm}
+        title={deleteConfirm.title}
+        message={deleteConfirm.message}
+        confirmText={deleteConfirm.confirmText || 'Sí, eliminar'}
+        cancelText="Cancelar"
+        isLoading={deleteConfirm.isLoading}
+        isDestructive={true}
+      />
     </div>
   );
 };

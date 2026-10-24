@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 
 export const NewAccountModal = () => {
-  const { isNewAccountModalOpen, setIsNewAccountModalOpen, addAccount, exchangeRate } = useFinance();
+  const { isNewAccountModalOpen, setIsNewAccountModalOpen, addAccount, exchangeRate, showToast } = useFinance();
 
   const [name, setName] = useState('');
   const [institution, setInstitution] = useState('');
@@ -42,6 +42,7 @@ export const NewAccountModal = () => {
       return;
     }
 
+    showToast(`Cuenta "${name}" agregada correctamente.`);
     setName('');
     setInstitution('');
     setBalance('');

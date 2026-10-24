@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { EditAccountModal } from '../modals/EditAccountModal';
+import { ConfirmModal } from '../common/ConfirmModal';
+import { BankCard } from './BankCard';
 
 export const AccountsView = () => {
   const {
@@ -12,24 +14,36 @@ export const AccountsView = () => {
     exchangeRateLastUpdated,
     fetchExchangeRate,
     deleteAccount,
+    showToast,
   } = useFinance();
 
   const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id || null);
   const [refreshingRate, setRefreshingRate] = useState(false);
   const [accountToEdit, setAccountToEdit] = useState(null);
+  const [accountToDelete, setAccountToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId) || accounts[0] || null;
 
-  const handleDeleteAccount = async (acc) => {
-    const confirmMsg = `¿Deseas eliminar la cuenta "${acc.name}"? Los movimientos que estaban vinculados a esta cuenta se conservarán en el historial pero quedarán sin cuenta asignada.`;
-    if (!window.confirm(confirmMsg)) return;
+  const handleDeleteAccount = (acc) => {
+    setAccountToDelete(acc);
+  };
 
-    const res = await deleteAccount(acc.id);
+  const handleConfirmDeleteAccount = async () => {
+    if (!accountToDelete) return;
+    setIsDeleting(true);
+    const res = await deleteAccount(accountToDelete.id);
+    setIsDeleting(false);
+
     if (res.error) {
-      alert('Error eliminando cuenta: ' + res.error);
-    } else if (selectedAccountId === acc.id) {
-      const remaining = accounts.filter((a) => a.id !== acc.id);
-      setSelectedAccountId(remaining[0]?.id || null);
+      showToast('Error eliminando cuenta: ' + res.error, 'error', 'Error');
+    } else {
+      showToast(`La cuenta "${accountToDelete.name}" fue eliminada.`, 'info', 'Cuenta eliminada');
+      if (selectedAccountId === accountToDelete.id) {
+        const remaining = accounts.filter((a) => a.id !== accountToDelete.id);
+        setSelectedAccountId(remaining[0]?.id || null);
+      }
+      setAccountToDelete(null);
     }
   };
 
@@ -57,21 +71,6 @@ export const AccountsView = () => {
     setRefreshingRate(true);
     await fetchExchangeRate();
     setTimeout(() => setRefreshingRate(false), 500);
-  };
-
-  const getAccountGradient = (acc) => {
-    switch (acc.type) {
-      case 'credito':
-        return 'from-[#3b0764] via-[#581c87] to-[#7e22ce]';
-      case 'inversion':
-        return 'from-[#022c22] via-[#064e3b] to-[#047857]';
-      case 'ahorro':
-        return 'from-[#1e1b4b] via-[#4338ca] to-[#0284c7]';
-      case 'efectivo':
-        return 'from-[#0f172a] via-[#1e293b] to-[#475569]';
-      default:
-        return 'from-slate-900 via-[#1e1b4b] to-[#1e3a8a]';
-    }
   };
 
   return (
@@ -156,7 +155,7 @@ export const AccountsView = () => {
         <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
           <div className="flex items-center justify-between">
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Patrimonio Consolidado
+              Tu Dinero Total (Neto)
             </span>
             <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full font-label-md text-label-md font-bold bg-secondary-fixed text-on-secondary-fixed">
               Valuado en MXN
@@ -169,7 +168,7 @@ export const AccountsView = () => {
             <span className="font-label-md text-label-md font-semibold text-on-surface-variant">MXN</span>
           </div>
           <div className="mt-1 flex items-center justify-between text-on-surface-variant font-body-md text-body-md">
-            <span>Conversión automática de USD a MXN</span>
+            <span>Disponible descontando tarjetas</span>
           </div>
         </div>
 
@@ -177,7 +176,7 @@ export const AccountsView = () => {
         <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
           <div className="flex items-center justify-between">
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Total Activos (Liquidez)
+              Dinero en Cuentas y Efectivo
             </span>
             <span className="p-1.5 rounded-lg bg-secondary-container text-secondary flex items-center justify-center">
               <span className="material-symbols-outlined text-base">savings</span>
@@ -190,7 +189,7 @@ export const AccountsView = () => {
             <span className="font-label-md text-label-md font-semibold text-on-surface-variant">MXN</span>
           </div>
           <div className="mt-1 flex items-center justify-between text-on-surface-variant font-body-md text-body-md">
-            <span>{accounts.filter(a => a.type !== 'credito').length} cuentas activas</span>
+            <span>{accounts.filter(a => a.type !== 'credito').length} cuenta(s) activa(s)</span>
           </div>
         </div>
 
@@ -198,7 +197,7 @@ export const AccountsView = () => {
         <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
           <div className="flex items-center justify-between">
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Deuda en Crédito (Pasivo)
+              Saldo por pagar en Tarjetas
             </span>
             <span className="p-1.5 rounded-lg bg-error-container text-error flex items-center justify-center">
               <span className="material-symbols-outlined text-base">credit_card</span>
@@ -211,7 +210,7 @@ export const AccountsView = () => {
             <span className="font-label-md text-label-md font-semibold text-on-surface-variant">MXN</span>
           </div>
           <div className="mt-1 flex items-center justify-between text-on-surface-variant font-body-md text-body-md">
-            <span>{accounts.filter(a => a.type === 'credito').length} plásticos de crédito</span>
+            <span>{accounts.filter(a => a.type === 'credito').length} tarjeta(s) de crédito</span>
           </div>
         </div>
       </div>
@@ -235,113 +234,18 @@ export const AccountsView = () => {
         </div>
 
         {accounts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {accounts.map((acc) => {
-              const isSelected = selectedAccount?.id === acc.id;
-              const isCredit = acc.type === 'credito';
-              const isUSD = acc.currency === 'USD';
-              const bal = Number(acc.balance) || 0;
-              const limit = Number(acc.credit_limit) || 0;
-              const gradient = getAccountGradient(acc);
-
-              // Converted value to MXN if USD
-              const convertedToMXN = isUSD ? bal * exchangeRate : null;
-
-              return (
-                <div
-                  key={acc.id}
-                  onClick={() => setSelectedAccountId(acc.id)}
-                  className={`group cursor-pointer relative flex flex-col justify-between rounded-2xl p-6 text-white shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-tr ${gradient} overflow-hidden min-h-[220px] ${
-                    isSelected ? 'ring-4 ring-primary ring-offset-2 ring-offset-background' : ''
-                  }`}
-                >
-                  <div className="absolute -right-12 -top-12 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-
-                  {/* Top card info */}
-                  <div className="flex items-start justify-between relative z-10">
-                    <div className="flex flex-col">
-                      <span className="font-label-md text-label-md uppercase tracking-wider text-slate-300 font-semibold">
-                        {acc.institution}
-                      </span>
-                      <span className="font-headline-md text-headline-md font-bold tracking-tight text-white mt-0.5">
-                        {acc.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAccountToEdit(acc);
-                        }}
-                        className="w-7 h-7 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer"
-                        title="Editar datos y saldo"
-                      >
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteAccount(acc);
-                        }}
-                        className="w-7 h-7 rounded-lg bg-white/20 hover:bg-red-500/80 text-white flex items-center justify-center transition-all cursor-pointer"
-                        title="Eliminar cuenta"
-                      >
-                        <span className="material-symbols-outlined text-sm">delete</span>
-                      </button>
-                      <span className="px-2 py-0.5 rounded-full font-label-md text-xs font-bold bg-white/20 text-white flex items-center gap-1">
-                        <span>{isUSD ? '🇺🇸 USD' : '🇲🇽 MXN'}</span>
-                      </span>
-                      <div className="w-8 h-6 rounded bg-amber-400/80 flex items-center justify-center shadow-inner">
-                        <span className="material-symbols-outlined text-xs text-amber-950 font-bold">contactless</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Middle balance */}
-                  <div className="my-3 relative z-10">
-                    <span className="font-label-md text-label-md text-slate-300 uppercase tracking-wider">
-                      {isCredit ? 'Saldo Deudor' : 'Saldo Disponible'}
-                    </span>
-                    <div className="font-headline-lg text-headline-lg font-bold tracking-tight tabular-nums text-white">
-                      {isUSD ? 'US$' : '$'}{bal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}{' '}
-                      <span className="text-xs font-normal text-slate-300">
-                        {acc.currency}
-                      </span>
-                    </div>
-
-                    {/* Show live conversion if account is in USD */}
-                    {isUSD && (
-                      <div className="mt-1 text-xs text-emerald-300 font-medium flex items-center gap-1">
-                        <span className="material-symbols-outlined text-xs">sync_alt</span>
-                        <span>
-                          ≈ ${convertedToMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN (al cambio actual)
-                        </span>
-                      </div>
-                    )}
-
-                    {isCredit && limit > 0 && (
-                      <div className="w-full bg-white/20 h-1.5 rounded-full overflow-hidden mt-2">
-                        <div
-                          className="bg-secondary-fixed h-full rounded-full"
-                          style={{ width: `${Math.min(100, (bal / limit) * 100)}%` }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Bottom row */}
-                  <div className="flex items-center justify-between pt-2 border-t border-white/10 relative z-10 text-xs">
-                    <div className="flex items-center gap-1 font-mono tracking-widest text-slate-300">
-                      <span>••••</span>
-                      <span className="text-white font-semibold">{acc.last4 || '0000'}</span>
-                    </div>
-                    <span className="text-slate-300 capitalize font-medium">{acc.type}</span>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {accounts.map((acc) => (
+              <BankCard
+                key={acc.id}
+                account={acc}
+                isSelected={selectedAccount?.id === acc.id}
+                exchangeRate={exchangeRate}
+                onSelect={() => setSelectedAccountId(acc.id)}
+                onEdit={(accToEdit) => setAccountToEdit(accToEdit)}
+                onDelete={(accToDelete) => handleDeleteAccount(accToDelete)}
+              />
+            ))}
           </div>
         ) : (
           <div className="bg-surface-container-lowest rounded-2xl border border-dashed border-outline-variant p-10 text-center flex flex-col items-center justify-center">
@@ -480,6 +384,19 @@ export const AccountsView = () => {
         account={accountToEdit}
         isOpen={Boolean(accountToEdit)}
         onClose={() => setAccountToEdit(null)}
+      />
+
+      {/* Modal de confirmación para eliminar cuenta */}
+      <ConfirmModal
+        isOpen={Boolean(accountToDelete)}
+        onClose={() => setAccountToDelete(null)}
+        onConfirm={handleConfirmDeleteAccount}
+        title="¿Eliminar esta cuenta?"
+        message={`¿Estás seguro de que deseas eliminar "${accountToDelete?.name}"? Los movimientos que estaban vinculados a esta cuenta se conservarán en tu historial pero quedarán sin cuenta asignada.`}
+        confirmText="Sí, eliminar cuenta"
+        cancelText="Conservar cuenta"
+        isLoading={isDeleting}
+        isDestructive={true}
       />
     </div>
   );

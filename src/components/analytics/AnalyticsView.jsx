@@ -241,7 +241,7 @@ export const AnalyticsView = () => {
 
             <div className="p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container-high/60">
               <span className="text-xs uppercase font-semibold text-on-surface-variant tracking-wider">
-                Superávit / Ahorro Neto
+                Dinero que te sobró (Ahorro)
               </span>
               <div className={`text-2xl font-bold mt-1 tabular-nums ${
                 totalFilteredIncome >= totalFilteredExpense ? 'text-secondary' : 'text-error'
@@ -249,9 +249,9 @@ export const AnalyticsView = () => {
                 {totalFilteredIncome >= totalFilteredExpense ? '+' : ''}${(totalFilteredIncome - totalFilteredExpense).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
               </div>
               <span className="text-xs text-on-surface-variant mt-1 block">
-                Tasa de ahorro:{' '}
+                Porcentaje ahorrado:{' '}
                 {totalFilteredIncome > 0
-                  ? `${Math.max(0, (((totalFilteredIncome - totalFilteredExpense) / totalFilteredIncome) * 100)).toFixed(1)}%`
+                  ? `${Math.max(0, (((totalFilteredIncome - totalFilteredExpense) / totalFilteredIncome) * 100)).toFixed(1)}% de tus ingresos`
                   : '0.0%'}
               </span>
             </div>

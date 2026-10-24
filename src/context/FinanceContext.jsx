@@ -73,6 +73,30 @@ export const FinanceProvider = ({ children }) => {
   const [isNewMovementModalOpen, setIsNewMovementModalOpen] = useState(false);
   const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
 
+  // Toast Notifications State & Helper
+  const [toast, setToast] = useState(null);
+  const showToast = useCallback((message, type = 'success', title = null) => {
+    setToast({
+      id: Date.now(),
+      message,
+      type,
+      title: title || (type === 'success' ? '¡Operación exitosa!' : type === 'error' ? 'Atención' : 'Notificación'),
+    });
+  }, []);
+
+  const hideToast = useCallback(() => {
+    setToast(null);
+  }, []);
+
+  // Auto-dismiss toast after 4 seconds
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => {
+      setToast(null);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   // 1. Listen for user session
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -165,6 +189,23 @@ export const FinanceProvider = ({ children }) => {
       const userTransactions = (txData || []).map((tx) => {
         const txTags = (tx.transaction_tags || []).map((tt) => tt.tags).filter(Boolean);
         const accCurrency = tx.accounts?.currency || 'MXN';
+        const isTransfer = tx.type === 'transfer';
+        const isIncome = tx.type === 'income';
+
+        let icon = tx.categories?.icon;
+        if (!icon) {
+          if (isTransfer) icon = 'swap_horiz';
+          else if (isIncome) icon = 'payments';
+          else icon = 'shopping_bag';
+        }
+
+        let iconBg = 'bg-surface-container-highest text-primary';
+        if (isTransfer) {
+          iconBg = 'bg-primary-container/20 text-primary';
+        } else if (isIncome) {
+          iconBg = 'bg-secondary-fixed/50 text-secondary';
+        }
+
         return {
           id: tx.id,
           concept: tx.description,
@@ -173,18 +214,18 @@ export const FinanceProvider = ({ children }) => {
           createdAt: tx.created_at,
           type: tx.type,
           currency: accCurrency,
-          category: tx.categories?.name || 'General',
+          category: tx.categories?.name || (isTransfer ? 'Transferencia' : 'General'),
           categoryId: tx.category_id,
           categoryType: tx.type,
-          categoryIcon: tx.categories?.icon || 'payments',
+          categoryIcon: icon,
           subcategory: tx.subcategories?.name || '',
           subcategoryId: tx.subcategory_id,
           account: tx.accounts?.name || 'Cuenta General',
           accountId: tx.account_id,
           tags: txTags,
           notes: tx.notes || '',
-          icon: tx.categories?.icon || (tx.type === 'income' ? 'payments' : 'shopping_bag'),
-          iconBg: tx.type === 'income' ? 'bg-secondary-fixed/50 text-secondary' : 'bg-surface-container-highest text-primary',
+          icon,
+          iconBg,
         };
       });
 
@@ -522,6 +563,125 @@ export const FinanceProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Transfer funds between two accounts taking currencies and account types into account.
+   * If currencies differ (e.g. MXN -> USD or USD -> MXN), convertedAmount handles the destination credit.
+   */
+  const addTransfer = async ({
+    fromAccountId,
+    toAccountId,
+    amount,
+    convertedAmount = null,
+    concept = 'Transferencia entre cuentas',
+    notes = '',
+    date = null,
+  }) => {
+    if (!currentUser) return { error: 'No user authenticated' };
+    if (!fromAccountId || !toAccountId) return { error: 'Debes seleccionar cuenta de origen y cuenta de destino.' };
+    if (fromAccountId === toAccountId) return { error: 'La cuenta origen y destino no pueden ser la misma.' };
+
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) return { error: 'Monto inválido.' };
+
+    try {
+      const fromAcc = accounts.find((a) => a.id === fromAccountId);
+      const toAcc = accounts.find((a) => a.id === toAccountId);
+      if (!fromAcc || !toAcc) throw new Error('Cuentas no encontradas.');
+
+      const txDate = date || new Date().toISOString().split('T')[0];
+
+      // Calculate amount received by destination account
+      let destAmount = numAmount;
+      if (convertedAmount && !isNaN(parseFloat(convertedAmount)) && parseFloat(convertedAmount) > 0) {
+        destAmount = parseFloat(convertedAmount);
+      } else if (fromAcc.currency !== toAcc.currency) {
+        // Automatic conversion based on current live exchangeRate
+        if (fromAcc.currency === 'MXN' && toAcc.currency === 'USD') {
+          destAmount = exchangeRate > 0 ? numAmount / exchangeRate : numAmount;
+        } else if (fromAcc.currency === 'USD' && toAcc.currency === 'MXN') {
+          destAmount = numAmount * (exchangeRate || 1);
+        }
+      }
+      destAmount = Number(destAmount.toFixed(2));
+
+      // 1. Insert Outgoing Transfer Transaction (Origen: debit/salida)
+      const outgoingConcept = concept || `Transferencia a ${toAcc.name}`;
+      const outgoingNotes = `${notes ? notes + ' | ' : ''}Transferencia enviada hacia ${toAcc.name} (${toAcc.institution || 'Bancaria'}). Destino recibe: ${toAcc.currency === 'USD' ? '$' : '$'}${destAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })} ${toAcc.currency}.`;
+
+      const { data: outTx, error: outError } = await supabase
+        .from('transactions')
+        .insert([
+          {
+            user_id: currentUser.id,
+            description: outgoingConcept,
+            amount: -Math.abs(numAmount), // negative = exit
+            type: 'transfer',
+            account_id: fromAccountId,
+            transaction_date: txDate,
+            notes: outgoingNotes,
+          },
+        ])
+        .select()
+        .single();
+
+      if (outError) throw outError;
+
+      // 2. Insert Incoming Transfer Transaction (Destino: credit/entrada)
+      const incomingConcept = concept || `Transferencia desde ${fromAcc.name}`;
+      const incomingNotes = `${notes ? notes + ' | ' : ''}Transferencia recibida de ${fromAcc.name} (${fromAcc.institution || 'Bancaria'}). Monto enviado: ${fromAcc.currency === 'USD' ? '$' : '$'}${numAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })} ${fromAcc.currency}.`;
+
+      const { data: inTx, error: inError } = await supabase
+        .from('transactions')
+        .insert([
+          {
+            user_id: currentUser.id,
+            description: incomingConcept,
+            amount: Math.abs(destAmount), // positive = arrival
+            type: 'transfer',
+            account_id: toAccountId,
+            transaction_date: txDate,
+            notes: incomingNotes,
+          },
+        ])
+        .select()
+        .single();
+
+      if (inError) throw inError;
+
+      // 3. Update From Account Balance
+      // For credit cards: an exit/outgoing transfer from a credit card is like a cash advance / expense (increases debt)
+      // For standard accounts: decreases balance
+      const fromCurrentBal = Number(fromAcc.balance) || 0;
+      const fromUpdatedBal = fromAcc.type === 'credito'
+        ? fromCurrentBal + numAmount
+        : fromCurrentBal - numAmount;
+
+      await supabase
+        .from('accounts')
+        .update({ balance: fromUpdatedBal })
+        .eq('id', fromAccountId);
+
+      // 4. Update To Account Balance
+      // For credit cards: an incoming transfer pays down debt (decreases balance/debt)
+      // For standard accounts: increases balance
+      const toCurrentBal = Number(toAcc.balance) || 0;
+      const toUpdatedBal = toAcc.type === 'credito'
+        ? toCurrentBal - destAmount
+        : toCurrentBal + destAmount;
+
+      await supabase
+        .from('accounts')
+        .update({ balance: toUpdatedBal })
+        .eq('id', toAccountId);
+
+      await refreshFinancialData();
+      return { success: true, outTx, inTx, error: null };
+    } catch (err) {
+      console.error('Error realizando transferencia:', err);
+      return { error: err.message };
+    }
+  };
+
   // Update account in Supabase
   const updateAccount = async (id, { name, institution, type, currency, balance, credit_limit, last4, color }) => {
     if (!currentUser) return { error: 'No user authenticated' };
@@ -732,6 +892,7 @@ export const FinanceProvider = ({ children }) => {
         updateAccount,
         deleteAccount,
         addTransaction,
+        addTransfer,
         updateTransaction,
         deleteTransactions,
         refreshFinancialData,
@@ -739,6 +900,9 @@ export const FinanceProvider = ({ children }) => {
         setIsNewMovementModalOpen,
         isNewAccountModalOpen,
         setIsNewAccountModalOpen,
+        toast,
+        showToast,
+        hideToast,
       }}
     >
       {children}

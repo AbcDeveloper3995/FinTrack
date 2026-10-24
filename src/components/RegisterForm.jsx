@@ -118,23 +118,23 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
 
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-secondary-container/40 rounded-full text-on-secondary-container font-label-md text-label-md">
           <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-          <span>Bóveda Cifrada</span>
+          <span>100% Privado</span>
         </div>
       </div>
 
       {/* Main Title & Lead */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <span className="material-symbols-outlined text-secondary text-2xl">verified_user</span>
+          <span className="material-symbols-outlined text-secondary text-2xl">sparkles</span>
           <span className="font-label-md text-label-md uppercase tracking-wider text-secondary font-semibold">
-            Registro Oficial FinTrack
+            Empieza hoy
           </span>
         </div>
         <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
-          Crea tu Cuenta Patrimonial
+          Crea tu cuenta gratis
         </h2>
         <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-          Configura tu entorno financiero con respaldo en la nube y aislamiento de datos.
+          Lleva el control de tus gastos, ahorros y metas en un solo lugar.
         </p>
       </div>
 
@@ -156,7 +156,7 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block font-label-md text-label-md text-on-surface font-semibold mb-2">
-            Nombre Completo
+            ¿Cómo te llamas?
           </label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
@@ -166,7 +166,7 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Ej. Sofía Ramírez"
+              placeholder="Tu nombre o apodo"
               required
               className="w-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-10 pr-4 py-3 rounded-xl border border-surface-container-high/80 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all font-body-md text-body-md"
             />
@@ -175,7 +175,7 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
 
         <div>
           <label className="block font-label-md text-label-md text-on-surface font-semibold mb-2">
-            Correo Electrónico
+            Tu correo electrónico
           </label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
@@ -195,10 +195,10 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="font-label-md text-label-md text-on-surface font-semibold">
-              Contraseña
+              Crea una contraseña
             </label>
             <span className="font-label-md text-[11px] text-on-surface-variant">
-              Fuerza: <strong className="text-on-surface font-semibold">{getStrengthLabel()}</strong>
+              Nivel: <strong className="text-on-surface font-semibold">{getStrengthLabel()}</strong>
             </span>
           </div>
           <div className="relative">
@@ -209,7 +209,7 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Crea una contraseña segura"
+              placeholder="Mínimo 6 caracteres"
               required
               className="w-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-10 pr-11 py-3 rounded-xl border border-surface-container-high/80 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all font-body-md text-body-md"
             />
@@ -243,7 +243,7 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
               className="w-4 h-4 mt-0.5 rounded text-primary focus:ring-primary/30 border-surface-container-high"
             />
             <span className="font-body-md text-body-md text-on-surface-variant leading-tight">
-              Acepto los términos de servicio, política de confidencialidad y aislamiento de datos patrimoniales.
+              Acepto los términos de uso y la política de privacidad de mis datos.
             </span>
           </label>
         </div>
@@ -257,11 +257,11 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
           {loading ? (
             <>
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              <span>Creando bóveda en Supabase...</span>
+              <span>Creando tu cuenta...</span>
             </>
           ) : (
             <>
-              <span>Registrar y Abrir Bóveda</span>
+              <span>Crear mi cuenta gratis</span>
               <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </>
           )}
@@ -271,7 +271,7 @@ export const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
       {/* Footer Switch */}
       <div className="mt-8 pt-6 border-t border-surface-container text-center">
         <p className="font-body-md text-body-md text-on-surface-variant">
-          ¿Ya tienes una cuenta patrimonial?{' '}
+          ¿Ya tienes cuenta?{' '}
           <button
             type="button"
             onClick={onSwitchToLogin}

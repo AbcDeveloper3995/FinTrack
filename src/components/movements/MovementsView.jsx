@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { EditMovementModal } from '../modals/EditMovementModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 
 export const MovementsView = () => {
-  const { transactions, tags, kpis, setIsNewMovementModalOpen, deleteTransactions } = useFinance();
+  const { transactions, tags, kpis, setIsNewMovementModalOpen, deleteTransactions, showToast } = useFinance();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all' | 'expense' | 'income'
@@ -11,6 +12,12 @@ export const MovementsView = () => {
   const [filterTag, setFilterTag] = useState('all');
   const [selectedIds, setSelectedIds] = useState([]);
   const [movementToEdit, setMovementToEdit] = useState(null);
+  const [deleteModalState, setDeleteModalState] = useState({
+    isOpen: false,
+    movement: null,
+    isBulk: false,
+    isLoading: false,
+  });
 
   // Filter transactions
   const filtered = transactions.filter((m) => {
@@ -47,26 +54,50 @@ export const MovementsView = () => {
     }
   };
 
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (selectedIds.length === 0) return;
-    if (!window.confirm(`¿Deseas eliminar ${selectedIds.length} movimiento(s)? Los saldos de las cuentas se actualizarán automáticamente.`)) return;
-
-    const res = await deleteTransactions(selectedIds, true);
-    if (res.error) {
-      alert('Error eliminando transacciones: ' + res.error);
-    } else {
-      setSelectedIds([]);
-    }
+    setDeleteModalState({
+      isOpen: true,
+      movement: null,
+      isBulk: true,
+      isLoading: false,
+    });
   };
 
-  const handleSingleDelete = async (movement) => {
-    if (!window.confirm(`¿Deseas eliminar el movimiento "${movement.concept}"? Su importe se revertirá automáticamente en la cuenta correspondiente.`)) return;
+  const handleSingleDelete = (movement) => {
+    setDeleteModalState({
+      isOpen: true,
+      movement,
+      isBulk: false,
+      isLoading: false,
+    });
+  };
 
-    const res = await deleteTransactions([movement.id], true);
-    if (res.error) {
-      alert('Error eliminando movimiento: ' + res.error);
-    } else {
-      setSelectedIds((prev) => prev.filter((id) => id !== movement.id));
+  const handleConfirmDelete = async () => {
+    setDeleteModalState((prev) => ({ ...prev, isLoading: true }));
+
+    if (deleteModalState.isBulk) {
+      const count = selectedIds.length;
+      const res = await deleteTransactions(selectedIds, true);
+      setDeleteModalState({ isOpen: false, movement: null, isBulk: false, isLoading: false });
+
+      if (res.error) {
+        showToast('Error eliminando movimientos: ' + res.error, 'error', 'Error');
+      } else {
+        setSelectedIds([]);
+        showToast(`Se eliminaron ${count} movimiento(s) y sus saldos fueron revertidos.`, 'info', 'Movimientos eliminados');
+      }
+    } else if (deleteModalState.movement) {
+      const movement = deleteModalState.movement;
+      const res = await deleteTransactions([movement.id], true);
+      setDeleteModalState({ isOpen: false, movement: null, isBulk: false, isLoading: false });
+
+      if (res.error) {
+        showToast('Error eliminando movimiento: ' + res.error, 'error', 'Error');
+      } else {
+        setSelectedIds((prev) => prev.filter((id) => id !== movement.id));
+        showToast(`El movimiento "${movement.concept}" fue eliminado y su saldo revertido.`, 'info', 'Movimiento eliminado');
+      }
     }
   };
 
@@ -207,6 +238,7 @@ export const MovementsView = () => {
             <option value="all">Tipo: Todos</option>
             <option value="expense">Solo Gastos</option>
             <option value="income">Solo Ingresos</option>
+            <option value="transfer">Solo Transferencias</option>
           </select>
 
           <select
@@ -354,21 +386,27 @@ export const MovementsView = () => {
                       <td className="py-3 px-3 text-center">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-label-md text-label-md font-bold ${
-                            isPositive
+                            m.type === 'transfer'
+                              ? 'bg-primary-container/30 text-primary border border-primary/20'
+                              : isPositive
                               ? 'bg-secondary-fixed text-on-secondary-fixed'
                               : 'bg-surface-container text-primary'
                           }`}
                         >
-                          {isPositive ? 'Ingreso' : 'Gasto'}
+                          {m.type === 'transfer' ? 'Transferencia' : isPositive ? 'Ingreso' : 'Gasto'}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <span
                           className={`font-bold tabular-nums ${
-                            isPositive ? 'text-secondary' : 'text-on-surface'
+                            m.type === 'transfer'
+                              ? m.amount > 0 ? 'text-secondary' : 'text-primary'
+                              : isPositive
+                              ? 'text-secondary'
+                              : 'text-on-surface'
                           }`}
                         >
-                          {isPositive ? '+' : ''}${Math.abs(m.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                          {m.amount > 0 ? '+' : ''}${Math.abs(m.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                           <span className="text-[10px] text-on-surface-variant font-normal ml-1">
                             {m.currency || 'MXN'}
                           </span>
@@ -428,6 +466,23 @@ export const MovementsView = () => {
         movement={movementToEdit}
         isOpen={Boolean(movementToEdit)}
         onClose={() => setMovementToEdit(null)}
+      />
+
+      {/* Confirm Modal para eliminar movimientos */}
+      <ConfirmModal
+        isOpen={deleteModalState.isOpen}
+        onClose={() => setDeleteModalState({ isOpen: false, movement: null, isBulk: false, isLoading: false })}
+        onConfirm={handleConfirmDelete}
+        title={deleteModalState.isBulk ? `¿Eliminar ${selectedIds.length} movimiento(s)?` : '¿Eliminar este movimiento?'}
+        message={
+          deleteModalState.isBulk
+            ? `Estás a punto de borrar ${selectedIds.length} movimientos seleccionados. Los importes se revertirán automáticamente en los saldos de sus cuentas correspondientes.`
+            : `¿Deseas eliminar el movimiento "${deleteModalState.movement?.concept || 'este movimiento'}"? Su importe se revertirá automáticamente en la cuenta asociada.`
+        }
+        confirmText={deleteModalState.isBulk ? 'Eliminar movimientos' : 'Eliminar movimiento'}
+        cancelText="Conservar"
+        isLoading={deleteModalState.isLoading}
+        isDestructive={true}
       />
     </div>
   );

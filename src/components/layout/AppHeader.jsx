@@ -2,7 +2,7 @@ import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { FEATURES } from '../../config/features';
 
-export const AppHeader = ({ activeTab, user, onLogout: _onLogout }) => {
+export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar }) => {
   const { currentPeriod, setIsNewMovementModalOpen, kpis } = useFinance();
   const [showNotifications, setShowNotifications] = React.useState(false);
   const notificationsRef = React.useRef(null);
@@ -23,32 +23,41 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout }) => {
   const getBreadcrumbLabel = () => {
     switch (activeTab) {
       case 'dashboard':
-        return 'Panel Financiero';
+        return 'Inicio';
       case 'movimientos':
-        return 'Bitácora de Movimientos';
+        return 'Mis Movimientos';
       case 'cuentas':
-        return 'Cuentas y Tarjetas';
+        return 'Mis Cuentas y Tarjetas';
       case 'categorias':
         return 'Categorías y Etiquetas';
       case 'analisis':
-        return 'Diagnóstico Comparativo Pro';
+        return 'Análisis del Mes';
       case 'presupuestos':
-        return 'Presupuestos y Metas';
+        return 'Mis Presupuestos';
       case 'configuracion':
-        return 'Configuración y Preferencias';
+        return 'Configuración';
       default:
-        return 'Panel Financiero';
+        return 'Inicio';
     }
   };
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl border-b border-surface-container-high/60 shadow-[0_1px_8px_rgba(0,0,0,0.03)] z-40 flex items-center justify-between px-6">
-      {/* Breadcrumb Module Title */}
-      <div className="flex items-center gap-2">
+    <header className="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl border-b border-surface-container-high/60 shadow-[0_1px_8px_rgba(0,0,0,0.03)] z-40 flex items-center justify-between px-4 sm:px-6">
+      {/* Breadcrumb Module Title & Mobile Hamburger Button */}
+      <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          onClick={onOpenSidebar}
+          className="lg:hidden p-2 rounded-xl text-on-surface hover:bg-surface-container transition-colors cursor-pointer flex items-center justify-center -ml-1"
+          title="Abrir menú"
+        >
+          <span className="material-symbols-outlined text-2xl">menu</span>
+        </button>
+
         <div className="flex items-center text-on-surface-variant font-label-md text-label-md">
-          <span className="hover:text-on-surface cursor-pointer">FinTrack</span>
-          <span className="material-symbols-outlined text-base mx-1 text-outline-variant">chevron_right</span>
-          <span className="text-on-surface font-semibold">{getBreadcrumbLabel()}</span>
+          <span className="hover:text-on-surface cursor-pointer hidden sm:inline">FinTrack</span>
+          <span className="material-symbols-outlined text-base mx-1 text-outline-variant hidden sm:inline">chevron_right</span>
+          <span className="text-on-surface font-semibold text-sm sm:text-base">{getBreadcrumbLabel()}</span>
         </div>
       </div>
 

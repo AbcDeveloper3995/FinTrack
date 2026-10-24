@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 
 export const EditAccountModal = ({ account, isOpen, onClose }) => {
-  const { updateAccount, exchangeRate } = useFinance();
+  const { updateAccount, exchangeRate, showToast } = useFinance();
 
   const [name, setName] = useState('');
   const [institution, setInstitution] = useState('');
@@ -56,6 +56,7 @@ export const EditAccountModal = ({ account, isOpen, onClose }) => {
       return;
     }
 
+    showToast(`Cuenta "${name.trim()}" actualizada correctamente.`);
     onClose();
   };
 

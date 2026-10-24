@@ -2,49 +2,69 @@ import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { FEATURES } from '../../config/features';
 
-export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
+export const AppSidebar = ({ activeTab, onNavigate, onLogout, isOpen = false, onClose }) => {
   const { kpis } = useFinance();
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-    { id: 'movimientos', label: 'Movimientos', icon: 'receipt_long' },
-    { id: 'cuentas', label: 'Cuentas', icon: 'account_balance_wallet' },
+    { id: 'dashboard', label: 'Inicio', icon: 'dashboard' },
+    { id: 'movimientos', label: 'Mis Movimientos', icon: 'receipt_long' },
+    { id: 'cuentas', label: 'Mis Cuentas', icon: 'account_balance_wallet' },
     { id: 'categorias', label: 'Categorías y Etiquetas', icon: 'label' },
-    { id: 'analisis', label: 'Análisis y Métricas', icon: 'monitoring', isPro: true },
-    { id: 'presupuestos', label: 'Presupuestos', icon: 'pie_chart' },
+    { id: 'analisis', label: 'Análisis del Mes', icon: 'monitoring', isPro: true },
+    { id: 'presupuestos', label: 'Mis Presupuestos', icon: 'pie_chart' },
     { id: 'configuracion', label: 'Configuración', icon: 'settings' },
   ];
 
+  const handleNavClick = (tabId) => {
+    onNavigate(tabId);
+    onClose?.();
+  };
+
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-r border-surface-container-high/60 z-50 flex flex-col justify-between">
-      <div className="flex flex-col flex-1 min-h-0">
-        {/* Top Brand Logo */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-surface-container-low">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[22px]">account_balance</span>
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 lg:hidden transition-opacity duration-300 animate-fade-in"
+        />
+      )}
+
+      {/* Sidebar Drawer (Slides in on mobile, fixed on desktop lg:translate-x-0) */}
+      <aside
+        className={`fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest shadow-2xl lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-r border-surface-container-high/60 z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Top Brand Logo & Mobile Close Button */}
+          <div className="h-16 flex items-center justify-between px-6 border-b border-surface-container-low">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <span className="material-symbols-outlined text-[22px]">account_balance</span>
+              </div>
+              <span className="font-headline-md text-headline-md font-bold tracking-tight text-primary">
+                FinTrack
+              </span>
             </div>
-            <span className="font-headline-md text-headline-md font-bold tracking-tight text-primary">
-              FinTrack
-            </span>
-          </div>
-          {FEATURES.SIDEBAR_COLLAPSE_BUTTON && (
+
+            {/* Mobile close button */}
             <button
               type="button"
-              className="flex items-center justify-center w-8 h-8 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-              title="Ocultar barra"
+              onClick={onClose}
+              className="lg:hidden p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+              title="Cerrar menú"
             >
-              <span className="material-symbols-outlined text-xl">dock_to_right</span>
+              <span className="material-symbols-outlined text-xl">close</span>
             </button>
-          )}
-        </div>
+          </div>
 
         {/* Quick Net Worth Summary Card */}
         <div className="px-4 py-3">
           <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
             <div className="flex items-center justify-between">
               <span className="font-label-md text-label-md text-on-surface-variant uppercase font-semibold">
-                Patrimonio Neto
+                Tu Dinero Total
               </span>
               <span className="flex items-center text-secondary font-label-md text-label-md font-bold">
                 <span className="material-symbols-outlined text-sm mr-0.5">trending_up</span>
@@ -68,7 +88,7 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onNavigate(item.id)}
+                onClick={() => handleNavClick(item.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-body-md text-body-md font-medium transition-all duration-200 cursor-pointer ${
                   isActive
                     ? 'bg-primary text-on-primary shadow-sm shadow-primary/20 font-semibold'
@@ -137,5 +157,6 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout }) => {
         </button>
       </div>
     </aside>
+  </>
   );
 };
