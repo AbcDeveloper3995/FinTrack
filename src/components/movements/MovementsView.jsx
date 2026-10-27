@@ -112,14 +112,14 @@ export const MovementsView = () => {
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-primary"></span>
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Registro Financiero
+              Tus Movimientos
             </span>
           </div>
           <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mt-1">
             Historial de Movimientos
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Bitácora unificada con desglose por categoría, subcategoría, cuenta y acciones rápidas.
+            Lleva el control de cada movimiento de tus cuentas y tarjetas día a día.
           </p>
         </div>
 
@@ -314,7 +314,6 @@ export const MovementsView = () => {
               <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
                 {filtered.map((m) => {
                   const isSelected = selectedIds.includes(m.id);
-                  const isPositive = m.amount > 0;
                   return (
                     <tr
                       key={m.id}
@@ -379,7 +378,10 @@ export const MovementsView = () => {
                       </td>
                       <td className="py-3 px-3 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container font-label-md text-label-md font-semibold text-on-surface">
-                          <span className="w-2 h-2 rounded-full bg-primary"></span>
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                            style={{ backgroundColor: m.accountColor || '#4338ca' }}
+                          ></span>
                           {m.account}
                         </span>
                       </td>
@@ -387,26 +389,26 @@ export const MovementsView = () => {
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-label-md text-label-md font-bold ${
                             m.type === 'transfer'
-                              ? 'bg-primary-container/30 text-primary border border-primary/20'
-                              : isPositive
-                              ? 'bg-secondary-fixed text-on-secondary-fixed'
-                              : 'bg-surface-container text-primary'
+                              ? 'bg-surface-container text-on-surface-variant border border-outline-variant/40'
+                              : m.type === 'expense'
+                              ? 'bg-error-container/40 text-error border border-error/20'
+                              : 'bg-secondary-fixed text-on-secondary-fixed'
                           }`}
                         >
-                          {m.type === 'transfer' ? 'Transferencia' : isPositive ? 'Ingreso' : 'Gasto'}
+                          {m.type === 'transfer' ? 'Transferencia' : m.type === 'expense' ? 'Gasto' : 'Ingreso'}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <span
                           className={`font-bold tabular-nums ${
                             m.type === 'transfer'
-                              ? m.amount > 0 ? 'text-secondary' : 'text-primary'
-                              : isPositive
-                              ? 'text-secondary'
-                              : 'text-on-surface'
+                              ? 'text-on-surface'
+                              : m.type === 'expense'
+                              ? 'text-error'
+                              : 'text-secondary'
                           }`}
                         >
-                          {m.amount > 0 ? '+' : ''}${Math.abs(m.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                          {m.type === 'expense' ? '-' : m.type === 'income' ? '+' : ''}${Math.abs(m.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                           <span className="text-[10px] text-on-surface-variant font-normal ml-1">
                             {m.currency || 'MXN'}
                           </span>
@@ -447,7 +449,7 @@ export const MovementsView = () => {
               Sin movimientos que mostrar
             </h3>
             <p className="text-on-surface-variant font-body-md text-body-md mt-1 max-w-md">
-              Aún no tienes movimientos registrados en tu bitácora o los filtros aplicados no arrojaron resultados.
+              Aún no tienes movimientos registrados o los filtros aplicados no arrojaron resultados.
             </p>
             <button
               type="button"

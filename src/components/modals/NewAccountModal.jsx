@@ -89,6 +89,38 @@ export const NewAccountModal = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Quick Bank Presets */}
+            <div>
+              <label className="block text-xs font-bold text-on-surface mb-1.5">
+                Bancos y cuentas populares (un clic para autocompletar)
+              </label>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {[
+                  { label: 'Nu', institution: 'Nu', color: '#7e22ce', type: 'credito' },
+                  { label: 'BBVA', institution: 'BBVA', color: '#0284c7', type: 'debito' },
+                  { label: 'Mercado Pago', institution: 'Mercado Pago', color: '#00aae4', type: 'debito' },
+                  { label: 'Santander', institution: 'Santander', color: '#dc2626', type: 'debito' },
+                  { label: 'Banorte', institution: 'Banorte', color: '#b91c1c', type: 'debito' },
+                  { label: 'Efectivo', institution: 'Efectivo', color: '#006c4a', type: 'efectivo' },
+                ].map((b) => (
+                  <button
+                    key={b.label}
+                    type="button"
+                    onClick={() => {
+                      setInstitution(b.institution);
+                      if (!name) setName(b.institution);
+                      setColor(b.color);
+                      setType(b.type);
+                    }}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }}></span>
+                    <span>{b.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                 Nombre de la cuenta
@@ -97,7 +129,7 @@ export const NewAccountModal = () => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="ej. Chase Checking, BBVA Nómina, Efectivo Dólares..."
+                placeholder="ej. BBVA Nómina, Nu Moradita, Efectivo billetera..."
                 required
                 className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
               />
@@ -112,7 +144,7 @@ export const NewAccountModal = () => {
                   type="text"
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
-                  placeholder="ej. BBVA, Nu, Chase, Bank of America, Efectivo"
+                  placeholder="ej. BBVA, Nu, Santander, Efectivo"
                   className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none"
                 />
               </div>

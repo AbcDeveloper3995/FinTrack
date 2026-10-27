@@ -27,6 +27,7 @@ export const NewMovementModal = () => {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Auto-initialize account selectors when modal opens or accounts change
   useEffect(() => {
@@ -86,12 +87,17 @@ export const NewMovementModal = () => {
     );
   };
 
+  const handleQuickAddAmount = (addVal) => {
+    const current = parseFloat(amount) || 0;
+    setAmount((current + addVal).toString());
+  };
+
   if (!isNewMovementModalOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount || parseFloat(amount) <= 0) {
-      setErrorMsg('Por favor ingresa un monto válido mayor a 0.');
+      setErrorMsg('Ingresa un monto válido mayor a 0.');
       return;
     }
 
@@ -100,17 +106,17 @@ export const NewMovementModal = () => {
 
     if (type === 'transfer') {
       if (!accountId || !toAccountId) {
-        setErrorMsg('Debes seleccionar tanto la cuenta de origen como la cuenta de destino.');
+        setErrorMsg('Selecciona la cuenta de salida y la de llegada.');
         setSaving(false);
         return;
       }
       if (accountId === toAccountId) {
-        setErrorMsg('La cuenta de origen y destino no pueden ser la misma.');
+        setErrorMsg('La cuenta de salida y llegada no pueden ser la misma.');
         setSaving(false);
         return;
       }
 
-      const transferConcept = concept.trim() || `Transferencia de ${fromAccount?.name || 'Origen'} a ${toAccount?.name || 'Destino'}`;
+      const transferConcept = concept.trim() || `Paso de dinero: ${fromAccount?.name || 'Origen'} a ${toAccount?.name || 'Destino'}`;
       const finalDestAmount = customConvertedAmount && parseFloat(customConvertedAmount) > 0
         ? parseFloat(customConvertedAmount)
         : autoCalculatedDestAmount;
@@ -126,13 +132,13 @@ export const NewMovementModal = () => {
 
       setSaving(false);
       if (res.error) {
-        setErrorMsg('Error al realizar transferencia: ' + res.error);
+        setErrorMsg('Error al transferir: ' + res.error);
         return;
       }
-      showToast('Transferencia realizada correctamente entre tus cuentas.');
+      showToast('¡Listo! Transferencia guardada correctamente.');
     } else {
       if (!concept.trim()) {
-        setErrorMsg('Por favor escribe un concepto para el movimiento.');
+        setErrorMsg(type === 'expense' ? '¿En qué lo gastaste? Escribe un concepto.' : '¿De qué es este dinero? Escribe un concepto.');
         setSaving(false);
         return;
       }
@@ -150,10 +156,10 @@ export const NewMovementModal = () => {
 
       setSaving(false);
       if (res.error) {
-        setErrorMsg('Error al guardar el movimiento: ' + res.error);
+        setErrorMsg('Error al guardar: ' + res.error);
         return;
       }
-      showToast(type === 'expense' ? 'Gasto registrado correctamente.' : 'Ingreso registrado correctamente.');
+      showToast(type === 'expense' ? '¡Gasto guardado con éxito!' : '¡Ingreso guardado con éxito!');
     }
 
     // Reset and close
@@ -163,122 +169,117 @@ export const NewMovementModal = () => {
     setNotes('');
     setSubcategoryId('');
     setSelectedTagIds([]);
+    setShowAdvanced(false);
     setIsNewMovementModalOpen(false);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-surface-container-high max-h-[90vh] flex flex-col">
-        {/* Header Ribbon */}
-        <div className="h-1.5 bg-gradient-to-r from-primary via-primary-container to-secondary shrink-0"></div>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-on-surface/50 backdrop-blur-sm animate-fade-in">
+      <div className="bg-surface-container-lowest rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-surface-container-high max-h-[92vh] sm:max-h-[90vh] flex flex-col">
+        {/* Color accent line matching type */}
+        <div
+          className={`h-1.5 transition-colors duration-300 shrink-0 ${
+            type === 'expense'
+              ? 'bg-error'
+              : type === 'income'
+              ? 'bg-secondary'
+              : 'bg-primary'
+          }`}
+        />
 
-        <div className="p-6 overflow-y-auto flex-1">
-          <div className="flex items-center justify-between mb-5">
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-primary-container/10 text-primary flex items-center justify-center">
-                <span className="material-symbols-outlined text-[24px]">payments</span>
+              <div
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${
+                  type === 'expense'
+                    ? 'bg-error-container/40 text-error'
+                    : type === 'income'
+                    ? 'bg-secondary-fixed/60 text-secondary'
+                    : 'bg-primary-fixed text-primary'
+                }`}
+              >
+                <span className="material-symbols-outlined text-2xl font-bold">
+                  {type === 'expense' ? 'arrow_downward' : type === 'income' ? 'arrow_upward' : 'swap_horiz'}
+                </span>
               </div>
               <div>
                 <h3 className="font-headline-md text-headline-md font-bold text-on-surface">
-                  Registrar Movimiento
+                  {type === 'expense' ? 'Anotar un Gasto' : type === 'income' ? 'Anotar un Ingreso' : 'Mover entre Cuentas'}
                 </h3>
                 <p className="text-xs text-on-surface-variant">
-                  Impacto inmediato en tus saldos, categorías y presupuestos.
+                  {type === 'expense' ? 'Registra lo que pagaste o compraste' : type === 'income' ? 'Registra el dinero que entró' : 'Pasa saldo de una cuenta a otra'}
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setIsNewMovementModalOpen(false)}
-              className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
           </div>
 
           {errorMsg && (
-            <div className="mb-4 p-3 rounded-lg bg-error-container text-on-error-container text-sm font-medium">
-              {errorMsg}
+            <div className="mb-4 p-3 rounded-xl bg-error-container text-on-error-container text-xs sm:text-sm font-medium flex items-center gap-2">
+              <span className="material-symbols-outlined text-base shrink-0">error</span>
+              <span>{errorMsg}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Type Switcher */}
-            <div className="flex p-1 bg-surface-container-low rounded-xl">
+            {/* Visual 3-Button Type Switcher */}
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-surface-container-low rounded-2xl">
               <button
                 type="button"
                 onClick={() => setType('expense')}
-                className={`flex-1 py-2 rounded-lg font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`py-2 sm:py-2.5 rounded-xl font-body-md text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
                   type === 'expense'
-                    ? 'bg-primary-container text-on-primary font-semibold shadow-sm'
+                    ? 'bg-error text-white shadow-sm'
                     : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">arrow_downward</span>
+                <span className="material-symbols-outlined text-base">remove_circle</span>
                 <span>Gasto</span>
               </button>
               <button
                 type="button"
                 onClick={() => setType('income')}
-                className={`flex-1 py-2 rounded-lg font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`py-2 sm:py-2.5 rounded-xl font-body-md text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
                   type === 'income'
-                    ? 'bg-secondary text-on-secondary font-semibold shadow-sm'
+                    ? 'bg-secondary text-white shadow-sm'
                     : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">arrow_upward</span>
+                <span className="material-symbols-outlined text-base">add_circle</span>
                 <span>Ingreso</span>
               </button>
               <button
                 type="button"
                 onClick={() => setType('transfer')}
-                className={`flex-1 py-2 rounded-lg font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`py-2 sm:py-2.5 rounded-xl font-body-md text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
                   type === 'transfer'
-                    ? 'bg-primary text-on-primary font-semibold shadow-sm'
+                    ? 'bg-primary text-white shadow-sm'
                     : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
                 <span className="material-symbols-outlined text-base">swap_horiz</span>
-                <span>Transferencia</span>
+                <span>Transferir</span>
               </button>
             </div>
 
-            {/* Concept */}
-            <div>
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                {type === 'transfer' ? 'Motivo o Referencia de la Transferencia' : 'Concepto o Comercio'}
+            {/* Giant Hero Amount Input */}
+            <div className="bg-surface-container-low/60 rounded-2xl p-4 border border-surface-container flex flex-col items-center justify-center">
+              <label className="text-[11px] uppercase tracking-wider font-bold text-on-surface-variant mb-1">
+                ¿Cuánto fue? ({fromAccount?.currency || 'MXN'})
               </label>
-              <input
-                type="text"
-                value={concept}
-                onChange={(e) => setConcept(e.target.value)}
-                placeholder={
-                  type === 'transfer'
-                    ? 'ej. Traspaso a ahorros, Pago tarjeta crédito, Cambio de divisas...'
-                    : 'ej. Supermercado, Pago Nómina, Pago Servicios...'
-                }
-                required={type !== 'transfer'}
-                className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-              />
-            </div>
-
-            {/* Amount with Currency info */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-label-md font-label-md text-on-surface-variant">
-                  {type === 'transfer'
-                    ? `Monto a Transferir (${fromAccount?.currency || 'MXN'})`
-                    : `Monto (${fromAccount?.currency || 'MXN'})`}
-                </label>
-                {fromAccount && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-surface-container text-primary">
-                    Moneda cuenta: {fromAccount.currency}
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <span className="absolute left-3.5 top-2.5 text-on-surface-variant font-bold">
-                  {fromAccount?.currency === 'USD' ? 'US$' : '$'}
+              <div className="flex items-center justify-center w-full">
+                <span className={`text-2xl sm:text-3xl font-extrabold mr-1 ${
+                  type === 'expense' ? 'text-error' : type === 'income' ? 'text-secondary' : 'text-primary'
+                }`}>
+                  {type === 'expense' ? '-' : type === 'income' ? '+' : ''}$
                 </span>
                 <input
                   type="number"
@@ -287,153 +288,118 @@ export const NewMovementModal = () => {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
+                  autoFocus
                   required
-                  className="w-full h-11 pl-10 pr-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                  className="w-48 sm:w-56 text-center text-3xl sm:text-4xl font-extrabold bg-transparent text-on-surface outline-none tabular-nums placeholder:text-on-surface-variant/40"
                 />
+              </div>
+
+              {/* Quick Add Amount Chips */}
+              <div className="flex items-center gap-1.5 mt-3 flex-wrap justify-center">
+                <span className="text-[10px] text-on-surface-variant mr-1">Rápido:</span>
+                {[50, 100, 200, 500, 1000].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => handleQuickAddAmount(val)}
+                    className="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold tabular-nums transition-colors cursor-pointer border border-outline-variant/30 active:scale-95"
+                  >
+                    +${val}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* TRANSFER MODE: Dual Account Selectors + Currency Conversion Preview */}
+            {/* Concept / Description */}
+            <div>
+              <label className="block text-xs font-bold text-on-surface mb-1">
+                {type === 'transfer' ? '¿Para qué es esta transferencia?' : type === 'expense' ? '¿En qué lo gastaste?' : '¿De qué es este ingreso?'}
+              </label>
+              <input
+                type="text"
+                value={concept}
+                onChange={(e) => setConcept(e.target.value)}
+                placeholder={
+                  type === 'transfer'
+                    ? 'ej. Pago de tarjeta, Guardar en ahorro...'
+                    : type === 'expense'
+                    ? 'ej. Oxxo, Tacos, Súper, Netflix...'
+                    : 'ej. Nómina, Venta, Pago que me debían...'
+                }
+                required={type !== 'transfer'}
+                className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl text-sm border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+              />
+            </div>
+
+            {/* Account Selector (or Dual Account for Transfer) */}
             {type === 'transfer' ? (
-              <div className="space-y-4 pt-2 pb-1 border-y border-surface-container">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* From Account */}
+              <div className="space-y-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface-variant mb-1 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm text-error">upload</span>
-                      <span>Cuenta Origen (De donde sale)</span>
+                    <label className="block text-xs font-bold text-on-surface mb-1 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-error"></span>
+                      <span>De esta cuenta (sale):</span>
                     </label>
                     <select
                       value={accountId}
                       onChange={(e) => setAccountId(e.target.value)}
-                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
+                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
                     >
                       {accounts.map((acc) => (
                         <option key={acc.id} value={acc.id}>
-                          {acc.name} ({acc.currency}) - Saldo: ${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                          {acc.name} - Saldo: ${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  {/* To Account */}
                   <div>
-                    <label className="block text-label-md font-label-md text-on-surface-variant mb-1 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm text-secondary">download</span>
-                      <span>Cuenta Destino (Hacia donde entra)</span>
+                    <label className="block text-xs font-bold text-on-surface mb-1 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-secondary"></span>
+                      <span>A esta cuenta (entra):</span>
                     </label>
                     <select
                       value={toAccountId}
                       onChange={(e) => setToAccountId(e.target.value)}
-                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
+                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
                     >
                       {accounts.map((acc) => (
                         <option key={acc.id} value={acc.id} disabled={acc.id === accountId}>
-                          {acc.name} ({acc.currency}) {acc.id === accountId ? '(Misma cuenta - No permitido)' : ''}
+                          {acc.name} {acc.id === accountId ? '(Misma - no permitido)' : ''}
                         </option>
                       ))}
                     </select>
                   </div>
                 </div>
 
-                {/* Conversion Banner if currencies differ */}
                 {isMultiCurrencyTransfer && (
-                  <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-primary">
-                      <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-base">currency_exchange</span>
-                        <span>Conversión de Divisa ({fromAccount?.currency} ➔ {toAccount?.currency})</span>
-                      </span>
-                      <span>T.C. actual: ${exchangeRate.toFixed(2)} MXN/USD</span>
+                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary space-y-1.5">
+                    <div className="flex items-center justify-between font-bold">
+                      <span>Conversión de divisa ({fromAccount?.currency} ➔ {toAccount?.currency})</span>
+                      <span>1 USD ≈ ${exchangeRate.toFixed(2)} MXN</span>
                     </div>
-
-                    <div>
-                      <label className="block text-label-md text-on-surface-variant text-[11px] mb-1">
-                        Monto recibido en cuenta destino ({toAccount?.currency})
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2 text-xs font-bold text-on-surface-variant">
-                          {toAccount?.currency === 'USD' ? 'US$' : '$'}
-                        </span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0.01"
-                          placeholder={autoCalculatedDestAmount > 0 ? autoCalculatedDestAmount.toFixed(2) : '0.00'}
-                          value={customConvertedAmount}
-                          onChange={(e) => setCustomConvertedAmount(e.target.value)}
-                          className="w-full h-9 pl-9 pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-xs font-semibold border border-primary/30 focus:border-primary outline-none"
-                        />
-                      </div>
-                      <span className="text-[10px] text-on-surface-variant mt-1 block">
-                        Calculado automáticamente: ${autoCalculatedDestAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })} {toAccount?.currency}. Puedes ajustarlo manualmente si tu banco aplicó otra tasa.
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <span>Recibe aprox:</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={customConvertedAmount}
+                        placeholder={autoCalculatedDestAmount > 0 ? autoCalculatedDestAmount.toFixed(2) : '0.00'}
+                        onChange={(e) => setCustomConvertedAmount(e.target.value)}
+                        className="w-28 h-8 px-2 bg-surface-container-lowest rounded-lg border border-primary/40 text-on-surface font-bold text-xs"
+                      />
+                      <span>{toAccount?.currency}</span>
                     </div>
-                  </div>
-                )}
-
-                {/* Notice for Credit Card destination */}
-                {toAccount?.type === 'credito' && (
-                  <div className="p-2.5 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center gap-2 text-xs text-secondary font-medium">
-                    <span className="material-symbols-outlined text-base">credit_card</span>
-                    <span>La cuenta destino es una Tarjeta de Crédito. Esta transferencia abonará a tu saldo utilizado para reducir la deuda.</span>
                   </div>
                 )}
               </div>
             ) : (
-              /* EXPENSE & INCOME: Category & Account inputs */
-              <>
-                {/* Category & Subcategory */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                      Categoría
-                    </label>
-                    <select
-                      value={categoryId}
-                      onChange={(e) => {
-                        setCategoryId(e.target.value);
-                        setSubcategoryId('');
-                      }}
-                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                    >
-                      {availableCategories.length > 0 ? (
-                        availableCategories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="">General</option>
-                      )}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                      Subcategoría <span className="text-xs text-on-surface-variant/70 font-normal">(opcional)</span>
-                    </label>
-                    <select
-                      value={subcategoryId}
-                      onChange={(e) => setSubcategoryId(e.target.value)}
-                      disabled={availableSubcategories.length === 0}
-                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer disabled:opacity-50"
-                    >
-                      <option value="">-- Ninguna --</option>
-                      {availableSubcategories.map((sub) => (
-                        <option key={sub.id} value={sub.id}>
-                          {sub.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Account */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-label-md font-label-md text-on-surface-variant">
-                      Cuenta / Tarjeta de Cargo o Abono
+                    <label className="text-xs font-bold text-on-surface">
+                      ¿Con qué cuenta o tarjeta?
                     </label>
                     {accounts.length === 0 && (
                       <button
@@ -442,7 +408,7 @@ export const NewMovementModal = () => {
                           setIsNewMovementModalOpen(false);
                           setIsNewAccountModalOpen(true);
                         }}
-                        className="text-xs text-primary hover:underline font-semibold"
+                        className="text-[11px] text-primary hover:underline font-bold"
                       >
                         + Crear cuenta
                       </button>
@@ -451,73 +417,137 @@ export const NewMovementModal = () => {
                   <select
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
-                    className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
+                    className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
                   >
                     {accounts.length > 0 ? (
                       accounts.map((acc) => (
                         <option key={acc.id} value={acc.id}>
-                          {acc.name} ({acc.institution}) [{acc.currency}] - Saldo: ${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                          {acc.name} (${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 0 })} {acc.currency})
                         </option>
                       ))
                     ) : (
-                      <option value="">Sin cuenta vinculada (Efectivo/General)</option>
+                      <option value="">Efectivo / General</option>
                     )}
                   </select>
                 </div>
-              </>
-            )}
 
-            {/* Tags Selection */}
-            {tags.length > 0 && (
-              <div>
-                <label className="block text-label-md font-label-md text-on-surface-variant mb-1.5">
-                  Etiquetas (Tags)
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((t) => {
-                    const isSelected = selectedTagIds.includes(t.id);
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => toggleTag(t.id)}
-                        style={{
-                          borderColor: t.color || '#4338ca',
-                          backgroundColor: isSelected ? (t.color || '#4338ca') : 'transparent',
-                          color: isSelected ? '#ffffff' : 'inherit',
-                        }}
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
-                          isSelected ? 'shadow-xs' : 'text-on-surface hover:bg-surface-container'
-                        }`}
-                      >
-                        #{t.name}
-                      </button>
-                    );
-                  })}
+                {/* Category */}
+                <div>
+                  <label className="block text-xs font-bold text-on-surface mb-1">
+                    Categoría
+                  </label>
+                  <select
+                    value={categoryId}
+                    onChange={(e) => {
+                      setCategoryId(e.target.value);
+                      setSubcategoryId('');
+                    }}
+                    className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
+                  >
+                    {availableCategories.length > 0 ? (
+                      availableCategories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="">General</option>
+                    )}
+                  </select>
                 </div>
               </div>
             )}
 
-            {/* Optional Notes */}
-            <div>
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                Nota o referencia adicional <span className="text-xs text-on-surface-variant/70 font-normal">(opcional)</span>
-              </label>
-              <input
-                type="text"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="ej. Ticket fiscal, compra compartida..."
-                className="w-full h-10 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
-              />
+            {/* Toggle for optional extra details (keeps modal super clean for everyday use) */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer py-1"
+              >
+                <span className="material-symbols-outlined text-base">
+                  {showAdvanced ? 'expand_less' : 'tune'}
+                </span>
+                <span>{showAdvanced ? 'Ocultar detalles opcionales' : '+ Agregar nota, etiqueta o subcategoría (opcional)'}</span>
+              </button>
+
+              {showAdvanced && (
+                <div className="mt-3 p-3.5 bg-surface-container-low rounded-2xl border border-surface-container space-y-3 animate-fade-in">
+                  {/* Subcategory if available */}
+                  {type !== 'transfer' && availableSubcategories.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-medium text-on-surface-variant mb-1">
+                        Subcategoría
+                      </label>
+                      <select
+                        value={subcategoryId}
+                        onChange={(e) => setSubcategoryId(e.target.value)}
+                        className="w-full h-10 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
+                      >
+                        <option value="">-- Sin subcategoría --</option>
+                        {availableSubcategories.map((sub) => (
+                          <option key={sub.id} value={sub.id}>
+                            {sub.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  <div>
+                    <label className="block text-xs font-medium text-on-surface-variant mb-1">
+                      Nota o comentario personal
+                    </label>
+                    <input
+                      type="text"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="ej. Pagado a medias con Carlos, factura #12..."
+                      className="w-full h-9 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs border border-outline-variant/60 focus:border-primary outline-none"
+                    />
+                  </div>
+
+                  {/* Tags */}
+                  {tags.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-medium text-on-surface-variant mb-1.5">
+                        Etiquetas (#)
+                      </label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {tags.map((t) => {
+                          const isSelected = selectedTagIds.includes(t.id);
+                          return (
+                            <button
+                              key={t.id}
+                              type="button"
+                              onClick={() => toggleTag(t.id)}
+                              style={{
+                                borderColor: t.color || '#4338ca',
+                                backgroundColor: isSelected ? (t.color || '#4338ca') : 'transparent',
+                                color: isSelected ? '#ffffff' : 'inherit',
+                              }}
+                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                                isSelected ? 'shadow-xs' : 'text-on-surface hover:bg-surface-container'
+                              }`}
+                            >
+                              #{t.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-container">
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setIsNewMovementModalOpen(false)}
-                className="px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-body-md font-medium transition-colors"
+                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
                 disabled={saving}
               >
                 Cancelar
@@ -525,10 +555,16 @@ export const NewMovementModal = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold shadow-md hover:shadow transition-all flex items-center gap-2"
+                className={`flex-1 sm:flex-initial px-6 py-2.5 rounded-xl text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  type === 'expense'
+                    ? 'bg-error hover:bg-red-700'
+                    : type === 'income'
+                    ? 'bg-secondary hover:bg-emerald-700'
+                    : 'bg-primary hover:bg-primary-container'
+                }`}
               >
-                {saving && <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>}
-                <span>{saving ? 'Guardando...' : 'Guardar Movimiento'}</span>
+                {saving && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
+                <span>{saving ? 'Guardando...' : type === 'expense' ? 'Guardar Gasto' : type === 'income' ? 'Guardar Ingreso' : 'Guardar Transferencia'}</span>
               </button>
             </div>
           </form>

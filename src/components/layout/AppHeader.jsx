@@ -68,16 +68,19 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar 
           <button
             type="button"
             className="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+            title="Mes anterior"
           >
             <span className="material-symbols-outlined text-lg">chevron_left</span>
           </button>
-          <div className="flex items-center gap-1.5 px-2 text-on-surface font-body-md text-body-md font-medium">
+          <div className="flex items-center gap-1.5 px-2 text-on-surface font-body-md text-body-md font-medium select-none">
             <span className="material-symbols-outlined text-base text-on-surface-variant">calendar_today</span>
             <span>{currentPeriod}</span>
           </div>
           <button
             type="button"
-            className="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+            disabled={true}
+            className="p-1 rounded text-on-surface-variant/30 cursor-not-allowed opacity-40 transition-colors"
+            title="Estás en el mes actual"
           >
             <span className="material-symbols-outlined text-lg">chevron_right</span>
           </button>

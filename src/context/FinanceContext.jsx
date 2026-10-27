@@ -170,7 +170,7 @@ export const FinanceProvider = ({ children }) => {
         .from('transactions')
         .select(`
           *,
-          accounts (name, institution, type, currency),
+          accounts (name, institution, type, currency, color),
           categories (name, icon, color, type),
           subcategories (name),
           transaction_tags (
@@ -221,6 +221,7 @@ export const FinanceProvider = ({ children }) => {
           subcategory: tx.subcategories?.name || '',
           subcategoryId: tx.subcategory_id,
           account: tx.accounts?.name || 'Cuenta General',
+          accountColor: tx.accounts?.color || '#4338ca',
           accountId: tx.account_id,
           tags: txTags,
           notes: tx.notes || '',

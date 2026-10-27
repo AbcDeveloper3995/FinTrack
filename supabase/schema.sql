@@ -161,7 +161,7 @@ BEGIN
 
   -- 1. Gastos: Alimentación
   INSERT INTO public.categories (user_id, name, type, icon, color, budget_monthly)
-  VALUES (NEW.id, 'Alimentación', 'expense', 'restaurant', '#f97316', 7000.00)
+  VALUES (NEW.id, 'Alimentación', 'expense', 'restaurant', '#f97316', 0.00)
   RETURNING id INTO cat_alimentacion;
 
   INSERT INTO public.subcategories (user_id, category_id, name) VALUES
@@ -171,7 +171,7 @@ BEGIN
 
   -- 2. Gastos: Vivienda
   INSERT INTO public.categories (user_id, name, type, icon, color, budget_monthly)
-  VALUES (NEW.id, 'Vivienda', 'expense', 'home', '#4338ca', 12000.00)
+  VALUES (NEW.id, 'Vivienda', 'expense', 'home', '#4338ca', 0.00)
   RETURNING id INTO cat_vivienda;
 
   INSERT INTO public.subcategories (user_id, category_id, name) VALUES
@@ -181,7 +181,7 @@ BEGIN
 
   -- 3. Gastos: Transporte
   INSERT INTO public.categories (user_id, name, type, icon, color, budget_monthly)
-  VALUES (NEW.id, 'Transporte', 'expense', 'directions_car', '#0284c7', 3500.00)
+  VALUES (NEW.id, 'Transporte', 'expense', 'directions_car', '#0284c7', 0.00)
   RETURNING id INTO cat_transporte;
 
   INSERT INTO public.subcategories (user_id, category_id, name) VALUES
@@ -191,7 +191,7 @@ BEGIN
 
   -- 4. Gastos: Servicios
   INSERT INTO public.categories (user_id, name, type, icon, color, budget_monthly)
-  VALUES (NEW.id, 'Servicios', 'expense', 'bolt', '#eab308', 2500.00)
+  VALUES (NEW.id, 'Servicios', 'expense', 'bolt', '#eab308', 0.00)
   RETURNING id INTO cat_servicios;
 
   INSERT INTO public.subcategories (user_id, category_id, name) VALUES
@@ -201,7 +201,7 @@ BEGIN
 
   -- 5. Gastos: Entretenimiento
   INSERT INTO public.categories (user_id, name, type, icon, color, budget_monthly)
-  VALUES (NEW.id, 'Entretenimiento', 'expense', 'movie', '#a855f7', 2000.00)
+  VALUES (NEW.id, 'Entretenimiento', 'expense', 'movie', '#a855f7', 0.00)
   RETURNING id INTO cat_entretenimiento;
 
   INSERT INTO public.subcategories (user_id, category_id, name) VALUES

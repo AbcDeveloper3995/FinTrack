@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { MonthComparisonBanner } from '../charts/MonthComparisonBanner';
+import { MonthPeaceOfMindCard } from './MonthPeaceOfMindCard';
 
 export const DashboardView = ({ onNavigate }) => {
   const {
@@ -17,7 +18,10 @@ export const DashboardView = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      {/* 0. Core Diagnosis Banner: ¿Gasté más o ahorré más respecto al mes anterior? */}
+      {/* 0. Semáforo de tranquilidad: ¿Cómo voy este mes? */}
+      <MonthPeaceOfMindCard kpis={kpis} hasTransactions={hasTransactions} />
+
+      {/* 0.1 Comparativa con mes anterior */}
       {hasTransactions && <MonthComparisonBanner kpis={kpis} />}
 
       {/* 1. Empty State Banner de Bienvenida Informativo si es usuario nuevo */}
@@ -34,7 +38,7 @@ export const DashboardView = ({ onNavigate }) => {
                   ¡Te damos la bienvenida a FinTrack!
                 </h3>
                 <p className="font-body-md text-body-md text-on-surface-variant mt-0.5 max-w-2xl">
-                  Tu plataforma está lista y limpia para registrar tus finanzas reales. Comienza agregando tus cuentas bancarias, tarjetas o efectivo, o registra tu primer movimiento.
+                  Tu plataforma está lista para llevar tus finanzas con calma. Agrega tus cuentas bancarias, tarjetas o efectivo, o anota tu primer gasto o ingreso.
                 </p>
               </div>
             </div>
@@ -44,32 +48,32 @@ export const DashboardView = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => setIsNewAccountModalOpen(true)}
-                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2"
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-base">account_balance_wallet</span>
-                  <span>Crear primera cuenta</span>
+                  <span>Agregar mi primera cuenta</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => setIsNewMovementModalOpen(true)}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">add</span>
-                <span>Registrar movimiento</span>
+                <span>Anotar un movimiento</span>
               </button>
             </div>
           </div>
         </section>
       )}
 
-      {/* 2. Row of 4 Metric KPI Cards */}
+      {/* 2. Row of 4 Metric KPI Cards con vocabulario humano */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* Card 1: Ingresos */}
+        {/* Card 1: Lo que entró */}
         <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-surface-container-high/60 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Ingresos del mes
+              Entró este mes
             </span>
             <div className="w-8 h-8 rounded-lg bg-secondary-fixed/50 text-secondary flex items-center justify-center">
               <span className="material-symbols-outlined text-lg">trending_up</span>
@@ -81,19 +85,19 @@ export const DashboardView = ({ onNavigate }) => {
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="text-on-surface-variant font-label-md text-label-md">
-              {hasTransactions ? 'Calculado en tiempo real' : 'Sin movimientos de ingreso aún'}
+              {hasTransactions ? 'Ingresos acumulados' : 'Sin ingresos registrados aún'}
             </span>
           </div>
         </div>
 
-        {/* Card 2: Gastos */}
+        {/* Card 2: Lo que gastaste */}
         <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-surface-container-high/60 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Gastos del mes
+              Gastaste este mes
             </span>
-            <div className="w-8 h-8 rounded-lg bg-surface-container text-primary flex items-center justify-center">
-              <span className="material-symbols-outlined text-lg">payments</span>
+            <div className="w-8 h-8 rounded-lg bg-error-container/40 text-error flex items-center justify-center">
+              <span className="material-symbols-outlined text-lg">shopping_cart</span>
             </div>
           </div>
           <div className="mt-2 font-metric-lg text-metric-lg font-bold text-on-surface tabular-nums tracking-tight">
@@ -102,16 +106,16 @@ export const DashboardView = ({ onNavigate }) => {
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="text-on-surface-variant font-label-md text-label-md">
-              {hasTransactions ? 'Flujo de egresos registrado' : 'Sin egresos registrados este mes'}
+              {hasTransactions ? 'Salidas y compras registradas' : 'Sin gastos registrados este mes'}
             </span>
           </div>
         </div>
 
-        {/* Card 3: Balance Neto */}
+        {/* Card 3: Te queda (Balance) */}
         <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-surface-container-high/60 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Balance neto
+              Te queda este mes
             </span>
             <div className="w-8 h-8 rounded-lg bg-primary-fixed text-primary flex items-center justify-center">
               <span className="material-symbols-outlined text-lg">account_balance</span>
@@ -125,23 +129,23 @@ export const DashboardView = ({ onNavigate }) => {
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="text-on-surface-variant font-label-md text-label-md">
-              Ingresos - Gastos del periodo
+              {kpis.netBalance >= 0 ? 'Saldo a tu favor' : 'Gastaste más de lo que entró'}
             </span>
           </div>
         </div>
 
-        {/* Card 4: Tasa de Ahorro */}
+        {/* Card 4: Porcentaje de ahorro */}
         <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-surface-container-high/60 hover:shadow-md transition-shadow flex items-center justify-between">
           <div>
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Tasa de ahorro
+              Ahorraste
             </span>
             <div className="mt-2 font-metric-lg text-metric-lg font-bold text-on-surface tabular-nums tracking-tight">
               {kpis.savingsRate}%
             </div>
             <div className="mt-1 text-on-surface-variant font-label-md text-label-md flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-secondary"></span>
-              <span>Meta recomendada: {kpis.savingsTarget}%</span>
+              <span>De lo que recibiste</span>
             </div>
           </div>
           <div className="relative w-14 h-14 flex items-center justify-center flex-shrink-0">
@@ -290,10 +294,10 @@ export const DashboardView = ({ onNavigate }) => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-                  Resumen de Operación
+                  Resumen rápido
                 </span>
                 <div className="font-headline-md text-headline-md font-semibold text-on-surface">
-                  Flujo del Mes
+                  Tu dinero en números
                 </div>
               </div>
             </div>
@@ -305,27 +309,27 @@ export const DashboardView = ({ onNavigate }) => {
                     <span className="material-symbols-outlined">payments</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-on-surface">Ingresos Acumulados</div>
-                    <div className="text-xs text-on-surface-variant">Entradas registradas</div>
+                    <div className="font-semibold text-on-surface">Todo lo que ingresó</div>
+                    <div className="text-xs text-on-surface-variant">Sueldo, ventas y cobros</div>
                   </div>
                 </div>
                 <div className="text-right font-bold text-secondary tabular-nums">
-                  ${kpis.monthlyIncome.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  +${kpis.monthlyIncome.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </div>
               </div>
 
               <div className="p-4 rounded-xl bg-surface-container-low flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-surface-container text-primary flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-error-container/40 text-error flex items-center justify-center">
                     <span className="material-symbols-outlined">shopping_cart</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-on-surface">Gastos Acumulados</div>
-                    <div className="text-xs text-on-surface-variant">Salidas registradas</div>
+                    <div className="font-semibold text-on-surface">Todo lo que gastaste</div>
+                    <div className="text-xs text-on-surface-variant">Compras, cuentas y servicios</div>
                   </div>
                 </div>
-                <div className="text-right font-bold text-on-surface tabular-nums">
-                  ${kpis.monthlyExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                <div className="text-right font-bold text-error tabular-nums">
+                  -${kpis.monthlyExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </div>
               </div>
 
@@ -335,19 +339,19 @@ export const DashboardView = ({ onNavigate }) => {
                     <span className="material-symbols-outlined">savings</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-on-surface">Capacidad de Ahorro</div>
-                    <div className="text-xs text-on-surface-variant">Saldo a favor neto</div>
+                    <div className="font-semibold text-on-surface">Dinero que te sobró</div>
+                    <div className="text-xs text-on-surface-variant">Ahorro libre del mes</div>
                   </div>
                 </div>
                 <div className={`text-right font-bold tabular-nums ${kpis.netBalance >= 0 ? 'text-secondary' : 'text-error'}`}>
-                  ${kpis.netBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  {kpis.netBalance >= 0 ? '+' : ''}${kpis.netBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-surface-container text-xs text-on-surface-variant text-center">
-            Información sincronizada en tiempo real con Supabase.
+            Tus datos están protegidos y respaldados.
           </div>
         </div>
       </section>
@@ -395,7 +399,6 @@ export const DashboardView = ({ onNavigate }) => {
               </thead>
               <tbody className="divide-y-0 text-body-md font-body-md">
                 {transactions.slice(0, 8).map((tx) => {
-                  const isPositive = tx.amount > 0;
                   return (
                     <tr key={tx.id} className="hover:bg-surface-container-low/60 transition-colors group">
                       <td className="py-3 px-3">
@@ -411,12 +414,24 @@ export const DashboardView = ({ onNavigate }) => {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-3 text-on-surface-variant">{tx.account}</td>
+                      <td className="py-3 px-3 text-on-surface-variant whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: tx.accountColor || '#4338ca' }}
+                          ></span>
+                          <span className="text-on-surface font-medium">{tx.account}</span>
+                        </span>
+                      </td>
                       <td className="py-3 px-3 text-on-surface-variant tabular-nums">{tx.date}</td>
                       <td className={`py-3 px-3 text-right font-bold tabular-nums ${
-                        isPositive ? 'text-secondary' : 'text-on-surface'
+                        tx.type === 'transfer'
+                          ? 'text-on-surface'
+                          : tx.type === 'expense'
+                          ? 'text-error'
+                          : 'text-secondary'
                       }`}>
-                        {isPositive ? '+' : ''}${Math.abs(tx.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        {tx.type === 'expense' ? '-' : tx.type === 'income' ? '+' : ''}${Math.abs(tx.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                       </td>
                     </tr>
                   );
