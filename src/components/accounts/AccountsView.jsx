@@ -299,7 +299,7 @@ export const AccountsView = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div>
               <div className="text-right">
                 <span className="text-xs uppercase text-on-surface-variant font-semibold">Saldo Nominal</span>
                 <div className="font-headline-lg text-headline-lg font-bold text-on-surface tabular-nums">
@@ -311,27 +311,6 @@ export const AccountsView = () => {
                     ≈ ${(Number(selectedAccount.balance) * exchangeRate).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN al tipo de cambio actual
                   </span>
                 )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAccountToEdit(selectedAccount)}
-                  className="p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center gap-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-                  title="Editar cuenta y saldo"
-                >
-                  <span className="material-symbols-outlined text-base">edit</span>
-                  <span>Editar</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteAccount(selectedAccount)}
-                  className="p-2.5 rounded-xl bg-error-container/40 hover:bg-error-container text-error flex items-center gap-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-                  title="Eliminar esta cuenta"
-                >
-                  <span className="material-symbols-outlined text-base">delete</span>
-                  <span>Eliminar</span>
-                </button>
               </div>
             </div>
           </div>
