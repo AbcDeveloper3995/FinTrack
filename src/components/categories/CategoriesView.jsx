@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { supabase } from '../../lib/supabase';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { CustomSelect } from '../common/CustomSelect';
 
 export const CategoriesView = () => {
   const { categories, tags, transactions, currentUser, refreshFinancialData, showToast } = useFinance();
@@ -304,70 +305,70 @@ export const CategoriesView = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Header and Switcher */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md uppercase tracking-wider mb-1">
-            <span>Gestión de Datos</span>
+          <div className="flex items-center gap-2 text-on-surface-variant font-label-md text-xs uppercase tracking-wider mb-1">
+            <span>Gestión</span>
             <span>•</span>
-            <span className="text-primary font-bold">Taxonomía Financiera</span>
+            <span className="text-primary font-bold">Taxonomía</span>
           </div>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
-            Categorías, Subcategorías y Etiquetas
+          <h1 className="text-2xl sm:text-headline-lg text-on-surface font-bold tracking-tight">
+            Categorías y Etiquetas
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Organiza tus movimientos con estructura jerárquica (Categorías / Subcategorías) y transversal (Etiquetas).
+          <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mt-0.5">
+            Organiza tus movimientos por tipos de gasto y marcas de búsqueda.
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="inline-flex p-1 bg-surface-container rounded-2xl shadow-inner self-start md:self-auto">
+        {/* Tab Switcher: Solo 'Categorías' y 'Etiquetas' */}
+        <div className="inline-flex p-1 bg-surface-container rounded-2xl shadow-inner self-stretch sm:self-auto justify-between sm:justify-start">
           <button
             type="button"
             onClick={() => setActiveTab('categories')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-body-md font-semibold transition-all ${
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'categories'
                 ? 'bg-surface-container-lowest text-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            <span className="material-symbols-outlined text-lg">account_tree</span>
-            <span>Categorías y Subcategorías</span>
-            <span className="px-2 py-0.5 rounded-full text-xs bg-surface-container-high text-on-surface-variant">
+            <span className="material-symbols-outlined text-lg">category</span>
+            <span>Categorías</span>
+            <span className="px-2 py-0.5 rounded-full text-xs bg-surface-container-high text-on-surface-variant font-bold">
               {categories.length}
             </span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('tags')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-body-md font-semibold transition-all ${
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'tags'
                 ? 'bg-surface-container-lowest text-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
             <span className="material-symbols-outlined text-lg">sell</span>
-            <span>Etiquetas (Tags)</span>
-            <span className="px-2 py-0.5 rounded-full text-xs bg-surface-container-high text-on-surface-variant">
+            <span>Etiquetas</span>
+            <span className="px-2 py-0.5 rounded-full text-xs bg-surface-container-high text-on-surface-variant font-bold">
               {tags.length}
             </span>
           </button>
         </div>
       </div>
 
-      {/* Explainer Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-surface-container-low p-4 sm:p-5 shadow-sm border border-surface-container">
-        <div className="flex items-start gap-4">
-          <div className="p-2.5 rounded-xl bg-surface-variant text-primary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-2xl">help_outline</span>
+      {/* Explainer Banner (Limpio y sintetizado para mobile) */}
+      <div className="rounded-2xl bg-surface-container-low p-3.5 sm:p-4 shadow-sm border border-surface-container">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-lg">info</span>
           </div>
-          <div className="flex-1 text-body-md font-body-md text-on-surface-variant">
+          <div className="flex-1 text-xs text-on-surface-variant leading-relaxed">
             {activeTab === 'categories' ? (
               <p>
-                <strong className="text-on-surface font-bold">¿Cómo funcionan las Categorías?</strong> Clasifican el origen o destino directo de tus fondos (ej. <em>Alimentación &gt; Supermercado</em>). Puedes agregar subcategorías dentro de cada una para mayor detalle.
+                <strong className="text-on-surface font-semibold">Categorías:</strong> Grupos principales y subcategorías para clasificar tus gastos e ingresos (ej. <em>Alimentación &gt; Supermercado</em>).
               </p>
             ) : (
               <p>
-                <strong className="text-on-surface font-bold">¿Para qué sirven las Etiquetas?</strong> Son marcas transversales que puedes asociar a cualquier movimiento sin importar su categoría (ej. <em>#Deducible, #Vacaciones, #Urgente, #Oxxo</em>) para filtrar reportes rápidamente.
+                <strong className="text-on-surface font-semibold">Etiquetas:</strong> Marcas para agrupar movimientos de cualquier tipo (ej. <em>#Vacaciones, #Deducible</em>).
               </p>
             )}
           </div>
@@ -455,12 +456,13 @@ export const CategoriesView = () => {
                   >
                     <div
                       onClick={() => toggleCategory(cat.id)}
-                      className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-surface-container-low/50 transition-colors select-none"
+                      className="p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer hover:bg-surface-container-low/50 transition-colors select-none"
                     >
-                      <div className="flex items-center gap-4">
+                      {/* Left: Icon & Category info */}
+                      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                         <button
                           type="button"
-                          className="text-on-surface-variant hover:text-on-surface transition-transform duration-200"
+                          className="text-on-surface-variant hover:text-on-surface transition-transform duration-200 mt-1 sm:mt-0 shrink-0"
                         >
                           <span
                             className={`material-symbols-outlined text-2xl transition-transform ${
@@ -470,40 +472,44 @@ export const CategoriesView = () => {
                             keyboard_arrow_down
                           </span>
                         </button>
-                        <div className="w-11 h-11 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-primary">
-                          <span className="material-symbols-outlined text-2xl">{cat.icon || 'category'}</span>
+
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-primary">
+                          <span className="material-symbols-outlined text-xl sm:text-2xl">{cat.icon || 'category'}</span>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-headline-md text-headline-md text-on-surface font-bold">
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-base sm:text-headline-md text-on-surface font-bold truncate">
                               {cat.name}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant capitalize">
+                            <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-on-surface-variant capitalize shrink-0">
                               {cat.type === 'income' ? 'Ingreso' : 'Gasto'}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant">
-                              {subcats.length} subcategorías
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container text-on-surface-variant shrink-0 whitespace-nowrap">
+                              {subcats.length} subcat.
                             </span>
                           </div>
-                          <p className="font-label-md text-label-md text-on-surface-variant mt-0.5">
-                            {catTransactions.length} movimiento(s) vinculados
+                          <p className="font-label-md text-xs text-on-surface-variant mt-0.5 truncate">
+                            {catTransactions.length} movimiento(s)
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto pl-12 md:pl-0">
+                      {/* Right: Amount & Actions Strip */}
+                      <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto pt-2 sm:pt-0 border-t sm:border-0 border-surface-container/60 pl-8 sm:pl-0">
                         <div className="flex flex-col md:items-end">
-                          <div className="font-metric-md text-metric-md font-bold text-on-surface tabular-nums">
-                            ${spentTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                          <div className="text-sm sm:text-metric-md font-bold text-on-surface tabular-nums">
+                            ${spentTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}{' '}
+                            <span className="text-xs font-normal text-on-surface-variant">MXN</span>
                           </div>
-                          <span className="text-xs text-on-surface-variant">Total acumulado</span>
+                          <span className="text-[11px] text-on-surface-variant">Total acumulado</span>
                         </div>
 
-                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             onClick={() => openNewSubModal(cat.id)}
-                            className="p-2 rounded-lg text-secondary hover:bg-secondary-fixed/30 transition-colors"
+                            className="p-1.5 sm:p-2 rounded-lg text-secondary hover:bg-secondary-fixed/30 transition-colors cursor-pointer"
                             title="Agregar subcategoría"
                           >
                             <span className="material-symbols-outlined text-xl">add_circle</span>
@@ -511,7 +517,7 @@ export const CategoriesView = () => {
                           <button
                             type="button"
                             onClick={() => openEditCatModal(cat)}
-                            className="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors"
+                            className="p-1.5 sm:p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors cursor-pointer"
                             title="Editar categoría"
                           >
                             <span className="material-symbols-outlined text-xl">edit</span>
@@ -519,7 +525,7 @@ export const CategoriesView = () => {
                           <button
                             type="button"
                             onClick={() => handleDeleteCategory(cat)}
-                            className="p-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container/40 transition-colors"
+                            className="p-1.5 sm:p-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container/40 transition-colors cursor-pointer"
                             title="Eliminar categoría"
                           >
                             <span className="material-symbols-outlined text-xl">delete</span>
@@ -528,20 +534,20 @@ export const CategoriesView = () => {
                       </div>
                     </div>
 
-                    {/* Subcategories */}
+                    {/* Subcategories Dropdown Panel */}
                     {isOpen && (
-                      <div className="bg-surface-container-low/40 px-6 py-4 pl-16 border-t border-surface-container">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                            Subcategorías de {cat.name}
+                      <div className="bg-surface-container-low/40 px-4 sm:px-6 py-3.5 pl-6 sm:pl-16 border-t border-surface-container">
+                        <div className="flex items-center justify-between mb-2.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+                            Subcategorías ({subcats.length})
                           </span>
                           <button
                             type="button"
                             onClick={() => openNewSubModal(cat.id)}
-                            className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+                            className="text-xs text-primary font-semibold hover:underline flex items-center gap-1 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-sm">add</span>
-                            <span>Añadir subcategoría</span>
+                            <span>Añadir</span>
                           </button>
                         </div>
 
@@ -550,14 +556,14 @@ export const CategoriesView = () => {
                             {subcats.map((sub) => (
                               <div
                                 key={sub.id}
-                                className="p-3 rounded-xl bg-surface-container-lowest border border-surface-container flex items-center justify-between text-body-md shadow-xs group"
+                                className="p-2.5 sm:p-3 rounded-xl bg-surface-container-lowest border border-surface-container flex items-center justify-between text-body-md shadow-xs group"
                               >
-                                <span className="font-medium text-on-surface">{sub.name}</span>
-                                <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100">
+                                <span className="font-medium text-sm text-on-surface truncate mr-2">{sub.name}</span>
+                                <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100">
                                   <button
                                     type="button"
                                     onClick={() => openEditSubModal(sub)}
-                                    className="p-1 text-on-surface-variant hover:text-primary rounded"
+                                    className="p-1 text-on-surface-variant hover:text-primary rounded cursor-pointer"
                                     title="Editar subcategoría"
                                   >
                                     <span className="material-symbols-outlined text-base">edit</span>
@@ -565,7 +571,7 @@ export const CategoriesView = () => {
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteSubcategory(sub)}
-                                    className="p-1 text-on-surface-variant hover:text-error rounded"
+                                    className="p-1 text-on-surface-variant hover:text-error rounded cursor-pointer"
                                     title="Eliminar subcategoría"
                                   >
                                     <span className="material-symbols-outlined text-base">delete</span>
@@ -575,8 +581,8 @@ export const CategoriesView = () => {
                             ))}
                           </div>
                         ) : (
-                          <div className="py-3 text-center text-xs text-on-surface-variant italic">
-                            Esta categoría aún no tiene subcategorías. Haz clic en "Añadir subcategoría" para crear la primera.
+                          <div className="py-2.5 text-center text-xs text-on-surface-variant italic">
+                            Esta categoría aún no tiene subcategorías. Haz clic en "Añadir" para crear la primera.
                           </div>
                         )}
                       </div>
@@ -720,38 +726,40 @@ export const CategoriesView = () => {
                   <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                     Tipo de Movimiento
                   </label>
-                  <select
+                  <CustomSelect
                     value={catType}
-                    onChange={(e) => setCatType(e.target.value)}
-                    className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg border border-outline-variant focus:border-primary outline-none"
-                  >
-                    <option value="expense">Gasto</option>
-                    <option value="income">Ingreso</option>
-                  </select>
+                    onChange={(val) => setCatType(val)}
+                    options={[
+                      { value: 'expense', label: 'Gasto', icon: 'arrow_downward', color: '#ef4444' },
+                      { value: 'income', label: 'Ingreso', icon: 'arrow_upward', color: '#10b981' },
+                    ]}
+                    placeholder="Selecciona tipo"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                     Ícono
                   </label>
-                  <select
+                  <CustomSelect
                     value={catIcon}
-                    onChange={(e) => setCatIcon(e.target.value)}
-                    className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg border border-outline-variant focus:border-primary outline-none"
-                  >
-                    <option value="category">Categoría General</option>
-                    <option value="restaurant">Restaurante / Comida</option>
-                    <option value="shopping_cart">Supermercado</option>
-                    <option value="home">Hogar / Vivienda</option>
-                    <option value="directions_car">Transporte / Auto</option>
-                    <option value="medical_services">Salud / Medicina</option>
-                    <option value="school">Educación</option>
-                    <option value="movie">Entretenimiento</option>
-                    <option value="payments">Salario / Sueldo</option>
-                    <option value="trending_up">Inversiones / Finanzas</option>
-                    <option value="fitness_center">Deportes / Gimnasio</option>
-                    <option value="pets">Mascotas</option>
-                  </select>
+                    onChange={(val) => setCatIcon(val)}
+                    options={[
+                      { value: 'category', label: 'Categoría General', icon: 'category' },
+                      { value: 'restaurant', label: 'Restaurante / Comida', icon: 'restaurant' },
+                      { value: 'shopping_cart', label: 'Supermercado', icon: 'shopping_cart' },
+                      { value: 'home', label: 'Hogar / Vivienda', icon: 'home' },
+                      { value: 'directions_car', label: 'Transporte / Auto', icon: 'directions_car' },
+                      { value: 'medical_services', label: 'Salud / Medicina', icon: 'medical_services' },
+                      { value: 'school', label: 'Educación', icon: 'school' },
+                      { value: 'movie', label: 'Entretenimiento', icon: 'movie' },
+                      { value: 'payments', label: 'Salario / Sueldo', icon: 'payments' },
+                      { value: 'trending_up', label: 'Inversiones / Finanzas', icon: 'trending_up' },
+                      { value: 'fitness_center', label: 'Deportes / Gimnasio', icon: 'fitness_center' },
+                      { value: 'pets', label: 'Mascotas', icon: 'pets' },
+                    ]}
+                    placeholder="Selecciona un ícono"
+                  />
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-container">

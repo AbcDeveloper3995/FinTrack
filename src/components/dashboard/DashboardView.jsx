@@ -175,19 +175,19 @@ export const DashboardView = ({ onNavigate }) => {
       {/* 3. Main Row 1 (Grid 7:5) - Patrimonio Consolidado & Cuentas */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 7 cols: Saldo Total & Cuentas */}
-        <div className="lg:col-span-7 bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-surface-container-lowest rounded-2xl p-4 sm:p-6 shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
                   Tu Dinero Total (Disponible - Tarjetas)
                 </span>
-                <div className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-on-surface tabular-nums tracking-tight mt-1">
+                <div className="text-2xl sm:text-3xl lg:text-display-lg font-bold text-on-surface tabular-nums tracking-tight mt-1">
                   ${kpis.netWorth.toLocaleString('es-MX', { minimumFractionDigits: 2 })}{' '}
                   <span className="font-metric-md text-metric-md font-normal text-on-surface-variant">MXN</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 self-start sm:self-center">
                 <button
                   type="button"
                   onClick={() => setIsNewAccountModalOpen(true)}
@@ -357,8 +357,8 @@ export const DashboardView = ({ onNavigate }) => {
       </section>
 
       {/* 4. Bottom Section: Actividad Reciente */}
-      <section className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
-        <div className="flex items-center justify-between mb-4">
+      <section className="bg-surface-container-lowest rounded-2xl p-4 sm:p-6 shadow-sm border border-surface-container-high/60">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
               Actividad Reciente
@@ -367,7 +367,7 @@ export const DashboardView = ({ onNavigate }) => {
               Últimos Movimientos
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-center">
             <button
               type="button"
               onClick={() => setIsNewMovementModalOpen(true)}

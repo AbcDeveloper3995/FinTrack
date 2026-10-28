@@ -7,11 +7,11 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout, isOpen = false, on
 
   const navItems = [
     { id: 'dashboard', label: 'Inicio', icon: 'dashboard' },
-    { id: 'movimientos', label: 'Mis Movimientos', icon: 'receipt_long' },
-    { id: 'cuentas', label: 'Mis Cuentas', icon: 'account_balance_wallet' },
+    { id: 'movimientos', label: 'Movimientos', icon: 'receipt_long' },
+    { id: 'cuentas', label: 'Cuentas', icon: 'account_balance_wallet' },
     { id: 'categorias', label: 'Categorías y Etiquetas', icon: 'label' },
     { id: 'analisis', label: 'Análisis del Mes', icon: 'monitoring', isPro: true },
-    { id: 'presupuestos', label: 'Mis Presupuestos', icon: 'pie_chart' },
+    { id: 'presupuestos', label: 'Presupuestos', icon: 'pie_chart' },
     { id: 'configuracion', label: 'Configuración', icon: 'settings' },
   ];
 

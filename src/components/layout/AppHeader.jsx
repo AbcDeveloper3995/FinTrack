@@ -25,15 +25,15 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar 
       case 'dashboard':
         return 'Inicio';
       case 'movimientos':
-        return 'Mis Movimientos';
+        return 'Movimientos';
       case 'cuentas':
-        return 'Mis Cuentas y Tarjetas';
+        return 'Cuentas';
       case 'categorias':
-        return 'Categorías y Etiquetas';
+        return 'Categorías';
       case 'analisis':
-        return 'Análisis del Mes';
+        return 'Análisis';
       case 'presupuestos':
-        return 'Mis Presupuestos';
+        return 'Presupuestos';
       case 'configuracion':
         return 'Configuración';
       default:
@@ -63,8 +63,8 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar 
 
       {/* Header Tools & Actions */}
       <div className="flex items-center gap-3">
-        {/* Month Selector */}
-        <div className="inline-flex items-center bg-surface-container-low rounded-lg px-2 py-1 border border-surface-container">
+        {/* Month Selector (Desktop/Tablet only) */}
+        <div className="hidden sm:inline-flex items-center bg-surface-container-low rounded-lg px-2 py-1 border border-surface-container">
           <button
             type="button"
             className="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"

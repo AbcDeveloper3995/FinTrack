@@ -84,10 +84,10 @@ export const MonthPeaceOfMindCard = ({ kpis, hasTransactions }) => {
 
   return (
     <div className={`rounded-2xl p-4 sm:p-5 border shadow-xs transition-all ${containerBg}`}>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-start gap-3.5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${
+            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${
               status === 'great'
                 ? 'bg-emerald-500 text-white'
                 : status === 'caution'
@@ -95,36 +95,39 @@ export const MonthPeaceOfMindCard = ({ kpis, hasTransactions }) => {
                 : 'bg-red-500 text-white'
             }`}
           >
-            <span className="material-symbols-outlined text-2xl">{iconName}</span>
+            <span className="material-symbols-outlined text-xl sm:text-2xl">{iconName}</span>
           </div>
 
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] uppercase font-bold tracking-wider text-on-surface-variant">
                 ¿Cómo voy este mes?
               </span>
-              <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${badgeColor}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0 ${badgeColor}`}>
                 {badgeLabel}
               </span>
             </div>
 
-            <h3 className="text-base sm:text-lg font-bold text-on-surface mt-0.5 leading-snug">
+            <h3 className="text-sm sm:text-lg font-bold text-on-surface mt-1 leading-snug">
               {messageTitle}
             </h3>
 
-            <p className="text-xs text-on-surface-variant mt-0.5">
+            <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
               {messageDesc}
             </p>
           </div>
         </div>
 
         {/* Quick Balance Pill */}
-        <div className="flex items-center gap-2 self-end sm:self-center shrink-0 bg-surface-container-lowest px-3.5 py-2 rounded-xl border border-surface-container shadow-xs">
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0 bg-surface-container-lowest/80 sm:bg-surface-container-lowest px-3.5 py-2 rounded-xl border border-surface-container shadow-xs">
+          <span className="text-[11px] sm:hidden text-on-surface-variant font-medium">
+            Te queda en el mes:
+          </span>
           <div className="flex flex-col text-right">
-            <span className="text-[10px] text-on-surface-variant uppercase font-semibold">
+            <span className="hidden sm:inline text-[10px] text-on-surface-variant uppercase font-semibold">
               Te queda en el mes
             </span>
-            <span className={`text-base font-extrabold tabular-nums ${netBalance >= 0 ? 'text-secondary' : 'text-error'}`}>
+            <span className={`text-sm sm:text-base font-extrabold tabular-nums ${netBalance >= 0 ? 'text-secondary' : 'text-error'}`}>
               {netBalance >= 0 ? '+' : ''}${netBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
             </span>
           </div>

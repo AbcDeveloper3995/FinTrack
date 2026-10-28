@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { supabase } from '../../lib/supabase';
+import { CustomSelect } from '../common/CustomSelect';
 
 export const BudgetsView = () => {
   const { kpis, categories, transactions, refreshFinancialData, showToast } = useFinance();
@@ -383,17 +384,17 @@ export const BudgetsView = () => {
                     </div>
                   ) : (
                     // In create mode: ONLY show categories that do NOT have a budget yet
-                    <select
+                    <CustomSelect
                       value={selectedCatId || (availableToBudget[0]?.id || '')}
-                      onChange={(e) => setSelectedCatId(e.target.value)}
-                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-sm border border-outline-variant focus:border-primary outline-none cursor-pointer"
-                    >
-                      {availableToBudget.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setSelectedCatId(val)}
+                      options={availableToBudget.map((c) => ({
+                        value: c.id,
+                        label: c.name,
+                        color: c.color,
+                        icon: c.icon,
+                      }))}
+                      placeholder="Selecciona una categoría"
+                    />
                   )}
                 </div>
 

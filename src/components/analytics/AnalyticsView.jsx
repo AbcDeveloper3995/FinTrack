@@ -130,28 +130,28 @@ export const AnalyticsView = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
-      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+          <div className="flex items-center gap-2 font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-secondary"></span>
-            <span>Inteligencia Financiera</span>
+            <span>Inteligencia</span>
             <span className="text-outline">/</span>
-            <span className="text-primary font-bold">Métricas & Diagnóstico</span>
+            <span className="text-primary font-bold">Diagnóstico</span>
           </div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mt-1">
-            Análisis de Flujo y Hábitos de Gasto
+          <h1 className="text-2xl sm:text-headline-lg font-bold text-on-surface tracking-tight mt-1">
+            Análisis Financiero
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-0.5 max-w-2xl">
-            Responde de inmediato si gastaste más o ahorraste respecto al mes anterior y detecta tus mayores concentraciones de gasto.
+          <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mt-0.5 max-w-2xl">
+            Compara tus gastos e ingresos con el mes anterior y detecta patrones.
           </p>
         </div>
 
-        {/* Period Selector Tabs */}
-        <div className="flex p-1 bg-surface-container-low rounded-xl self-start sm:self-auto border border-surface-container">
+        {/* Period Selector Tabs (En mobile: Mes Actual y Mes Anterior a 50%/50%, Histórico solo en sm+) */}
+        <div className="flex p-1 bg-surface-container-low rounded-xl self-stretch sm:self-auto border border-surface-container justify-between sm:justify-start">
           <button
             type="button"
             onClick={() => setPeriodFilter('current')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-initial text-center px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               periodFilter === 'current'
                 ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -162,7 +162,7 @@ export const AnalyticsView = () => {
           <button
             type="button"
             onClick={() => setPeriodFilter('prev')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-initial text-center px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               periodFilter === 'prev'
                 ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -173,7 +173,7 @@ export const AnalyticsView = () => {
           <button
             type="button"
             onClick={() => setPeriodFilter('all')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`hidden sm:inline-block px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               periodFilter === 'all'
                 ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -296,7 +296,7 @@ export const AnalyticsView = () => {
           {/* 3. Section: ¿En qué gasto más? (Gráfica de Pastel / Dona) & Evolución Mensual (Gráfica de Barras) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Gráfica de Pastel/Dona: Distribución de Gastos */}
-            <div className="lg:col-span-6 p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
+            <div className="lg:col-span-6 p-4 sm:p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -304,7 +304,7 @@ export const AnalyticsView = () => {
                       <h3 className="font-headline-md text-headline-md font-bold text-on-surface flex items-center gap-2">
                         <span className="material-symbols-outlined text-primary text-xl">pie_chart</span>
                         <span>
-                          {activeDrillCategory ? `Subcategorías de ${activeDrillCategory.name}` : '¿En qué gasto más? (Distribución)'}
+                          {activeDrillCategory ? `Subcategorías de ${activeDrillCategory.name}` : '¿En qué gasto más?'}
                         </span>
                       </h3>
                       {activeDrillCategory && (
@@ -322,7 +322,7 @@ export const AnalyticsView = () => {
                     <p className="text-xs text-on-surface-variant mt-0.5">
                       {activeDrillCategory
                         ? `Desglose interno de los $${activeDrillCategory.spent.toLocaleString('es-MX', { minimumFractionDigits: 2 })} gastados en ${activeDrillCategory.name}.`
-                        : 'Haz clic en cualquier categoría para profundizar y ver en qué subcategorías se fue tu dinero.'}
+                        : 'Toca cualquier categoría para ver en qué subcategorías se fue tu dinero.'}
                     </p>
                   </div>
                 </div>
@@ -359,7 +359,7 @@ export const AnalyticsView = () => {
                         <span>Regresar al panorama general</span>
                       </button>
                     ) : (
-                      <>Mayor rubro: <strong className="text-on-surface">{categoryTotals[0].name}</strong></>
+                      <>Mayor gasto: <strong className="text-on-surface">{categoryTotals[0].name}</strong></>
                     )}
                   </span>
                   <span className="font-bold text-primary tabular-nums">
@@ -372,7 +372,7 @@ export const AnalyticsView = () => {
             </div>
 
             {/* Gráfica de Barras: Comparación Mensual Histórica */}
-            <div className="lg:col-span-6 p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
+            <div className="lg:col-span-6 p-4 sm:p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -381,7 +381,7 @@ export const AnalyticsView = () => {
                       <span>Evolución Mensual (Últimos 6 Meses)</span>
                     </h3>
                     <p className="text-xs text-on-surface-variant mt-0.5">
-                      Comparativa continua de Ingresos vs. Gastos para verificar si tu ahorro está creciendo.
+                      Comparativa de Ingresos vs. Gastos para verificar tu ahorro mes a mes.
                     </p>
                   </div>
                 </div>
@@ -399,34 +399,36 @@ export const AnalyticsView = () => {
           {/* 4. Top Categorías y Fugas de Dinero con Desglose de Subcategorías */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top Gastos Críticos con Acordeón / Desglose de Subcategorías */}
-            <div className="p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container-high/60">
-              <div className="flex items-center justify-between mb-3">
+            <div className="p-4 sm:p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container-high/60">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="font-headline-md text-headline-md font-bold text-on-surface flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-lg">local_fire_department</span>
-                  <span>Ranking de Fugas de Dinero (Top Gastos)</span>
+                  <span>
+                    Ranking de Fugas <span className="hidden sm:inline font-normal text-on-surface-variant text-sm">(Top Gastos)</span>
+                  </span>
                 </h3>
                 {selectedCategoryDrill && (
                   <button
                     type="button"
                     onClick={() => setSelectedCategoryDrill(null)}
-                    className="text-xs text-primary hover:underline font-semibold"
+                    className="text-xs text-primary hover:underline font-semibold cursor-pointer"
                   >
-                    Cerrar detalle
+                    Cerrar
                   </button>
                 )}
               </div>
-              <p className="text-xs text-on-surface-variant mb-4">
-                Haz clic en cualquier categoría para expandir en qué subcategorías específicas se distribuyó el importe.
+              <p className="text-xs text-on-surface-variant mb-3 leading-relaxed">
+                Toca cualquier categoría para ver su distribución interna.
               </p>
 
               {categoryTotals.length > 0 ? (
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   {categoryTotals.slice(0, 6).map((c, i) => {
                     const isExpanded = selectedCategoryDrill === c.name || selectedCategoryDrill === c.id;
                     return (
                       <div
                         key={c.id}
-                        className={`p-3 rounded-xl transition-all border ${
+                        className={`p-2.5 sm:p-3 rounded-xl transition-all border ${
                           isExpanded
                             ? 'bg-surface-container-low border-primary/30 shadow-xs'
                             : 'bg-transparent border-transparent hover:bg-surface-container-low/60'
@@ -434,31 +436,32 @@ export const AnalyticsView = () => {
                       >
                         <div
                           onClick={() => setSelectedCategoryDrill(isExpanded ? null : c.name)}
-                          className="flex items-center justify-between cursor-pointer"
+                          className="flex items-center justify-between gap-2 cursor-pointer select-none"
                         >
-                          <div className="flex items-center gap-2.5">
-                            <span className="w-5 text-center text-xs font-bold text-on-surface-variant">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <span className="w-4 text-center text-xs font-bold text-on-surface-variant shrink-0">
                               #{i + 1}
                             </span>
                             <span
                               style={{ backgroundColor: c.color }}
                               className="w-2.5 h-2.5 rounded-full shrink-0"
                             />
-                            <span className={`font-semibold text-sm ${isExpanded ? 'text-primary font-bold' : 'text-on-surface'}`}>
+                            <span className={`text-sm truncate ${isExpanded ? 'text-primary font-bold' : 'text-on-surface font-semibold'}`}>
                               {c.name}
                             </span>
-                            <span className="text-[10px] text-on-surface-variant bg-surface-container px-1.5 py-0.2 rounded font-semibold">
+                            <span className="hidden sm:inline-block text-[10px] text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded font-semibold shrink-0">
                               {c.subcategories.length} subcat.
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 tabular-nums">
+
+                          <div className="flex items-center gap-1.5 shrink-0 tabular-nums text-right">
                             <span className="font-bold text-on-surface text-sm">
                               ${c.spent.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                             </span>
-                            <span className="text-xs text-on-surface-variant font-medium w-12 text-right">
-                              ({c.pct.toFixed(1)}%)
+                            <span className="text-xs text-on-surface-variant font-medium">
+                              ({c.pct.toFixed(0)}%)
                             </span>
-                            <span className="material-symbols-outlined text-xs text-on-surface-variant">
+                            <span className="material-symbols-outlined text-base text-on-surface-variant">
                               {isExpanded ? 'expand_less' : 'expand_more'}
                             </span>
                           </div>

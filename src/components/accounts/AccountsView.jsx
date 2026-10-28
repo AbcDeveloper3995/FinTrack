@@ -76,60 +76,61 @@ export const AccountsView = () => {
   return (
     <div className="space-y-6">
       {/* Top Header & Metrics Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* Top Header & Metrics Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-secondary"></span>
-            <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+            <span className="font-label-md text-xs uppercase tracking-wider text-on-surface-variant font-semibold">
               Portafolio Multidivisa
             </span>
           </div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mt-1">
-            Cuentas y Tarjetas
+          <h1 className="text-2xl sm:text-headline-lg font-bold text-on-surface tracking-tight mt-1">
+            Cuentas
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Monitoreo en tiempo real de saldos en Pesos Mexicanos (MXN) y Dólares (USD).
+          <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mt-0.5">
+            Monitoreo en tiempo real de saldos en MXN y USD.
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setIsNewAccountModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-container text-on-primary font-body-md text-body-md font-semibold px-4 py-2.5 rounded-xl shadow-sm hover:shadow transition-all self-start lg:self-auto cursor-pointer"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold px-4 py-2.5 rounded-xl shadow-sm hover:shadow transition-all cursor-pointer shrink-0"
         >
           <span className="material-symbols-outlined text-lg">add_circle</span>
-          <span>Nueva cuenta / tarjeta</span>
+          <span>Nueva cuenta</span>
         </button>
       </div>
 
       {/* Tipo de Cambio en Directo (Widget Google Finance / Mercado Interbancario) */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-surface-container-lowest via-surface-container-low to-surface-container-lowest p-5 border border-primary/20 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-primary-container/20 text-primary flex items-center justify-center shadow-xs flex-shrink-0">
-            <span className="material-symbols-outlined text-2xl">currency_exchange</span>
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-surface-container-lowest via-surface-container-low to-surface-container-lowest p-4 sm:p-5 border border-primary/20 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-primary-container/20 text-primary flex items-center justify-center shadow-xs shrink-0 mt-0.5 sm:mt-0">
+            <span className="material-symbols-outlined text-xl sm:text-2xl">currency_exchange</span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider font-bold text-primary">
-                Tipo de Cambio en Directo
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] uppercase tracking-wider font-bold text-primary">
+                Tipo de Cambio
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-fixed text-on-secondary-fixed flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-fixed text-on-secondary-fixed inline-flex items-center gap-1 shrink-0 whitespace-nowrap">
                 <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
                 <span>En vivo</span>
               </span>
             </div>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-xl font-bold text-on-surface tabular-nums">
+            <div className="flex items-baseline gap-2 flex-wrap mt-0.5">
+              <span className="text-lg sm:text-xl font-bold text-on-surface tabular-nums">
                 1 USD = ${exchangeRate.toFixed(4)} MXN
               </span>
-              <span className="text-xs text-on-surface-variant">
-                (Google Finance / Mercado Spot)
+              <span className="text-[11px] text-on-surface-variant">
+                (Google Finance)
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 self-end sm:self-auto">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-0 border-surface-container/60 shrink-0">
           {exchangeRateLastUpdated && (
             <span className="text-xs text-on-surface-variant font-medium">
               Actualizado: {exchangeRateLastUpdated}
@@ -138,7 +139,7 @@ export const AccountsView = () => {
           <button
             type="button"
             onClick={handleManualRateRefresh}
-            className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+            className="p-1.5 sm:p-2 px-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer ml-auto sm:ml-0"
             title="Refrescar cotización"
           >
             <span className={`material-symbols-outlined text-base ${refreshingRate ? 'animate-spin' : ''}`}>
@@ -150,66 +151,66 @@ export const AccountsView = () => {
       </section>
 
       {/* KPI Cards Grid (Consolidated in MXN) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {/* KPI 1: Patrimonio Neto Total */}
-        <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
-          <div className="flex items-center justify-between">
-            <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+        <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-4 sm:p-6 shadow-sm border border-surface-container-high/60">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="font-label-md text-xs sm:text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
               Tu Dinero Total (Neto)
             </span>
-            <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full font-label-md text-label-md font-bold bg-secondary-fixed text-on-secondary-fixed">
-              Valuado en MXN
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-secondary-fixed text-on-secondary-fixed shrink-0 whitespace-nowrap">
+              En MXN
             </span>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-on-surface tracking-tight tabular-nums">
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl sm:text-headline-lg lg:text-display-lg font-bold text-on-surface tracking-tight tabular-nums">
               ${kpis.netWorth.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
             </span>
-            <span className="font-label-md text-label-md font-semibold text-on-surface-variant">MXN</span>
+            <span className="text-xs sm:text-sm font-semibold text-on-surface-variant">MXN</span>
           </div>
-          <div className="mt-1 flex items-center justify-between text-on-surface-variant font-body-md text-body-md">
+          <div className="mt-1 text-on-surface-variant text-xs sm:text-body-md">
             <span>Disponible descontando tarjetas</span>
           </div>
         </div>
 
         {/* KPI 2: Total Activos / Capital */}
-        <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
-          <div className="flex items-center justify-between">
-            <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Dinero en Cuentas y Efectivo
+        <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-4 sm:p-6 shadow-sm border border-surface-container-high/60">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-label-md text-xs sm:text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+              Cuentas y Efectivo
             </span>
-            <span className="p-1.5 rounded-lg bg-secondary-container text-secondary flex items-center justify-center">
+            <span className="p-1.5 rounded-lg bg-secondary-container text-secondary flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-base">savings</span>
             </span>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-secondary tracking-tight tabular-nums">
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl sm:text-headline-lg lg:text-display-lg font-bold text-secondary tracking-tight tabular-nums">
               ${totalAssetsMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
             </span>
-            <span className="font-label-md text-label-md font-semibold text-on-surface-variant">MXN</span>
+            <span className="text-xs sm:text-sm font-semibold text-on-surface-variant">MXN</span>
           </div>
-          <div className="mt-1 flex items-center justify-between text-on-surface-variant font-body-md text-body-md">
+          <div className="mt-1 text-on-surface-variant text-xs sm:text-body-md">
             <span>{accounts.filter(a => a.type !== 'credito').length} cuenta(s) activa(s)</span>
           </div>
         </div>
 
         {/* KPI 3: Pasivo en Tarjetas */}
-        <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
-          <div className="flex items-center justify-between">
-            <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-              Saldo por pagar en Tarjetas
+        <div className="relative overflow-hidden bg-surface-container-lowest rounded-2xl p-4 sm:p-6 shadow-sm border border-surface-container-high/60">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-label-md text-xs sm:text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+              Por pagar en Tarjetas
             </span>
-            <span className="p-1.5 rounded-lg bg-error-container text-error flex items-center justify-center">
+            <span className="p-1.5 rounded-lg bg-error-container text-error flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-base">credit_card</span>
             </span>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-error tracking-tight tabular-nums">
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl sm:text-headline-lg lg:text-display-lg font-bold text-error tracking-tight tabular-nums">
               ${totalLiabilitiesMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
             </span>
-            <span className="font-label-md text-label-md font-semibold text-on-surface-variant">MXN</span>
+            <span className="text-xs sm:text-sm font-semibold text-on-surface-variant">MXN</span>
           </div>
-          <div className="mt-1 flex items-center justify-between text-on-surface-variant font-body-md text-body-md">
+          <div className="mt-1 text-on-surface-variant text-xs sm:text-body-md">
             <span>{accounts.filter(a => a.type === 'credito').length} tarjeta(s) de crédito</span>
           </div>
         </div>
@@ -222,7 +223,7 @@ export const AccountsView = () => {
             <h2 className="font-headline-md text-headline-md font-bold text-on-surface">
               Tus Billeteras & Cuentas
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-surface-container font-label-md text-label-md text-on-surface-variant font-bold">
+            <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-surface-container font-label-md text-label-md text-on-surface-variant font-bold">
               {accounts.length} Registradas
             </span>
           </div>
@@ -272,37 +273,37 @@ export const AccountsView = () => {
 
       {/* Selected Account Detail View if accounts exist */}
       {selectedAccount && (
-        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-high/60 p-6 sm:p-8 space-y-6">
+        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-high/60 p-4 sm:p-8 space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-surface-container-high">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div
                 style={{ backgroundColor: selectedAccount.color || '#4338ca' }}
-                className="w-14 h-14 rounded-2xl text-white flex items-center justify-center font-bold text-headline-md shadow-sm uppercase"
+                className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl text-white flex items-center justify-center font-bold text-base sm:text-headline-md shadow-sm uppercase shrink-0"
               >
                 {selectedAccount.institution.slice(0, 3)}
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-headline-lg text-headline-lg font-bold text-on-surface">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base sm:text-headline-lg font-bold text-on-surface truncate">
                     {selectedAccount.name}
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full font-label-md text-label-md font-semibold bg-surface-container text-on-surface-variant">
+                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full font-label-md text-label-md font-semibold bg-surface-container text-on-surface-variant shrink-0">
                     •••• {selectedAccount.last4 || '0000'}
                   </span>
-                  <span className="px-2 py-0.5 rounded-full font-label-md text-xs font-bold bg-primary/10 text-primary">
+                  <span className="px-2 py-0.5 rounded-full font-label-md text-xs font-bold bg-primary/10 text-primary shrink-0">
                     {selectedAccount.currency || 'MXN'}
                   </span>
                 </div>
-                <p className="font-body-md text-body-md text-on-surface-variant">
+                <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant truncate">
                   {selectedAccount.institution} • Tipo: {selectedAccount.type}
                 </p>
               </div>
             </div>
 
             <div>
-              <div className="text-right">
-                <span className="text-xs uppercase text-on-surface-variant font-semibold">Saldo Nominal</span>
-                <div className="font-headline-lg text-headline-lg font-bold text-on-surface tabular-nums">
+              <div className="text-left md:text-right pt-2 md:pt-0 border-t md:border-0 border-surface-container/60">
+                <span className="text-[11px] uppercase text-on-surface-variant font-semibold">Saldo Nominal</span>
+                <div className="text-xl sm:text-headline-lg font-bold text-on-surface tabular-nums">
                   {selectedAccount.currency === 'USD' ? 'US$' : '$'}
                   {Number(selectedAccount.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {selectedAccount.currency || 'MXN'}
                 </div>

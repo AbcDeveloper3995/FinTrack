@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { CustomSelect } from '../common/CustomSelect';
 
 export const NewMovementModal = () => {
   const {
@@ -340,17 +341,15 @@ export const NewMovementModal = () => {
                       <span className="w-2 h-2 rounded-full bg-error"></span>
                       <span>De esta cuenta (sale):</span>
                     </label>
-                    <select
+                    <CustomSelect
                       value={accountId}
-                      onChange={(e) => setAccountId(e.target.value)}
-                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                    >
-                      {accounts.map((acc) => (
-                        <option key={acc.id} value={acc.id}>
-                          {acc.name} - Saldo: ${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setAccountId(val)}
+                      options={accounts.map((acc) => ({
+                        value: acc.id,
+                        label: `${acc.name} - Saldo: $${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`,
+                        color: acc.color,
+                      }))}
+                    />
                   </div>
 
                   <div>
@@ -358,17 +357,16 @@ export const NewMovementModal = () => {
                       <span className="w-2 h-2 rounded-full bg-secondary"></span>
                       <span>A esta cuenta (entra):</span>
                     </label>
-                    <select
+                    <CustomSelect
                       value={toAccountId}
-                      onChange={(e) => setToAccountId(e.target.value)}
-                      className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                    >
-                      {accounts.map((acc) => (
-                        <option key={acc.id} value={acc.id} disabled={acc.id === accountId}>
-                          {acc.name} {acc.id === accountId ? '(Misma - no permitido)' : ''}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setToAccountId(val)}
+                      options={accounts.map((acc) => ({
+                        value: acc.id,
+                        label: acc.id === accountId ? `${acc.name} (Misma cuenta)` : acc.name,
+                        disabled: acc.id === accountId,
+                        color: acc.color,
+                      }))}
+                    />
                   </div>
                 </div>
 
@@ -414,21 +412,15 @@ export const NewMovementModal = () => {
                       </button>
                     )}
                   </div>
-                  <select
+                  <CustomSelect
                     value={accountId}
-                    onChange={(e) => setAccountId(e.target.value)}
-                    className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                  >
-                    {accounts.length > 0 ? (
-                      accounts.map((acc) => (
-                        <option key={acc.id} value={acc.id}>
-                          {acc.name} (${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 0 })} {acc.currency})
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">Efectivo / General</option>
-                    )}
-                  </select>
+                    onChange={(val) => setAccountId(val)}
+                    options={accounts.length > 0 ? accounts.map((acc) => ({
+                      value: acc.id,
+                      label: `${acc.name} ($${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 0 })} ${acc.currency})`,
+                      color: acc.color,
+                    })) : [{ value: '', label: 'Efectivo / General' }]}
+                  />
                 </div>
 
                 {/* Category */}
@@ -436,24 +428,18 @@ export const NewMovementModal = () => {
                   <label className="block text-xs font-bold text-on-surface mb-1">
                     Categoría
                   </label>
-                  <select
+                  <CustomSelect
                     value={categoryId}
-                    onChange={(e) => {
-                      setCategoryId(e.target.value);
+                    onChange={(val) => {
+                      setCategoryId(val);
                       setSubcategoryId('');
                     }}
-                    className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                  >
-                    {availableCategories.length > 0 ? (
-                      availableCategories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">General</option>
-                    )}
-                  </select>
+                    options={availableCategories.length > 0 ? availableCategories.map((cat) => ({
+                      value: cat.id,
+                      label: cat.name,
+                      icon: cat.icon || 'category',
+                    })) : [{ value: '', label: 'General' }]}
+                  />
                 </div>
               </div>
             )}
@@ -479,18 +465,18 @@ export const NewMovementModal = () => {
                       <label className="block text-xs font-medium text-on-surface-variant mb-1">
                         Subcategoría
                       </label>
-                      <select
+                      <CustomSelect
                         value={subcategoryId}
-                        onChange={(e) => setSubcategoryId(e.target.value)}
-                        className="w-full h-10 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                      >
-                        <option value="">-- Sin subcategoría --</option>
-                        {availableSubcategories.map((sub) => (
-                          <option key={sub.id} value={sub.id}>
-                            {sub.name}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(val) => setSubcategoryId(val)}
+                        placeholder="-- Sin subcategoría --"
+                        options={[
+                          { value: '', label: '-- Sin subcategoría --' },
+                          ...availableSubcategories.map((sub) => ({
+                            value: sub.id,
+                            label: sub.name,
+                          })),
+                        ]}
+                      />
                     </div>
                   )}
 

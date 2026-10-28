@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { EditMovementModal } from '../modals/EditMovementModal';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { CustomSelect } from '../common/CustomSelect';
 
 export const MovementsView = () => {
   const { transactions, tags, kpis, setIsNewMovementModalOpen, deleteTransactions, showToast } = useFinance();
@@ -115,53 +116,58 @@ export const MovementsView = () => {
               Tus Movimientos
             </span>
           </div>
-          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mt-1">
+          <h1 className="text-2xl sm:text-headline-lg font-bold text-on-surface tracking-tight mt-1">
             Historial de Movimientos
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+          <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
             Lleva el control de cada movimiento de tus cuentas y tarjetas día a día.
           </p>
         </div>
 
-        {/* Quick Stat Chips */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-lowest shadow-sm border border-surface-container">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-secondary-fixed text-on-secondary-fixed">
-              <span className="material-symbols-outlined text-sm font-bold">arrow_downward</span>
+        {/* Quick Stat Chips (Balanced 3-column grid on mobile, row on desktop) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full lg:w-auto">
+          {/* Ingresos: Verde con flecha hacia ARRIBA */}
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-container-lowest shadow-sm border border-surface-container">
+            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 shrink-0">
+              <span className="material-symbols-outlined text-base font-bold">arrow_upward</span>
             </span>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="font-label-md text-[10px] text-on-surface-variant uppercase font-semibold">
                 Ingresos
               </span>
-              <span className="font-metric-md text-metric-md text-secondary font-bold tabular-nums">
+              <span className="font-metric-md text-metric-md text-secondary font-bold tabular-nums truncate">
                 +${kpis.monthlyIncome.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-lowest shadow-sm border border-surface-container">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-surface-container text-primary">
-              <span className="material-symbols-outlined text-sm font-bold">arrow_upward</span>
+          {/* Gastos: Rojo con flecha hacia ABAJO */}
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-container-lowest shadow-sm border border-surface-container">
+            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-error-container/50 text-error shrink-0">
+              <span className="material-symbols-outlined text-base font-bold">arrow_downward</span>
             </span>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="font-label-md text-[10px] text-on-surface-variant uppercase font-semibold">
                 Gastos
               </span>
-              <span className="font-metric-md text-metric-md text-on-surface font-bold tabular-nums">
+              <span className="font-metric-md text-metric-md text-error font-bold tabular-nums truncate">
                 -${kpis.monthlyExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-primary text-on-primary shadow-sm">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-fixed text-on-primary-fixed">
-              <span className="material-symbols-outlined text-sm">account_balance</span>
+          {/* Balance Neto */}
+          <div className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl shadow-sm text-on-primary ${
+            kpis.netBalance >= 0 ? 'bg-primary' : 'bg-primary'
+          }`}>
+            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary-fixed text-on-primary-fixed shrink-0">
+              <span className="material-symbols-outlined text-base">account_balance</span>
             </span>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="font-label-md text-[10px] text-primary-fixed uppercase font-semibold">
                 Balance Neto
               </span>
-              <span className="font-metric-md text-metric-md text-on-primary font-bold tabular-nums">
+              <span className="font-metric-md text-metric-md text-on-primary font-bold tabular-nums truncate">
                 {kpis.netBalance >= 0 ? '+' : ''}${kpis.netBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -170,10 +176,10 @@ export const MovementsView = () => {
       </div>
 
       {/* Filter & Command Bar */}
-      <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-surface-container-high/60 flex flex-col gap-4">
+      <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-surface-container-high/60 flex flex-col gap-3.5">
         {/* Search & Actions */}
-        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-2xl">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="relative flex-1">
             <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
               search
             </span>
@@ -181,14 +187,14 @@ export const MovementsView = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por concepto, subcategoría, etiqueta (#) o nota..."
-              className="w-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-10 pr-20 py-2.5 rounded-xl font-body-md text-body-md border border-transparent focus:border-primary/30 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 outline-none"
+              placeholder="Buscar por concepto, subcategoría, etiqueta (#)..."
+              className="w-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant pl-10 pr-16 py-2.5 rounded-xl font-body-md text-sm border border-transparent focus:border-primary/30 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 outline-none"
             />
             {searchTerm && (
               <button
                 type="button"
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 font-label-md text-xs text-on-surface-variant hover:text-on-surface"
+                className="absolute right-3 top-1/2 -translate-y-1/2 font-label-md text-xs text-on-surface-variant hover:text-on-surface cursor-pointer"
               >
                 Limpiar
               </button>
@@ -196,14 +202,11 @@ export const MovementsView = () => {
           </div>
 
           {/* Bulk Action Strip & New Movement CTA */}
-          <div className="flex items-center gap-2 flex-wrap justify-end">
+          <div className="flex items-center gap-2">
             {selectedIds.length > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container text-on-surface font-body-md text-body-md">
-                <span className="font-label-md text-label-md bg-primary-container text-on-primary px-2 py-0.5 rounded-full font-bold">
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container text-on-surface font-body-md text-body-md">
+                <span className="font-label-md text-xs bg-primary-container text-on-primary px-2 py-0.5 rounded-full font-bold">
                   {selectedIds.length}
-                </span>
-                <span className="font-label-md text-label-md text-on-surface font-semibold mr-1">
-                  Sel.
                 </span>
                 <button
                   type="button"
@@ -212,7 +215,7 @@ export const MovementsView = () => {
                   title="Eliminar seleccionados"
                 >
                   <span className="material-symbols-outlined text-base">delete</span>
-                  <span>Eliminar selección</span>
+                  <span className="hidden sm:inline">Eliminar</span>
                 </button>
               </div>
             )}
@@ -220,7 +223,7 @@ export const MovementsView = () => {
             <button
               type="button"
               onClick={() => setIsNewMovementModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold transition-all shadow-sm cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold transition-all shadow-sm cursor-pointer shrink-0"
             >
               <span className="material-symbols-outlined text-lg">add</span>
               <span>Nuevo movimiento</span>
@@ -229,45 +232,49 @@ export const MovementsView = () => {
         </div>
 
         {/* Droplist Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-wrap">
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer"
-          >
-            <option value="all">Tipo: Todos</option>
-            <option value="expense">Solo Gastos</option>
-            <option value="income">Solo Ingresos</option>
-            <option value="transfer">Solo Transferencias</option>
-          </select>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
+            <CustomSelect
+              value={filterType}
+              onChange={(val) => setFilterType(val)}
+              options={[
+                { value: 'all', label: 'Tipo: Todos' },
+                { value: 'expense', label: 'Solo Gastos', icon: 'arrow_downward' },
+                { value: 'income', label: 'Solo Ingresos', icon: 'arrow_upward' },
+                { value: 'transfer', label: 'Solo Transferencias', icon: 'swap_horiz' },
+              ]}
+              buttonClassName="bg-surface-container-low hover:bg-surface-container border-transparent focus:border-primary/30"
+            />
 
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer"
-          >
-            <option value="all">Categorías: Todas</option>
-            {uniqueCategories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+            <CustomSelect
+              value={filterCategory}
+              onChange={(val) => setFilterCategory(val)}
+              options={[
+                { value: 'all', label: 'Categorías: Todas' },
+                ...uniqueCategories.map((cat) => ({
+                  value: cat,
+                  label: cat,
+                })),
+              ]}
+              buttonClassName="bg-surface-container-low hover:bg-surface-container border-transparent focus:border-primary/30"
+            />
 
-          {tags.length > 0 && (
-            <select
-              value={filterTag}
-              onChange={(e) => setFilterTag(e.target.value)}
-              className="bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold px-3 py-1.5 rounded-lg focus:outline-none cursor-pointer"
-            >
-              <option value="all">Etiqueta: Todas</option>
-              {tags.map((t) => (
-                <option key={t.id} value={t.id}>
-                  #{t.name}
-                </option>
-              ))}
-            </select>
-          )}
+            {tags.length > 0 && (
+              <CustomSelect
+                value={filterTag}
+                onChange={(val) => setFilterTag(val)}
+                options={[
+                  { value: 'all', label: 'Etiqueta: Todas' },
+                  ...tags.map((t) => ({
+                    value: t.id,
+                    label: `#${t.name}`,
+                    color: t.color,
+                  })),
+                ]}
+                buttonClassName="bg-surface-container-low hover:bg-surface-container border-transparent focus:border-primary/30"
+              />
+            )}
+          </div>
 
           {(filterType !== 'all' || filterCategory !== 'all' || filterTag !== 'all' || searchTerm) && (
             <button
@@ -278,7 +285,7 @@ export const MovementsView = () => {
                 setFilterTag('all');
                 setSearchTerm('');
               }}
-              className="text-primary font-semibold text-xs hover:underline ml-2 cursor-pointer"
+              className="text-primary font-semibold text-xs hover:underline cursor-pointer py-1 px-2 self-start sm:self-center shrink-0"
             >
               Limpiar filtros
             </button>

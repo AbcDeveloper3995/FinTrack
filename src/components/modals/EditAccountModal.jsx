@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { CustomSelect } from '../common/CustomSelect';
 
 export const EditAccountModal = ({ account, isOpen, onClose }) => {
   const { updateAccount, exchangeRate, showToast } = useFinance();
@@ -132,17 +133,18 @@ export const EditAccountModal = ({ account, isOpen, onClose }) => {
                 <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                   Tipo de Cuenta
                 </label>
-                <select
+                <CustomSelect
                   value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                >
-                  <option value="debito">Débito / Cheques</option>
-                  <option value="credito">Tarjeta de Crédito</option>
-                  <option value="inversion">Inversión / Bonos</option>
-                  <option value="ahorro">Ahorro / Cajita</option>
-                  <option value="efectivo">Efectivo Físico</option>
-                </select>
+                  onChange={(val) => setType(val)}
+                  options={[
+                    { value: 'debito', label: 'Débito / Cheques', icon: 'account_balance' },
+                    { value: 'credito', label: 'Tarjeta de Crédito', icon: 'credit_card' },
+                    { value: 'inversion', label: 'Inversión / Bonos', icon: 'trending_up' },
+                    { value: 'ahorro', label: 'Ahorro / Cajita', icon: 'savings' },
+                    { value: 'efectivo', label: 'Efectivo Físico', icon: 'payments' },
+                  ]}
+                  placeholder="Selecciona tipo de cuenta"
+                />
               </div>
             </div>
 

@@ -136,16 +136,16 @@ export const MonthlyMatrixReport = ({
   return (
     <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-high/60 overflow-hidden">
       {/* Header Bar */}
-      <div className="p-5 border-b border-surface-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 border-b border-surface-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-xl">table_chart</span>
-            <h3 className="font-headline-md text-headline-md font-bold text-on-surface">
-              Matriz Comparativa: Mes Actual vs. Mes Anterior
+            <h3 className="text-base sm:text-headline-md font-bold text-on-surface">
+              Matriz Comparativa Mensual
             </h3>
           </div>
           <p className="text-xs text-on-surface-variant mt-0.5">
-            Compara importe por importe en qué categorías y subcategorías gastaste más o ahorraste respecto al mes pasado.
+            Comparativa de categorías entre el mes actual y el mes anterior.
           </p>
         </div>
 
@@ -204,13 +204,13 @@ export const MonthlyMatrixReport = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-container-low text-on-surface-variant text-xs uppercase font-bold tracking-wider">
-                <th className="py-3 px-4 min-w-[220px]">Categoría & Subcategoría</th>
-                <th className="py-3 px-3 text-right">Mes Anterior</th>
-                <th className="py-3 px-3 text-right">Mes Actual</th>
-                <th className="py-3 px-3 text-right">Variación ($ MXN)</th>
-                <th className="py-3 px-3 text-center">Variación (%)</th>
+                <th className="py-2.5 sm:py-3 px-3 sm:px-4 min-w-[180px] sm:min-w-[220px]">Categoría</th>
+                <th className="py-2.5 sm:py-3 px-3 text-right">Mes Anterior</th>
+                <th className="py-2.5 sm:py-3 px-3 text-right">Mes Actual</th>
+                <th className="py-2.5 sm:py-3 px-3 text-right">Variación ($)</th>
+                <th className="py-2.5 sm:py-3 px-3 text-center">Variación (%)</th>
                 {activeTab === 'expense' && (
-                  <th className="py-3 px-4 text-center min-w-[140px]">Estado de Presupuesto</th>
+                  <th className="py-2.5 sm:py-3 px-4 text-center min-w-[140px]">Presupuesto</th>
                 )}
               </tr>
             </thead>
@@ -230,8 +230,8 @@ export const MonthlyMatrixReport = ({
                         hasSubs ? 'cursor-pointer' : ''
                       } ${isExpanded ? 'bg-surface-container-low/40' : ''}`}
                     >
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2.5">
+                      <td className="py-3 px-3 sm:px-4">
+                        <div className="flex items-center gap-2">
                           {hasSubs ? (
                             <span className="material-symbols-outlined text-base text-on-surface-variant transition-transform">
                               {isExpanded ? 'expand_more' : 'chevron_right'}
@@ -241,13 +241,13 @@ export const MonthlyMatrixReport = ({
                           )}
                           <span
                             style={{ backgroundColor: cat.color }}
-                            className="w-3 h-3 rounded-full shrink-0 shadow-xs"
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
                           />
-                          <span className="font-bold text-on-surface">
+                          <span className="font-bold text-on-surface text-sm truncate">
                             {cat.name}
                           </span>
                           {hasSubs && (
-                            <span className="text-[10px] text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded font-semibold">
+                            <span className="hidden sm:inline-block text-[10px] text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded font-semibold shrink-0">
                               {cat.subcategories.length} subcat.
                             </span>
                           )}

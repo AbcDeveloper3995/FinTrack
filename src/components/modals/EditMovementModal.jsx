@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { CustomSelect } from '../common/CustomSelect';
 
 export const EditMovementModal = ({ movement, isOpen, onClose }) => {
   const {
@@ -212,40 +213,43 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
                 <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                   Categoría
                 </label>
-                <select
+                <CustomSelect
                   value={categoryId}
-                  onChange={(e) => {
-                    setCategoryId(e.target.value);
+                  onChange={(val) => {
+                    setCategoryId(val);
                     setSubcategoryId('');
                   }}
-                  className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-                >
-                  <option value="">-- Sin categoría --</option>
-                  {availableCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: '', label: '-- Sin categoría --' },
+                    ...availableCategories.map((cat) => ({
+                      value: cat.id,
+                      label: cat.name,
+                      color: cat.color,
+                      icon: cat.icon,
+                    })),
+                  ]}
+                  placeholder="Selecciona una categoría"
+                />
               </div>
 
               <div>
                 <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                   Subcategoría <span className="text-xs text-on-surface-variant/70 font-normal">(opcional)</span>
                 </label>
-                <select
+                <CustomSelect
                   value={subcategoryId}
-                  onChange={(e) => setSubcategoryId(e.target.value)}
+                  onChange={(val) => setSubcategoryId(val)}
                   disabled={availableSubcategories.length === 0}
-                  className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer disabled:opacity-50"
-                >
-                  <option value="">-- Ninguna --</option>
-                  {availableSubcategories.map((sub) => (
-                    <option key={sub.id} value={sub.id}>
-                      {sub.name}
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: '', label: '-- Ninguna --' },
+                    ...availableSubcategories.map((sub) => ({
+                      value: sub.id,
+                      label: sub.name,
+                      color: sub.color,
+                    })),
+                  ]}
+                  placeholder="Selecciona subcategoría"
+                />
               </div>
             </div>
 
@@ -254,18 +258,21 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
               <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                 Cuenta / Tarjeta
               </label>
-              <select
+              <CustomSelect
                 value={accountId}
-                onChange={(e) => setAccountId(e.target.value)}
-                className="w-full h-11 px-3 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none cursor-pointer"
-              >
-                <option value="">-- Sin cuenta vinculada (Efectivo/General) --</option>
-                {accounts.map((acc) => (
-                  <option key={acc.id} value={acc.id}>
-                    {acc.name} ({acc.institution}) - ${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {acc.currency}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setAccountId(val)}
+                options={[
+                  { value: '', label: '-- Sin cuenta vinculada (Efectivo/General) --' },
+                  ...accounts.map((acc) => ({
+                    value: acc.id,
+                    label: `${acc.name} (${acc.institution})`,
+                    badge: `$${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })} ${acc.currency}`,
+                    color: acc.color,
+                    icon: acc.icon,
+                  })),
+                ]}
+                placeholder="Selecciona una cuenta"
+              />
             </div>
 
             {/* Tags Selection */}
