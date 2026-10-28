@@ -277,15 +277,22 @@ export const AnalyticsView = () => {
                   </span>
                 </div>
                 <div className="mt-1 flex items-center gap-1 text-[11px]">
-                  {kpis.projectedVsPrevExpensesDiff > 0 ? (
-                    <span className="text-amber-700 font-semibold flex items-center gap-0.5">
-                      <span className="material-symbols-outlined text-sm">trending_up</span>
-                      Proyecta +{Math.abs(kpis.projectedSavingsVsPrev || 0).toFixed(0)}% vs mes pasado
-                    </span>
+                  {kpis.prevMonthExpenses > 0 ? (
+                    kpis.projectedVsPrevExpensesDiff > 0 ? (
+                      <span className="text-amber-700 font-semibold flex items-center gap-0.5">
+                        <span className="material-symbols-outlined text-sm">trending_up</span>
+                        Proyecta +{Math.abs(kpis.projectedSavingsVsPrev || 0).toFixed(0)}% vs mes pasado
+                      </span>
+                    ) : (
+                      <span className="text-secondary font-semibold flex items-center gap-0.5">
+                        <span className="material-symbols-outlined text-sm">trending_down</span>
+                        Proyecta menor gasto que mes pasado
+                      </span>
+                    )
                   ) : (
-                    <span className="text-secondary font-semibold flex items-center gap-0.5">
-                      <span className="material-symbols-outlined text-sm">trending_down</span>
-                      Proyecta menor gasto que mes pasado
+                    <span className="text-on-surface-variant/80 font-normal flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">info</span>
+                      Primer mes de registro (sin datos previos)
                     </span>
                   )}
                 </div>
