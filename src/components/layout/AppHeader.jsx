@@ -1,9 +1,10 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { FEATURES } from '../../config/features';
+import { Logo } from '../common/Logo';
 
 export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar }) => {
-  const { currentPeriod, setIsNewMovementModalOpen, kpis, isOnline } = useFinance();
+  const { currentPeriod, setIsNewMovementModalOpen, kpis, isOnline, toggleTheme, isDark } = useFinance();
   const [showNotifications, setShowNotifications] = React.useState(false);
   const notificationsRef = React.useRef(null);
 
@@ -54,10 +55,11 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar 
           <span className="material-symbols-outlined text-2xl">menu</span>
         </button>
 
-        <div className="flex items-center text-on-surface-variant font-label-md text-label-md">
-          <span className="hover:text-on-surface cursor-pointer hidden sm:inline">FinTrack</span>
-          <span className="material-symbols-outlined text-base mx-1 text-outline-variant hidden sm:inline">chevron_right</span>
-          <span className="text-on-surface font-semibold text-sm sm:text-base">{getBreadcrumbLabel()}</span>
+        <div className="flex items-center text-on-surface-variant font-label-md text-label-md gap-1.5">
+          <Logo size={22} className="hidden sm:inline-flex" />
+          <span className="hover:text-primary transition-colors cursor-pointer hidden sm:inline font-medium">FinTrack</span>
+          <span className="material-symbols-outlined text-base mx-0.5 text-on-surface-variant/60 hidden sm:inline">chevron_right</span>
+          <span className="text-on-surface font-semibold text-sm sm:text-base tracking-tight">{getBreadcrumbLabel()}</span>
         </div>
       </div>
 
@@ -122,14 +124,17 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar 
           <span className="hidden sm:inline">Nuevo movimiento</span>
         </button>
 
-        {/* Theme Mode Toggle (Phase 2 Feature) */}
+        {/* Theme Mode Toggle */}
         {FEATURES.HEADER_THEME_TOGGLE && (
           <button
             type="button"
+            onClick={toggleTheme}
             className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
-            title="Modo Visual"
+            title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           >
-            <span className="material-symbols-outlined text-xl">light_mode</span>
+            <span className="material-symbols-outlined text-xl">
+              {isDark ? 'light_mode' : 'dark_mode'}
+            </span>
           </button>
         )}
 
@@ -215,14 +220,14 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar 
 
         {/* Profile Card & Session */}
         <div className="flex items-center gap-2 pl-2 border-l border-surface-container">
-          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm ring-2 ring-primary-fixed">
+          <div className="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-sm ring-2 ring-primary/30">
             {user?.name ? user.name[0] : (user?.email ? user.email[0].toUpperCase() : 'U')}
           </div>
           <div className="hidden lg:flex flex-col text-left">
             <span className="font-body-md text-body-md font-semibold text-on-surface leading-tight">
               {user?.name || user?.email?.split('@')[0] || 'Usuario'}
             </span>
-            <span className="font-label-md text-label-md text-secondary leading-none">
+            <span className="font-label-md text-label-md text-secondary font-medium leading-none mt-0.5">
               FinTrack Pro
             </span>
           </div>

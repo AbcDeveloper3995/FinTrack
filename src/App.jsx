@@ -15,6 +15,7 @@ import { SettingsView } from './components/settings/SettingsView';
 import { NewMovementModal } from './components/modals/NewMovementModal';
 import { NewAccountModal } from './components/modals/NewAccountModal';
 import { Toast } from './components/common/Toast';
+import { Logo } from './components/common/Logo';
 import { FinanceProvider, useFinance } from './context/FinanceContext';
 import { supabase } from './lib/supabase';
 
@@ -87,8 +88,11 @@ function MainApp() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
-        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <div className="animate-pulse">
+          <Logo size={48} showText={true} textClassName="font-headline-lg text-headline-lg text-primary font-bold" />
+        </div>
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p className="font-body-md text-body-md text-on-surface-variant font-medium">
           Cargando entorno FinTrack...
         </p>
@@ -207,13 +211,13 @@ function MainApp() {
       </main>
 
       {/* Global Public Footer */}
-      <footer className="py-6 border-t border-surface-container bg-surface/50 backdrop-blur text-center text-xs text-on-surface-variant">
+      <footer className="py-6 border-t border-surface-container-high/60 bg-surface/80 dark:bg-surface-container-lowest/90 backdrop-blur-xl text-center text-xs text-on-surface-variant transition-colors shadow-[0_-1px_8px_rgba(0,0,0,0.03)]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 FinTrack Inc. Todos los derechos reservados. Seguridad e integridad patrimonial.</p>
-          <div className="flex items-center gap-4">
-            <a href="#" className="hover:underline">Privacidad</a>
-            <a href="#" className="hover:underline">Términos</a>
-            <a href="#" className="hover:underline">Soporte 24/7</a>
+          <p>© 2026 FinTrack Inc. Todos los derechos reservados. Control y claridad patrimonial.</p>
+          <div className="flex items-center gap-4 text-on-surface-variant">
+            <a href="#" className="hover:text-primary transition-colors">Privacidad</a>
+            <a href="#" className="hover:text-primary transition-colors">Términos</a>
+            <a href="#" className="hover:text-primary transition-colors">Soporte</a>
           </div>
         </div>
       </footer>

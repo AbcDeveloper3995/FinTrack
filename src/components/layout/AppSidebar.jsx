@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { FEATURES } from '../../config/features';
+import { Logo } from '../common/Logo';
 
 export const AppSidebar = ({ activeTab, onNavigate, onLogout, isOpen = false, onClose }) => {
   const { kpis } = useFinance();
@@ -39,14 +40,7 @@ export const AppSidebar = ({ activeTab, onNavigate, onLogout, isOpen = false, on
         <div className="flex flex-col flex-1 min-h-0">
           {/* Top Brand Logo & Mobile Close Button */}
           <div className="h-16 flex items-center justify-between px-6 border-b border-surface-container-low">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-[22px]">account_balance</span>
-              </div>
-              <span className="font-headline-md text-headline-md font-bold tracking-tight text-primary">
-                FinTrack
-              </span>
-            </div>
+            <Logo size={32} showText={true} textClassName="font-headline-md text-headline-md text-primary font-bold" />
 
             {/* Mobile close button */}
             <button

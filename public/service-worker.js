@@ -1,11 +1,15 @@
 // FinTrack Service Worker for PWA Offline Caching & Installation
-const CACHE_NAME = 'fintrack-cache-v1';
+const CACHE_NAME = 'fintrack-cache-v2';
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/favicon.svg',
+  '/favicon-32x32.png',
+  '/apple-touch-icon.png',
+  '/pwa-192.png',
+  '/pwa-512.png',
   '/pwa-192.svg',
   '/pwa-512.svg',
 ];

@@ -12,6 +12,9 @@ export const SettingsView = () => {
     tags,
     refreshFinancialData,
     showToast,
+    theme,
+    setTheme,
+    isDark,
   } = useFinance();
 
   // Profile Form States
@@ -86,250 +89,347 @@ export const SettingsView = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
-          <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
-            Configuración de Cuenta
-          </span>
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-14 px-2 sm:px-4">
+      {/* Header View */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-surface-container">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+            <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+              Panel de Control Personal
+            </span>
+          </div>
+          <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mt-1">
+            Configuración y Preferencias
+          </h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
+            Personaliza el aspecto de FinTrack, administra tu cuenta y descarga tus respaldos.
+          </p>
         </div>
-        <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mt-1">
-          Perfil de Usuario y Seguridad
-        </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant">
-          Administra la información de tu cuenta personal y actualiza tus credenciales de acceso.
-        </p>
+
+        {/* Quick User Badge */}
+        <div className="flex items-center gap-3 px-4 py-2 bg-surface-container-low rounded-2xl border border-surface-container self-start sm:self-auto">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
+            {currentUser?.name ? currentUser.name[0].toUpperCase() : (currentUser?.email ? currentUser.email[0].toUpperCase() : 'U')}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-on-surface leading-tight">
+              {currentUser?.name || 'Usuario'}
+            </p>
+            <p className="text-xs text-on-surface-variant leading-none mt-0.5">
+              {currentUser?.email || 'Sin correo'}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Card 1: Información de Perfil */}
-        <div className="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container-high/60">
-          <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
-            <div className="w-10 h-10 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">person</span>
-            </div>
-            <div>
-              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                Información del Perfil
-              </h2>
-              <p className="text-xs text-on-surface-variant">
-                Tu nombre de usuario visible en la plataforma.
-              </p>
-            </div>
-          </div>
-
-          {profileMsg.text && (
-            <div
-              className={`mt-4 p-3 rounded-xl text-sm font-medium ${
-                profileMsg.type === 'success'
-                  ? 'bg-secondary-fixed/30 text-secondary border border-secondary/30'
-                  : 'bg-error-container text-on-error-container'
-              }`}
-            >
-              {profileMsg.text}
-            </div>
-          )}
-
-          <form onSubmit={handleUpdateProfile} className="mt-5 space-y-4">
-            <div>
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                Correo Electrónico (No editable)
-              </label>
-              <input
-                type="email"
-                value={currentUser?.email || ''}
-                disabled
-                className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface-variant/80 rounded-xl font-body-md text-body-md border border-surface-container cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                Nombre Completo
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Ingresa tu nombre completo"
-                required
-                className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-              />
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="submit"
-                disabled={savingProfile}
-                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-sm shadow-sm transition-all flex items-center gap-2 cursor-pointer"
-              >
-                {savingProfile && <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>}
-                <span>{savingProfile ? 'Guardando...' : 'Actualizar Perfil'}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Card 2: Cambiar Contraseña */}
-        <div className="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container-high/60">
-          <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
-            <div className="w-10 h-10 rounded-xl bg-secondary-fixed/30 text-secondary flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">lock_reset</span>
-            </div>
-            <div>
-              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                Cambiar Contraseña
-              </h2>
-              <p className="text-xs text-on-surface-variant">
-                Actualiza tu clave de acceso para mayor seguridad.
-              </p>
-            </div>
-          </div>
-
-          {passwordMsg.text && (
-            <div
-              className={`mt-4 p-3 rounded-xl text-sm font-medium ${
-                passwordMsg.type === 'success'
-                  ? 'bg-secondary-fixed/30 text-secondary border border-secondary/30'
-                  : 'bg-error-container text-on-error-container'
-              }`}
-            >
-              {passwordMsg.text}
-            </div>
-          )}
-
-          <form onSubmit={handleUpdatePassword} className="mt-5 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                  Nueva Contraseña
-                </label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  required
-                  minLength={6}
-                  className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                />
+      {/* Main Grid: 2 Columns on desktop to use full width */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column (5 cols): Apariencia & Perfil */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Card: Apariencia & Tema Visual */}
+          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
+            <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">palette</span>
               </div>
-
               <div>
-                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                  Confirmar Nueva Contraseña
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repite la contraseña"
-                  required
-                  minLength={6}
-                  className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="submit"
-                disabled={savingPassword}
-                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-sm shadow-sm transition-all flex items-center gap-2 cursor-pointer"
-              >
-                {savingPassword && <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>}
-                <span>{savingPassword ? 'Cambiando...' : 'Cambiar Contraseña'}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Card 3: Respaldo y Portabilidad de Datos */}
-        <div className="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container-high/60">
-          <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
-            <div className="w-10 h-10 rounded-xl bg-tertiary-container/30 text-tertiary flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">cloud_download</span>
-            </div>
-            <div>
-              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                Respaldo y Portabilidad de Datos
-              </h2>
-              <p className="text-xs text-on-surface-variant">
-                Descarga tus datos financieros para resguardarlos en tu dispositivo o abrirlos en Excel / hojas de cálculo.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Opción 1: Excel Nativo .xlsx */}
-            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-on-surface font-semibold text-sm">
-                  <span className="material-symbols-outlined text-secondary text-lg">table_chart</span>
-                  <span>Reporte Financiero en Excel (.xlsx)</span>
-                </div>
-                <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
-                  Descarga tus movimientos ({transactions.length} registros) en un libro de Microsoft Excel real con 2 pestañas: "Movimientos" formateados con anchos de celda calculados y "Resumen Ejecutivo" con totales contables.
+                <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+                  Apariencia de la App
+                </h2>
+                <p className="text-xs text-on-surface-variant">
+                  Elige entre el tema claro u oscuro según tu preferencia.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    if (transactions.length === 0) {
-                      showToast('No tienes movimientos registrados para exportar.', 'warning', 'Sin datos');
-                      return;
+            </div>
+
+            <div className="mt-5 space-y-3">
+              <label className="block text-label-md font-label-md text-on-surface-variant">
+                Modo de Pantalla
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Claro */}
+                <button
+                  type="button"
+                  onClick={() => setTheme('light')}
+                  className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                    theme === 'light'
+                      ? 'border-primary bg-primary/10 text-primary font-semibold ring-2 ring-primary/20 shadow-xs'
+                      : 'border-surface-container bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:border-outline-variant'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-2xl">light_mode</span>
+                  <span className="text-xs">Claro</span>
+                </button>
+
+                {/* Oscuro */}
+                <button
+                  type="button"
+                  onClick={() => setTheme('dark')}
+                  className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                    theme === 'dark'
+                      ? 'border-primary bg-primary/10 text-primary font-semibold ring-2 ring-primary/20 shadow-xs'
+                      : 'border-surface-container bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:border-outline-variant'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-2xl">dark_mode</span>
+                  <span className="text-xs">Oscuro</span>
+                </button>
+
+                {/* Sistema */}
+                <button
+                  type="button"
+                  onClick={() => setTheme('system')}
+                  className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                    theme === 'system'
+                      ? 'border-primary bg-primary/10 text-primary font-semibold ring-2 ring-primary/20 shadow-xs'
+                      : 'border-surface-container bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:border-outline-variant'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-2xl">desktop_windows</span>
+                  <span className="text-xs">Sistema</span>
+                </button>
+              </div>
+
+              <div className="p-3 bg-surface-container-low rounded-xl text-xs text-on-surface-variant flex items-center gap-2 mt-2">
+                <span className="material-symbols-outlined text-base text-primary">info</span>
+                <span>
+                  El tema seleccionado se guardará automáticamente en este dispositivo.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card: Información del Perfil */}
+          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
+            <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
+              <div className="w-10 h-10 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">person</span>
+              </div>
+              <div>
+                <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+                  Datos de Perfil
+                </h2>
+                <p className="text-xs text-on-surface-variant">
+                  Tu nombre visible en la plataforma y reportes.
+                </p>
+              </div>
+            </div>
+
+            {profileMsg.text && (
+              <div
+                className={`mt-4 p-3 rounded-xl text-sm font-medium ${
+                  profileMsg.type === 'success'
+                    ? 'bg-secondary-fixed/30 text-secondary border border-secondary/30'
+                    : 'bg-error-container text-on-error-container'
+                }`}
+              >
+                {profileMsg.text}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateProfile} className="mt-5 space-y-4">
+              <div>
+                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                  Correo Electrónico (No editable)
+                </label>
+                <input
+                  type="email"
+                  value={currentUser?.email || ''}
+                  disabled
+                  className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface-variant/80 rounded-xl font-body-md text-body-md border border-surface-container cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                  Nombre Completo
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Ingresa tu nombre completo"
+                  required
+                  className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-sm shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  {savingProfile && <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>}
+                  <span>{savingProfile ? 'Guardando...' : 'Actualizar Perfil'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Right Column (7 cols): Seguridad & Portabilidad de Datos */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Card: Cambiar Contraseña */}
+          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
+            <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
+              <div className="w-10 h-10 rounded-xl bg-secondary-fixed/30 text-secondary flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">lock_reset</span>
+              </div>
+              <div>
+                <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+                  Seguridad y Contraseña
+                </h2>
+                <p className="text-xs text-on-surface-variant">
+                  Actualiza tu clave de acceso para mantener protegida tu cuenta.
+                </p>
+              </div>
+            </div>
+
+            {passwordMsg.text && (
+              <div
+                className={`mt-4 p-3 rounded-xl text-sm font-medium ${
+                  passwordMsg.type === 'success'
+                    ? 'bg-secondary-fixed/30 text-secondary border border-secondary/30'
+                    : 'bg-error-container text-on-error-container'
+                }`}
+              >
+                {passwordMsg.text}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdatePassword} className="mt-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                    Nueva Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                    minLength={6}
+                    className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                    Confirmar Nueva Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repite la contraseña"
+                    required
+                    minLength={6}
+                    className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={savingPassword}
+                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-sm shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  {savingPassword && <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>}
+                  <span>{savingPassword ? 'Cambiando...' : 'Cambiar Contraseña'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Card: Respaldo y Portabilidad de Datos (Excel & JSON) */}
+          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
+            <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
+              <div className="w-10 h-10 rounded-xl bg-tertiary-container/30 text-tertiary flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">cloud_download</span>
+              </div>
+              <div>
+                <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+                  Respaldo y Descarga de Datos
+                </h2>
+                <p className="text-xs text-on-surface-variant">
+                  Tus datos son 100% tuyos. Descárgalos cuando quieras en Excel o en copia JSON integral.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Opción 1: Excel .xlsx */}
+              <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 text-on-surface font-semibold text-sm">
+                    <span className="material-symbols-outlined text-secondary text-lg">table_chart</span>
+                    <span>Libro Microsoft Excel (.xlsx)</span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                    Descarga tus movimientos ({transactions.length} registros) formateados con fórmulas, tablas limpias y resumen contable.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      if (transactions.length === 0) {
+                        showToast('No tienes movimientos registrados para exportar.', 'warning', 'Sin datos');
+                        return;
+                      }
+                      const res = await exportMovementsToCSV(transactions, {
+                        userName: currentUser?.name || currentUser?.email || 'Usuario FinTrack',
+                        periodLabel: 'Historial Completo Consolidado',
+                      });
+                      showToast(`Reporte Excel listo: ${res.filename} (Neto: $${res.netResult.toFixed(2)} MXN)`, 'success', 'Descarga lista');
+                    } catch (err) {
+                      showToast(err.message, 'error', 'Error');
                     }
-                    const res = await exportMovementsToCSV(transactions, {
-                      userName: currentUser?.name || currentUser?.email || 'Usuario FinTrack',
-                      periodLabel: 'Historial Completo Consolidado',
-                    });
-                    showToast(`Reporte Excel listo: ${res.filename} (Neto: $${res.netResult.toFixed(2)} MXN)`, 'success', 'Descarga lista');
-                  } catch (err) {
-                    showToast(err.message, 'error', 'Error');
-                  }
-                }}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-highest text-on-surface font-semibold text-xs border border-surface-container-high transition-colors cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-base text-secondary">download</span>
-                <span>Descargar Reporte Excel (.xlsx)</span>
-              </button>
-            </div>
-
-            {/* Opción 2: Respaldo Completo JSON */}
-            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-on-surface font-semibold text-sm">
-                  <span className="material-symbols-outlined text-tertiary text-lg">folder_zip</span>
-                  <span>Copia de Seguridad Integral (JSON)</span>
-                </div>
-                <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
-                  Genera una instantánea completa con todas tus cuentas ({accounts.length}), categorías ({categories.length}), transacciones ({transactions.length}) y etiquetas.
-                </p>
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-highest text-on-surface font-semibold text-xs border border-surface-container-high transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base text-secondary">download</span>
+                  <span>Descargar Excel (.xlsx)</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  try {
-                    const res = exportFullBackupJSON({
-                      user: currentUser,
-                      accounts,
-                      transactions,
-                      categories,
-                      tags,
-                    });
-                    showToast(`Respaldo creado y descargado: ${res.filename}`, 'success', 'Copia guardada');
-                  } catch (err) {
-                    showToast(err.message, 'error', 'Error');
-                  }
-                }}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs shadow-xs transition-colors cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-base">save</span>
-                <span>Crear Copia de Seguridad (.json)</span>
-              </button>
+
+              {/* Opción 2: Copia JSON */}
+              <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 text-on-surface font-semibold text-sm">
+                    <span className="material-symbols-outlined text-tertiary text-lg">folder_zip</span>
+                    <span>Copia de Respaldo (.json)</span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                    Genera una instantánea completa con tus {accounts.length} cuentas, {categories.length} categorías y {transactions.length} movimientos.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      const res = exportFullBackupJSON({
+                        user: currentUser,
+                        accounts,
+                        transactions,
+                        categories,
+                        tags,
+                      });
+                      showToast(`Respaldo creado y descargado: ${res.filename}`, 'success', 'Copia guardada');
+                    } catch (err) {
+                      showToast(err.message, 'error', 'Error');
+                    }
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base">save</span>
+                  <span>Crear Copia (.json)</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

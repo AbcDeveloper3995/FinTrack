@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 import { useToast } from '../hooks/useToast';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { useTheme } from '../hooks/useTheme';
 import { accountService } from '../services/accountService';
 import { transactionService } from '../services/transactionService';
 import { calculatePeriodMetrics } from '../services/calculations';
@@ -13,6 +14,9 @@ const FinanceContext = createContext(null);
 export const FinanceProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Modular Hook: Dark / Light Mode Theme
+  const { theme, setTheme, toggleTheme, isDark } = useTheme();
 
   // Modular Hook: Exchange Rate USD/MXN
   const { exchangeRate, exchangeRateLastUpdated, fetchExchangeRate } = useExchangeRate(17.85);
@@ -276,6 +280,10 @@ export const FinanceProvider = ({ children }) => {
     showToast,
     hideToast,
     isOnline,
+    theme,
+    setTheme,
+    toggleTheme,
+    isDark,
   }), [
     currentUser,
     loading,
@@ -303,6 +311,10 @@ export const FinanceProvider = ({ children }) => {
     showToast,
     hideToast,
     isOnline,
+    theme,
+    setTheme,
+    toggleTheme,
+    isDark,
   ]);
 
   return (

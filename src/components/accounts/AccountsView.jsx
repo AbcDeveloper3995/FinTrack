@@ -104,9 +104,9 @@ export const AccountsView = () => {
       </div>
 
       {/* Tipo de Cambio en Directo (Widget Google Finance / Mercado Interbancario) */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-surface-container-lowest via-surface-container-low to-surface-container-lowest p-4 sm:p-5 border border-primary/20 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-primary-container/20 text-primary flex items-center justify-center shadow-xs shrink-0 mt-0.5 sm:mt-0">
+      <section className="relative overflow-hidden rounded-2xl bg-surface-container-lowest dark:bg-surface-container-low/70 p-4 sm:p-5 border border-primary/20 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs shrink-0 mt-0.5 sm:mt-0">
             <span className="material-symbols-outlined text-xl sm:text-2xl">currency_exchange</span>
           </div>
           <div className="min-w-0 flex-1">
@@ -123,7 +123,7 @@ export const AccountsView = () => {
               <span className="text-lg sm:text-xl font-bold text-on-surface tabular-nums">
                 1 USD = ${exchangeRate.toFixed(4)} MXN
               </span>
-              <span className="text-[11px] text-on-surface-variant">
+              <span className="text-[11px] text-on-surface-variant font-medium">
                 (Google Finance)
               </span>
             </div>

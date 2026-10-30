@@ -10,7 +10,7 @@ export const FEATURES = {
   
   // Header
   HEADER_SEARCH_BAR: false,        // Command+K global quick search
-  HEADER_THEME_TOGGLE: false,      // Dark/Light mode switcher toggle
+  HEADER_THEME_TOGGLE: true,       // Dark/Light mode switcher toggle
   HEADER_NOTIFICATIONS: true,      // Notification bell with alert dot and smart notifications dropdown
   
   // Navigation / Modules
@@ -19,4 +19,5 @@ export const FEATURES = {
   
   // Public Landing / Gateway
   PUBLIC_SSL_AUDIT_FOOTER: false,  // Links to SSL Audit/Security badges in public footer
+  AUTH_GOOGLE_LOGIN: false,        // Google OAuth sign-in option (enable when configured in Supabase)
 };

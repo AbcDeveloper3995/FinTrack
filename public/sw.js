@@ -1,10 +1,14 @@
 // FinTrack Progressive Web App Service Worker
-const CACHE_NAME = 'fintrack-shell-v1';
+const CACHE_NAME = 'fintrack-shell-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
   '/favicon.svg',
+  '/favicon-32x32.png',
+  '/apple-touch-icon.png',
+  '/pwa-192.png',
+  '/pwa-512.png',
 ];
 
 // Install: Cache critical application shell

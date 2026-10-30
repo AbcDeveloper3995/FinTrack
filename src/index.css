@@ -9,9 +9,172 @@
     font-family: 'Inter', sans-serif;
     background-color: #faf8ff;
     color: #131b2e;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  html.dark, html.dark body {
+    background-color: #0b0f19;
+    color: #f1f5f9;
   }
 }
 
+/* =========================================================
+   DARK MODE COLOR OVERRIDES & CONTRAST ENHANCEMENTS
+   ========================================================= */
+
+/* 1. Header / Navbar in Dark Mode */
+html.dark header,
+html.dark header.bg-surface-container-lowest\/90,
+html.dark header.bg-surface\/80 {
+  background-color: rgba(13, 19, 34, 0.92) !important;
+  border-bottom-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* 2. Sidebar in Dark Mode */
+html.dark aside,
+html.dark aside.bg-surface-container-lowest {
+  background-color: #0d1322 !important;
+  border-right-color: #1e293b !important;
+}
+
+/* 2.1 Public Footer in Dark Mode (Matches Header) */
+html.dark footer,
+html.dark footer.bg-surface\/50,
+html.dark footer.dark\:bg-surface-container-lowest\/90 {
+  background-color: rgba(13, 19, 34, 0.92) !important;
+  border-top-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+html.dark footer a:hover {
+  color: #f8fafc !important;
+}
+
+/* 3. Surface & Background Tokens */
+html.dark .bg-background {
+  background-color: #0b0f19 !important;
+}
+html.dark .bg-surface {
+  background-color: #0f172a !important;
+}
+html.dark .bg-surface-container-lowest {
+  background-color: #0d1322 !important;
+}
+html.dark .bg-surface-container-low {
+  background-color: #131c31 !important;
+}
+html.dark .bg-surface-container {
+  background-color: #18233c !important;
+}
+html.dark .bg-surface-container-high {
+  background-color: #1e2c4a !important;
+}
+html.dark .bg-surface-container-highest {
+  background-color: #26375a !important;
+}
+
+/* Gradient stops in dark mode so gradients don't evaluate to white */
+html.dark .from-surface-container-lowest {
+  --tw-gradient-from: #0d1322 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(13 19 34 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.dark .via-surface-container-low {
+  --tw-gradient-to: rgb(19 28 49 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #131c31 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+html.dark .to-surface-container-lowest {
+  --tw-gradient-to: #0d1322 var(--tw-gradient-to-position) !important;
+}
+html.dark .via-surface-container-lowest {
+  --tw-gradient-to: rgb(13 19 34 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #0d1322 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+
+/* 4. Text Contrast Overrides */
+html.dark .text-on-surface {
+  color: #f8fafc !important;
+}
+html.dark .text-on-surface-variant {
+  color: #94a3b8 !important;
+}
+html.dark .text-on-background {
+  color: #f8fafc !important;
+}
+
+/* 5. Primary and Secondary Color Contrast in Dark Mode */
+/* In dark mode, pure deep blue (#2a14b4) is unreadable against black.
+   We elevate it to a vibrant indigo/violet (#818cf8 / #a5b4fc) and bright emerald (#34d399) */
+html.dark .text-primary {
+  color: #a5b4fc !important;
+}
+html.dark .text-secondary {
+  color: #34d399 !important;
+}
+
+/* Light badge pills (bg-primary/10) become luminous in dark mode */
+html.dark .bg-primary\/10 {
+  background-color: rgba(129, 140, 248, 0.18) !important;
+  color: #c7d2fe !important;
+}
+html.dark .bg-primary-container\/20,
+html.dark .bg-primary-container\/10 {
+  background-color: rgba(129, 140, 248, 0.18) !important;
+}
+
+html.dark .bg-secondary\/10,
+html.dark .bg-secondary-fixed\/30,
+html.dark .bg-secondary-container\/40 {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+}
+
+/* Active primary button / highlight */
+html.dark .bg-primary {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+html.dark .bg-primary:hover {
+  background-color: #4338ca !important;
+}
+
+html.dark .bg-primary-container {
+  background-color: #4338ca !important;
+  color: #ffffff !important;
+}
+
+/* Ring utilities */
+html.dark .ring-primary-fixed {
+  --tw-ring-color: #312e81 !important;
+}
+
+/* 6. Borders & Dividers */
+html.dark .border-surface-container,
+html.dark .border-surface-container-low,
+html.dark .border-surface-container-high,
+html.dark .border-surface-container-high\/60,
+html.dark .border-surface-container-highest {
+  border-color: #1e293b !important;
+}
+
+/* 7. Inputs, Selects & Textareas */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #131c31 !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* =========================================================
+   MATERIAL SYMBOLS & LAYOUT UTILITIES
+   ========================================================= */
 .material-symbols-outlined {
   font-variation-settings:
     'FILL' 0,
