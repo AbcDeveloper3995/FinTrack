@@ -4,12 +4,23 @@ import { ExpenseDonutChart } from '../charts/ExpenseDonutChart';
 import { MonthlyBarChart } from '../charts/MonthlyBarChart';
 import { MonthComparisonBanner } from '../charts/MonthComparisonBanner';
 import { MonthlyMatrixReport } from './MonthlyMatrixReport';
+import { PdfExportModal } from '../modals/PdfExportModal';
 
 export const AnalyticsView = () => {
-  const { transactions, kpis, categories, setIsNewMovementModalOpen, exchangeRate } = useFinance();
+  const {
+    transactions,
+    kpis,
+    categories,
+    currentUser,
+    currentPeriod,
+    setIsNewMovementModalOpen,
+    exchangeRate,
+    showToast,
+  } = useFinance();
 
   const [periodFilter, setPeriodFilter] = useState('current'); // 'current' | 'prev' | 'all'
   const [selectedCategoryDrill, setSelectedCategoryDrill] = useState(null);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   const hasTransactions = transactions.length > 0;
 
@@ -146,41 +157,54 @@ export const AnalyticsView = () => {
           </p>
         </div>
 
-        {/* Period Selector Tabs (En mobile: Mes Actual y Mes Anterior a 50%/50%, Histórico solo en sm+) */}
-        <div className="flex p-1 bg-surface-container-low rounded-xl self-stretch sm:self-auto border border-surface-container justify-between sm:justify-start">
+        {/* Action Controls: PDF Report Button & Period Selector */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <button
             type="button"
-            onClick={() => setPeriodFilter('current')}
-            className={`flex-1 sm:flex-initial text-center px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              periodFilter === 'current'
-                ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
+            onClick={() => setIsPdfModalOpen(true)}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-semibold text-xs border border-surface-container-high/60 shadow-xs transition-all cursor-pointer"
+            title="Descargar análisis financiero en formato PDF para imprimir o compartir"
           >
-            Mes Actual
+            <span className="material-symbols-outlined text-base text-primary">picture_as_pdf</span>
+            <span>Descargar Reporte PDF</span>
           </button>
-          <button
-            type="button"
-            onClick={() => setPeriodFilter('prev')}
-            className={`flex-1 sm:flex-initial text-center px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              periodFilter === 'prev'
-                ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            Mes Anterior
-          </button>
-          <button
-            type="button"
-            onClick={() => setPeriodFilter('all')}
-            className={`hidden sm:inline-block px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              periodFilter === 'all'
-                ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            Todo el Histórico
-          </button>
+
+          {/* Period Selector Tabs */}
+          <div className="flex p-1 bg-surface-container-low rounded-xl self-stretch sm:self-auto border border-surface-container justify-between sm:justify-start">
+            <button
+              type="button"
+              onClick={() => setPeriodFilter('current')}
+              className={`flex-1 sm:flex-initial text-center px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                periodFilter === 'current'
+                  ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              Mes Actual
+            </button>
+            <button
+              type="button"
+              onClick={() => setPeriodFilter('prev')}
+              className={`flex-1 sm:flex-initial text-center px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                periodFilter === 'prev'
+                  ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              Mes Anterior
+            </button>
+            <button
+              type="button"
+              onClick={() => setPeriodFilter('all')}
+              className={`hidden sm:inline-block px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                periodFilter === 'all'
+                  ? 'bg-surface-container-lowest text-primary shadow-xs font-bold'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              Todo el Histórico
+            </button>
+          </div>
         </div>
       </section>
 
@@ -568,6 +592,19 @@ export const AnalyticsView = () => {
           />
         </div>
       )}
+
+      {/* PDF Export Selection Modal */}
+      <PdfExportModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        user={currentUser}
+        currentPeriod={currentPeriod}
+        kpis={kpis}
+        categories={categories}
+        transactions={transactions}
+        exchangeRate={exchangeRate}
+        showToast={showToast}
+      />
     </div>
   );
 };

@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { supabase } from '../../lib/supabase';
+import { exportFullBackupJSON, exportMovementsToCSV } from '../../services/exportService';
 
 export const SettingsView = () => {
-  const { currentUser, refreshFinancialData } = useFinance();
+  const {
+    currentUser,
+    accounts,
+    transactions,
+    categories,
+    tags,
+    refreshFinancialData,
+    showToast,
+  } = useFinance();
 
   // Profile Form States
   const [fullName, setFullName] = useState(currentUser?.name || '');
@@ -235,6 +244,94 @@ export const SettingsView = () => {
               </button>
             </div>
           </form>
+        </div>
+
+        {/* Card 3: Respaldo y Portabilidad de Datos */}
+        <div className="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm border border-surface-container-high/60">
+          <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
+            <div className="w-10 h-10 rounded-xl bg-tertiary-container/30 text-tertiary flex items-center justify-center">
+              <span className="material-symbols-outlined text-xl">cloud_download</span>
+            </div>
+            <div>
+              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+                Respaldo y Portabilidad de Datos
+              </h2>
+              <p className="text-xs text-on-surface-variant">
+                Descarga tus datos financieros para resguardarlos en tu dispositivo o abrirlos en Excel / hojas de cálculo.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Opción 1: Excel Nativo .xlsx */}
+            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 text-on-surface font-semibold text-sm">
+                  <span className="material-symbols-outlined text-secondary text-lg">table_chart</span>
+                  <span>Reporte Financiero en Excel (.xlsx)</span>
+                </div>
+                <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                  Descarga tus movimientos ({transactions.length} registros) en un libro de Microsoft Excel real con 2 pestañas: "Movimientos" formateados con anchos de celda calculados y "Resumen Ejecutivo" con totales contables.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    if (transactions.length === 0) {
+                      showToast('No tienes movimientos registrados para exportar.', 'warning', 'Sin datos');
+                      return;
+                    }
+                    const res = await exportMovementsToCSV(transactions, {
+                      userName: currentUser?.name || currentUser?.email || 'Usuario FinTrack',
+                      periodLabel: 'Historial Completo Consolidado',
+                    });
+                    showToast(`Reporte Excel listo: ${res.filename} (Neto: $${res.netResult.toFixed(2)} MXN)`, 'success', 'Descarga lista');
+                  } catch (err) {
+                    showToast(err.message, 'error', 'Error');
+                  }
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-highest text-on-surface font-semibold text-xs border border-surface-container-high transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base text-secondary">download</span>
+                <span>Descargar Reporte Excel (.xlsx)</span>
+              </button>
+            </div>
+
+            {/* Opción 2: Respaldo Completo JSON */}
+            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 text-on-surface font-semibold text-sm">
+                  <span className="material-symbols-outlined text-tertiary text-lg">folder_zip</span>
+                  <span>Copia de Seguridad Integral (JSON)</span>
+                </div>
+                <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                  Genera una instantánea completa con todas tus cuentas ({accounts.length}), categorías ({categories.length}), transacciones ({transactions.length}) y etiquetas.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    const res = exportFullBackupJSON({
+                      user: currentUser,
+                      accounts,
+                      transactions,
+                      categories,
+                      tags,
+                    });
+                    showToast(`Respaldo creado y descargado: ${res.filename}`, 'success', 'Copia guardada');
+                  } catch (err) {
+                    showToast(err.message, 'error', 'Error');
+                  }
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base">save</span>
+                <span>Crear Copia de Seguridad (.json)</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

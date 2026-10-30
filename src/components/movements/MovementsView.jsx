@@ -3,9 +3,19 @@ import { useFinance } from '../../context/FinanceContext';
 import { EditMovementModal } from '../modals/EditMovementModal';
 import { ConfirmModal } from '../common/ConfirmModal';
 import { CustomSelect } from '../common/CustomSelect';
+import { exportMovementsToCSV } from '../../services/exportService';
 
 export const MovementsView = () => {
-  const { transactions, tags, kpis, setIsNewMovementModalOpen, deleteTransactions, showToast } = useFinance();
+  const {
+    transactions,
+    tags,
+    kpis,
+    currentUser,
+    currentPeriod,
+    setIsNewMovementModalOpen,
+    deleteTransactions,
+    showToast,
+  } = useFinance();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all' | 'expense' | 'income'
@@ -104,6 +114,31 @@ export const MovementsView = () => {
 
   // Get unique categories for dropdown
   const uniqueCategories = Array.from(new Set(transactions.map((t) => t.category).filter(Boolean)));
+
+  const handleExportCSV = async () => {
+    try {
+      const itemsToExport = selectedIds.length > 0
+        ? filtered.filter((m) => selectedIds.includes(m.id))
+        : filtered;
+
+      if (itemsToExport.length === 0) {
+        showToast('No hay movimientos que coincidan con los filtros para exportar.', 'warning', 'Exportación vacía');
+        return;
+      }
+
+      const result = await exportMovementsToCSV(itemsToExport, {
+        userName: currentUser?.name || currentUser?.email || 'Usuario FinTrack',
+        periodLabel: currentPeriod || 'Historial Completo',
+      });
+      showToast(
+        `Se exportaron ${result.count} movimientos a ${result.filename} (Neto: $${result.netResult.toFixed(2)} MXN)`,
+        'success',
+        'Reporte Ejecutivo Descargado'
+      );
+    } catch (err) {
+      showToast(err.message, 'error', 'Error al exportar');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -219,6 +254,16 @@ export const MovementsView = () => {
                 </button>
               </div>
             )}
+
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-body-md font-medium transition-all border border-surface-container-high/60 shadow-xs cursor-pointer shrink-0"
+              title="Descargar reporte financiero en formato nativo de Microsoft Excel (.xlsx)"
+            >
+              <span className="material-symbols-outlined text-lg text-secondary">table_chart</span>
+              <span className="text-xs sm:text-sm font-semibold">Exportar Excel</span>
+            </button>
 
             <button
               type="button"

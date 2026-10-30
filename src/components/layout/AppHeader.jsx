@@ -3,7 +3,7 @@ import { useFinance } from '../../context/FinanceContext';
 import { FEATURES } from '../../config/features';
 
 export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar }) => {
-  const { currentPeriod, setIsNewMovementModalOpen, kpis } = useFinance();
+  const { currentPeriod, setIsNewMovementModalOpen, kpis, isOnline } = useFinance();
   const [showNotifications, setShowNotifications] = React.useState(false);
   const notificationsRef = React.useRef(null);
 
@@ -63,6 +63,17 @@ export const AppHeader = ({ activeTab, user, onLogout: _onLogout, onOpenSidebar 
 
       {/* Header Tools & Actions */}
       <div className="flex items-center gap-3">
+        {/* Offline Status Badge */}
+        {!isOnline && (
+          <div
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-medium text-xs shadow-xs animate-pulse"
+            title="Estás en modo sin conexión. Visualizando datos guardados localmente."
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Sin conexión (Caché local)</span>
+          </div>
+        )}
+
         {/* Month Selector (Desktop/Tablet only) */}
         <div className="hidden sm:inline-flex items-center bg-surface-container-low rounded-lg px-2 py-1 border border-surface-container">
           <button
