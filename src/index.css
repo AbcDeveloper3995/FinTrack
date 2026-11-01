@@ -154,8 +154,21 @@ html.dark .border-surface-container,
 html.dark .border-surface-container-low,
 html.dark .border-surface-container-high,
 html.dark .border-surface-container-high\/60,
-html.dark .border-surface-container-highest {
-  border-color: #1e293b !important;
+html.dark .border-surface-container-highest,
+html.dark .border-outline-variant,
+html.dark .border-outline-variant\/60,
+html.dark .border-outline-variant\/40,
+html.dark .border-outline-variant\/30,
+html.dark .border-outline {
+  border-color: #283548 !important;
+}
+
+/* Opacity variations for surface containers in dark mode */
+html.dark .bg-surface-container-low\/70,
+html.dark .bg-surface-container-low\/60,
+html.dark .bg-surface-container-low\/50,
+html.dark .bg-surface-container-low\/40 {
+  background-color: rgba(19, 28, 49, 0.6) !important;
 }
 
 /* 7. Inputs, Selects & Textareas */

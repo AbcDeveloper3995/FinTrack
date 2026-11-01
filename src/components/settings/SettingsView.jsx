@@ -130,10 +130,10 @@ export const SettingsView = () => {
           {/* Card: Apariencia & Tema Visual */}
           <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
             <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center">
                 <span className="material-symbols-outlined text-xl">palette</span>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
                   Apariencia de la App
                 </h2>
@@ -203,10 +203,10 @@ export const SettingsView = () => {
           {/* Card: Información del Perfil */}
           <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
             <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
-              <div className="w-10 h-10 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary-container/20 text-primary flex-shrink-0 flex items-center justify-center">
                 <span className="material-symbols-outlined text-xl">person</span>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
                   Datos de Perfil
                 </h2>
@@ -274,10 +274,10 @@ export const SettingsView = () => {
           {/* Card: Cambiar Contraseña */}
           <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
             <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
-              <div className="w-10 h-10 rounded-xl bg-secondary-fixed/30 text-secondary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-secondary-fixed/30 text-secondary flex-shrink-0 flex items-center justify-center">
                 <span className="material-symbols-outlined text-xl">lock_reset</span>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
                   Seguridad y Contraseña
                 </h2>
@@ -348,10 +348,10 @@ export const SettingsView = () => {
           {/* Card: Respaldo y Portabilidad de Datos (Excel & JSON) */}
           <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-surface-container-high/60">
             <div className="flex items-center gap-3 pb-4 border-b border-surface-container">
-              <div className="w-10 h-10 rounded-xl bg-tertiary-container/30 text-tertiary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-tertiary-container/30 dark:bg-tertiary/20 text-tertiary dark:text-tertiary-fixed-dim flex-shrink-0 flex items-center justify-center">
                 <span className="material-symbols-outlined text-xl">cloud_download</span>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
                   Respaldo y Descarga de Datos
                 </h2>

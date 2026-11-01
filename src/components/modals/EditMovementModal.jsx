@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { CustomSelect } from '../common/CustomSelect';
+import { CustomDatePicker } from '../common/CustomDatePicker';
 
 export const EditMovementModal = ({ movement, isOpen, onClose }) => {
   const {
@@ -197,12 +198,9 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
                 <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                   Fecha
                 </label>
-                <input
-                  type="date"
+                <CustomDatePicker
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                  className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none"
+                  onChange={(newDate) => setDate(newDate)}
                 />
               </div>
             </div>

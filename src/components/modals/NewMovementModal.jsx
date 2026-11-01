@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { CustomSelect } from '../common/CustomSelect';
+import { CustomDatePicker } from '../common/CustomDatePicker';
 
 export const NewMovementModal = () => {
   const {
@@ -19,6 +20,7 @@ export const NewMovementModal = () => {
   const [type, setType] = useState('expense'); // 'expense' | 'income' | 'transfer'
   const [concept, setConcept] = useState('');
   const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [categoryId, setCategoryId] = useState('');
   const [subcategoryId, setSubcategoryId] = useState('');
   const [accountId, setAccountId] = useState('');
@@ -30,8 +32,11 @@ export const NewMovementModal = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Auto-initialize account selectors when modal opens or accounts change
+  // Auto-initialize account selectors and date when modal opens
   useEffect(() => {
+    if (isNewMovementModalOpen && !date) {
+      setDate(new Date().toISOString().split('T')[0]);
+    }
     if (accounts.length > 0) {
       if (!accountId || !accounts.find(a => a.id === accountId)) {
         setAccountId(accounts[0].id);
@@ -41,7 +46,7 @@ export const NewMovementModal = () => {
         if (otherAcc) setToAccountId(otherAcc.id);
       }
     }
-  }, [accounts, accountId, toAccountId, isNewMovementModalOpen]);
+  }, [accounts, accountId, toAccountId, isNewMovementModalOpen, date]);
 
   // Filter categories by type
   const availableCategories = categories.filter((c) => c.type === type);
@@ -93,6 +98,29 @@ export const NewMovementModal = () => {
     setAmount((current + addVal).toString());
   };
 
+  // Date helper presets & friendly formatter
+  const todayStr = new Date().toISOString().split('T')[0];
+  const yesterdayObj = new Date();
+  yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+  const yesterdayStr = yesterdayObj.toISOString().split('T')[0];
+
+  const formatHumanDate = (dateVal) => {
+    if (!dateVal) return '';
+    if (dateVal === todayStr) return 'Hoy';
+    if (dateVal === yesterdayStr) return 'Ayer';
+    try {
+      const [y, m, d] = dateVal.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      return dt.toLocaleDateString('es-MX', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      });
+    } catch {
+      return dateVal;
+    }
+  };
+
   if (!isNewMovementModalOpen) return null;
 
   const handleSubmit = async (e) => {
@@ -129,6 +157,7 @@ export const NewMovementModal = () => {
         convertedAmount: isMultiCurrencyTransfer ? finalDestAmount : null,
         concept: transferConcept,
         notes,
+        date: date || new Date().toISOString().split('T')[0],
       });
 
       setSaving(false);
@@ -153,6 +182,7 @@ export const NewMovementModal = () => {
         accountId: accountId || (accounts[0]?.id || null),
         notes,
         tagIds: selectedTagIds,
+        date: date || new Date().toISOString().split('T')[0],
       });
 
       setSaving(false);
@@ -166,6 +196,7 @@ export const NewMovementModal = () => {
     // Reset and close
     setConcept('');
     setAmount('');
+    setDate(new Date().toISOString().split('T')[0]);
     setCustomConvertedAmount('');
     setNotes('');
     setSubcategoryId('');
@@ -332,6 +363,65 @@ export const NewMovementModal = () => {
               />
             </div>
 
+            {/* Date Selection: Clean & Premium (no outer container box) */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-sm text-primary">event</span>
+                  <span>Fecha del movimiento</span>
+                </label>
+
+                {/* Quick Presets: Hoy / Ayer */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setDate(todayStr)}
+                    className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      date === todayStr
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
+                    }`}
+                  >
+                    Hoy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDate(yesterdayStr)}
+                    className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      date === yesterdayStr
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
+                    }`}
+                  >
+                    Ayer
+                  </button>
+                </div>
+              </div>
+
+              {/* Custom floating DatePicker popup component */}
+              <CustomDatePicker
+                value={date}
+                onChange={(newVal) => setDate(newVal)}
+                maxDate={todayStr}
+              />
+
+              {date && date !== todayStr && (
+                <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 flex items-center justify-between text-xs animate-fade-in">
+                  <div className="flex items-center gap-1.5 text-primary font-medium">
+                    <span className="material-symbols-outlined text-sm">history</span>
+                    <span>Registrando con fecha retroactiva: <strong>{date === yesterdayStr ? 'Ayer' : date}</strong></span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDate(todayStr)}
+                    className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
+                  >
+                    Volver a Hoy
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Account Selector (or Dual Account for Transfer) */}
             {type === 'transfer' ? (
               <div className="space-y-3 pt-1">
@@ -395,8 +485,8 @@ export const NewMovementModal = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Account */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-on-surface">
+                  <div className="flex items-center justify-between mb-1 gap-2 whitespace-nowrap">
+                    <label className="text-xs font-bold text-on-surface truncate">
                       ¿Con qué cuenta o tarjeta?
                     </label>
                     {accounts.length === 0 && (
@@ -406,7 +496,7 @@ export const NewMovementModal = () => {
                           setIsNewMovementModalOpen(false);
                           setIsNewAccountModalOpen(true);
                         }}
-                        className="text-[11px] text-primary hover:underline font-bold"
+                        className="text-[11px] text-primary hover:underline font-bold shrink-0"
                       >
                         + Crear cuenta
                       </button>

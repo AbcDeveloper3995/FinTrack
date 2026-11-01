@@ -43,12 +43,12 @@ export const DashboardView = ({ onNavigate }) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
               {!hasAccounts && (
                 <button
                   type="button"
                   onClick={() => setIsNewAccountModalOpen(true)}
-                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
                 >
                   <span className="material-symbols-outlined text-base">account_balance_wallet</span>
                   <span>Agregar mi primera cuenta</span>
@@ -57,7 +57,7 @@ export const DashboardView = ({ onNavigate }) => {
               <button
                 type="button"
                 onClick={() => setIsNewMovementModalOpen(true)}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md text-label-md font-semibold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-base">add</span>
                 <span>Anotar un movimiento</span>
@@ -249,18 +249,21 @@ export const DashboardView = ({ onNavigate }) => {
                 })}
               </div>
             ) : (
-              <div className="mt-6 p-6 rounded-2xl bg-surface-container-low/70 border border-dashed border-outline-variant flex flex-col items-center justify-center text-center">
-                <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">account_balance_wallet</span>
-                <p className="font-body-md text-body-md font-semibold text-on-surface">No has agregado cuentas aún</p>
-                <p className="text-xs text-on-surface-variant mt-1 max-w-sm">
+              <div className="mt-6 p-6 rounded-2xl bg-surface-container-low/50 dark:bg-surface-container-low/40 border border-dashed border-outline-variant/60 dark:border-surface-container-high flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-2xl bg-primary-fixed/50 dark:bg-primary/20 text-primary flex items-center justify-center mb-3">
+                  <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                </div>
+                <p className="font-body-md text-body-md font-bold text-on-surface">No has agregado cuentas aún</p>
+                <p className="text-xs text-on-surface-variant mt-1.5 max-w-sm leading-relaxed">
                   Agrega tus cuentas de débito, crédito o efectivo para saber exactamente cuánto dinero tienes.
                 </p>
                 <button
                   type="button"
                   onClick={() => setIsNewAccountModalOpen(true)}
-                  className="mt-3 px-4 py-2 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary-container transition-colors cursor-pointer"
+                  className="mt-4 px-4 py-2 bg-primary text-white rounded-xl text-xs font-semibold hover:bg-primary-container transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
-                  + Agregar primera cuenta
+                  <span className="material-symbols-outlined text-base">add</span>
+                  <span>Agregar primera cuenta</span>
                 </button>
               </div>
             )}
