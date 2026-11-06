@@ -3,6 +3,7 @@ import { useFinance } from '../../context/FinanceContext';
 import { EditAccountModal } from '../modals/EditAccountModal';
 import { ConfirmModal } from '../common/ConfirmModal';
 import { BankCard } from './BankCard';
+import { getAccountTypeMeta } from '../../lib/accountTypes';
 
 export const AccountsView = () => {
   const {
@@ -287,6 +288,15 @@ export const AccountsView = () => {
                   <h3 className="text-base sm:text-headline-lg font-bold text-on-surface truncate">
                     {selectedAccount.name}
                   </h3>
+                  {(() => {
+                    const typeMeta = getAccountTypeMeta(selectedAccount.type);
+                    return (
+                      <span className={`px-2 py-0.5 rounded-md font-label-md text-xs font-bold border inline-flex items-center gap-1 ${typeMeta.badgeClass}`}>
+                        <span className="material-symbols-outlined text-[13px]">{typeMeta.icon}</span>
+                        <span>{typeMeta.label}</span>
+                      </span>
+                    );
+                  })()}
                   <span className="hidden sm:inline-block px-2 py-0.5 rounded-full font-label-md text-label-md font-semibold bg-surface-container text-on-surface-variant shrink-0">
                     •••• {selectedAccount.last4 || '0000'}
                   </span>
@@ -294,9 +304,17 @@ export const AccountsView = () => {
                     {selectedAccount.currency || 'MXN'}
                   </span>
                 </div>
-                <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant truncate">
-                  {selectedAccount.institution} • Tipo: {selectedAccount.type}
-                </p>
+                <div className="font-body-md text-xs sm:text-body-md text-on-surface-variant flex items-center gap-2 flex-wrap mt-1">
+                  <span>{selectedAccount.institution}</span>
+                  {selectedAccount.min_balance && (
+                    <>
+                      <span>•</span>
+                      <span className="text-xs">
+                        Saldo mín. deseado: <strong>${Number(selectedAccount.min_balance).toLocaleString('es-MX')} {selectedAccount.currency}</strong>
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 

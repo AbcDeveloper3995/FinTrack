@@ -13,8 +13,8 @@ export const MonthComparisonBanner = ({ kpis }) => {
     comparisonStatus = 'neutral',
   } = kpis;
 
-  // If no transactions in both current and previous months
-  if (monthlyExpenses === 0 && prevMonthExpenses === 0) {
+  // If there is no data from the previous month (first month of usage), omit comparison
+  if (!kpis?.hasPrevMonthData || prevMonthExpenses === 0) {
     return null;
   }
 

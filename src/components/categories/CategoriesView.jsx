@@ -4,6 +4,14 @@ import { supabase } from '../../lib/supabase';
 import { ConfirmModal } from '../common/ConfirmModal';
 import { CustomSelect } from '../common/CustomSelect';
 
+const COLOR_PALETTE_PRESETS = [
+  '#4338ca', '#3b82f6', '#0284c7', '#06b6d4',
+  '#006c4a', '#10b981', '#14b8a6', '#84cc16',
+  '#d97706', '#f97316', '#ef4444', '#dc2626',
+  '#be123c', '#e11d48', '#ec4899', '#a855f7',
+  '#7e22ce', '#6366f1', '#64748b', '#334155'
+];
+
 export const CategoriesView = () => {
   const { categories, tags, transactions, currentUser, refreshFinancialData, showToast } = useFinance();
   
@@ -19,6 +27,7 @@ export const CategoriesView = () => {
   const [catName, setCatName] = useState('');
   const [catType, setCatType] = useState('expense');
   const [catIcon, setCatIcon] = useState('category');
+  const [catColor, setCatColor] = useState('#4338ca');
 
   // Subcategory modal
   const [subModalOpen, setSubModalOpen] = useState(false);
@@ -54,6 +63,7 @@ export const CategoriesView = () => {
     setCatName('');
     setCatType('expense');
     setCatIcon('category');
+    setCatColor('#4338ca');
     setCatModalOpen(true);
   };
 
@@ -62,6 +72,7 @@ export const CategoriesView = () => {
     setCatName(cat.name);
     setCatType(cat.type);
     setCatIcon(cat.icon || 'category');
+    setCatColor(cat.color || (cat.type === 'income' ? '#006c4a' : '#4338ca'));
     setCatModalOpen(true);
   };
 
@@ -78,6 +89,7 @@ export const CategoriesView = () => {
             name: catName.trim(),
             type: catType,
             icon: catIcon,
+            color: catColor,
           })
           .eq('id', editingCategory.id);
         if (error) throw error;
@@ -91,7 +103,7 @@ export const CategoriesView = () => {
               name: catName.trim(),
               type: catType,
               icon: catIcon,
-              color: catType === 'income' ? '#006c4a' : '#4338ca',
+              color: catColor,
             },
           ]);
         if (error) throw error;
@@ -762,6 +774,39 @@ export const CategoriesView = () => {
                   />
                 </div>
 
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-label-md font-label-md text-on-surface-variant">
+                      Color identificador
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] text-on-surface-variant font-mono uppercase">{catColor}</span>
+                      <input
+                        type="color"
+                        value={catColor}
+                        onChange={(e) => setCatColor(e.target.value)}
+                        className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent"
+                        title="Elegir color libremente"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {COLOR_PALETTE_PRESETS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setCatColor(c)}
+                        style={{ backgroundColor: c }}
+                        className={`w-5 h-5 rounded-full border-2 transition-transform cursor-pointer ${
+                          catColor.toLowerCase() === c.toLowerCase()
+                            ? 'scale-125 border-on-surface ring-2 ring-primary/30'
+                            : 'border-transparent hover:scale-110'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-container">
                   <button
                     type="button"
@@ -877,20 +922,32 @@ export const CategoriesView = () => {
                 </div>
 
                 <div>
-                  <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                    Color identificador
-                  </label>
-                  <div className="flex items-center gap-3">
-                    {[
-                      '#4338ca', '#006c4a', '#0284c7', '#7e22ce', '#be123c', '#d97706', '#334155', '#e11d48'
-                    ].map((c) => (
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-label-md font-label-md text-on-surface-variant">
+                      Color identificador
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] text-on-surface-variant font-mono uppercase">{tagColor}</span>
+                      <input
+                        type="color"
+                        value={tagColor}
+                        onChange={(e) => setTagColor(e.target.value)}
+                        className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent"
+                        title="Elegir color libremente"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {COLOR_PALETTE_PRESETS.map((c) => (
                       <button
                         key={c}
                         type="button"
                         onClick={() => setTagColor(c)}
                         style={{ backgroundColor: c }}
-                        className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                          tagColor === c ? 'scale-125 border-on-surface' : 'border-transparent hover:scale-110'
+                        className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
+                          tagColor.toLowerCase() === c.toLowerCase()
+                            ? 'scale-125 border-on-surface ring-2 ring-primary/30'
+                            : 'border-transparent hover:scale-110'
                         }`}
                       />
                     ))}

@@ -1,10 +1,13 @@
 import React from 'react';
+import { getAccountTypeMeta } from '../../lib/accountTypes';
 
 /**
  * Realistic Physical Bank Card (Mastercard style)
  * Features:
  * - Proportional ISO credit card aspect ratio (1.586 : 1)
  * - Custom dark tone based on selected account color
+ * - Specific account type badge (Débito, Crédito, Inversión, Ahorro, Efectivo)
+ * - Minimum balance threshold warning indicator
  * - Realistic EMV Gold Chip with circuit contacts
  * - Contactless NFC symbol
  * - Interlocking Mastercard logo circles
@@ -23,15 +26,21 @@ export const BankCard = ({
   const isUSD = account.currency === 'USD';
   const bal = Number(account.balance) || 0;
   const limit = Number(account.credit_limit) || 0;
+  const minBalance =
+    account.min_balance !== null && account.min_balance !== undefined && account.min_balance !== ''
+      ? Number(account.min_balance)
+      : null;
+  const isBelowMin = !isCredit && minBalance !== null && bal < minBalance;
   const last4 = account.last4 || '8842';
+  const typeMeta = getAccountTypeMeta(account.type);
 
-  // Base hex color chosen by user (e.g. #4338ca, #059669, #dc2626, #d97706, #0284c7)
+  // Base hex color chosen by user
   const baseColor = account.color || '#1e1b4b';
 
   return (
     <div
       onClick={onSelect}
-      className={`group relative w-full aspect-[1.586/1] min-h-[200px] rounded-2xl p-5 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer overflow-hidden border border-white/10 select-none flex flex-col justify-between ${
+      className={`group relative w-full aspect-[1.586/1] min-h-[205px] rounded-2xl p-5 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer overflow-hidden border border-white/10 select-none flex flex-col justify-between ${
         isSelected ? 'ring-4 ring-primary ring-offset-2 ring-offset-background' : ''
       }`}
       style={{
@@ -45,12 +54,14 @@ export const BankCard = ({
       {/* Top Header: Institution, Type Badge & Quick Actions */}
       <div className="flex items-start justify-between relative z-10">
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] sm:text-xs font-semibold tracking-widest uppercase text-white/80 font-mono">
               {account.institution || 'BANCARIA'}
             </span>
-            <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-white/15 text-white tracking-wider uppercase border border-white/10">
-              {isCredit ? 'Crédito' : 'Débito'}
+            {/* Specific Account Type Badge */}
+            <span className="px-2 py-0.5 text-[9px] font-bold rounded bg-white/20 text-white tracking-wider uppercase border border-white/20 flex items-center gap-1 shadow-xs backdrop-blur-xs">
+              <span className="material-symbols-outlined text-[11px]">{typeMeta.icon}</span>
+              <span>{typeMeta.label}</span>
             </span>
           </div>
           <span className="text-sm sm:text-base font-bold text-white tracking-tight mt-0.5 truncate max-w-[160px] sm:max-w-[200px]">
@@ -104,6 +115,17 @@ export const BankCard = ({
         <span className="material-symbols-outlined text-lg sm:text-xl text-white/60 -rotate-90">
           wifi
         </span>
+
+        {/* Minimum Balance Warning Badge if triggered */}
+        {isBelowMin && (
+          <div
+            title={`Saldo actual ($${bal.toLocaleString('es-MX')}) menor al mínimo configurado ($${minBalance.toLocaleString('es-MX')})`}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/30 border border-amber-300/40 text-[10px] font-bold text-amber-200 shadow-sm"
+          >
+            <span className="material-symbols-outlined text-xs">warning</span>
+            <span>Bajo mín. (${minBalance.toLocaleString('es-MX')})</span>
+          </div>
+        )}
       </div>
 
       {/* Embossed Card Number */}

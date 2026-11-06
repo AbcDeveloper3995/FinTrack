@@ -2,6 +2,7 @@ import React from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { MonthComparisonBanner } from '../charts/MonthComparisonBanner';
 import { MonthPeaceOfMindCard } from './MonthPeaceOfMindCard';
+import { getAccountTypeMeta } from '../../lib/accountTypes';
 
 export const DashboardView = ({ onNavigate }) => {
   const {
@@ -213,31 +214,58 @@ export const DashboardView = ({ onNavigate }) => {
                 {accounts.map((acc) => {
                   const bal = Number(acc.balance) || 0;
                   const isCredit = acc.type === 'credito';
+                  const typeMeta = getAccountTypeMeta(acc.type);
+                  const minBal =
+                    acc.min_balance !== null && acc.min_balance !== undefined && acc.min_balance !== ''
+                      ? Number(acc.min_balance)
+                      : null;
+                  const isBelowMin = !isCredit && minBal !== null && bal < minBal;
+
                   return (
                     <div
                       key={acc.id}
-                      className="p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors flex items-center justify-between"
+                      className="p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors flex items-center justify-between gap-3"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div
                           style={{ backgroundColor: acc.color || '#4338ca' }}
-                          className="w-9 h-9 rounded-lg text-white flex items-center justify-center font-bold text-xs uppercase"
+                          className="w-9 h-9 rounded-lg text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-xs"
                         >
                           {acc.institution ? acc.institution.slice(0, 3) : 'FIN'}
                         </div>
-                        <div>
-                          <div className="font-body-md text-body-md font-semibold text-on-surface">
-                            {acc.name}
+                        <div className="min-w-0 flex-1">
+                          <div className="font-body-md text-body-md font-semibold text-on-surface flex items-center gap-1.5 flex-wrap">
+                            <span className="truncate">{acc.name}</span>
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border inline-flex items-center gap-0.5 shrink-0 ${typeMeta.badgeClass}`}
+                            >
+                              <span className="material-symbols-outlined text-[11px]">{typeMeta.icon}</span>
+                              <span>{typeMeta.label}</span>
+                            </span>
                           </div>
-                          <div className="font-label-md text-label-md text-on-surface-variant font-medium">
-                            {acc.last4 ? `•••• ${acc.last4}` : (isCredit ? 'Tarjeta de Crédito' : 'Cuenta / Efectivo')}
+                          <div className="font-label-md text-label-md text-on-surface-variant font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
+                            {acc.last4 && <span>•••• {acc.last4}</span>}
+                            {acc.institution && (
+                              <span className="text-on-surface-variant/70 text-xs">({acc.institution})</span>
+                            )}
+                            {isBelowMin && (
+                              <span
+                                className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1 rounded"
+                                title={`Saldo menor al mínimo configurado ($${minBal.toLocaleString('es-MX')})`}
+                              >
+                                <span className="material-symbols-outlined text-xs">warning</span>
+                                Bajo mín.
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className={`font-body-md text-body-md font-bold tabular-nums ${
-                          isCredit ? 'text-error' : 'text-on-surface'
-                        }`}>
+                      <div className="text-right shrink-0">
+                        <div
+                          className={`font-body-md text-body-md font-bold tabular-nums ${
+                            isCredit ? 'text-error' : 'text-on-surface'
+                          }`}
+                        >
                           {isCredit ? '-' : ''}${bal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                         </div>
                         <div className="font-label-md text-label-md text-on-surface-variant capitalize">

@@ -18,24 +18,25 @@ export const accountService = {
     return data || [];
   },
 
-  async addAccount(userId, { name, institution, type, currency = 'MXN', balance, credit_limit, last4, color }) {
+  async addAccount(userId, { name, institution, type, currency = 'MXN', balance, credit_limit, min_balance, last4, color }) {
     if (!userId) throw new Error('No user authenticated');
+
+    const insertPayload = {
+      user_id: userId,
+      name,
+      institution: institution || 'Bancaria',
+      type,
+      currency: currency || 'MXN',
+      balance: parseFloat(balance) || 0,
+      credit_limit: credit_limit ? parseFloat(credit_limit) : null,
+      min_balance: min_balance !== undefined && min_balance !== '' && min_balance !== null ? parseFloat(min_balance) : null,
+      last4: last4 || null,
+      color: color || '#4338ca',
+    };
 
     const { data, error } = await supabase
       .from('accounts')
-      .insert([
-        {
-          user_id: userId,
-          name,
-          institution: institution || 'Bancaria',
-          type,
-          currency: currency || 'MXN',
-          balance: parseFloat(balance) || 0,
-          credit_limit: credit_limit ? parseFloat(credit_limit) : null,
-          last4: last4 || null,
-          color: color || '#4338ca',
-        },
-      ])
+      .insert([insertPayload])
       .select()
       .single();
 
@@ -43,7 +44,7 @@ export const accountService = {
     return data;
   },
 
-  async updateAccount(userId, id, { name, institution, type, currency, balance, credit_limit, last4, color }) {
+  async updateAccount(userId, id, { name, institution, type, currency, balance, credit_limit, min_balance, last4, color }) {
     if (!userId) throw new Error('No user authenticated');
 
     const updatePayload = {
@@ -53,6 +54,7 @@ export const accountService = {
       currency,
       balance: parseFloat(balance) || 0,
       credit_limit: type === 'credito' && credit_limit ? parseFloat(credit_limit) : null,
+      min_balance: min_balance !== undefined && min_balance !== '' && min_balance !== null ? parseFloat(min_balance) : null,
       last4: last4 ? String(last4).slice(-4) : null,
       color: color || '#4338ca',
       updated_at: new Date().toISOString(),

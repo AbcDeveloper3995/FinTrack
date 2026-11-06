@@ -180,6 +180,16 @@ html.dark textarea {
   border-color: #334155 !important;
 }
 
+html.dark select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark select:hover {
+  border-color: #6366f1 !important;
+  background-color: #1a2540 !important;
+}
+
 html.dark input::placeholder,
 html.dark textarea::placeholder {
   color: #64748b !important;

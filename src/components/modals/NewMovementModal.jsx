@@ -38,11 +38,11 @@ export const NewMovementModal = () => {
       setDate(new Date().toISOString().split('T')[0]);
     }
     if (accounts.length > 0) {
-      if (!accountId || !accounts.find(a => a.id === accountId)) {
+      if (!accountId || !accounts.find((a) => a.id === accountId)) {
         setAccountId(accounts[0].id);
       }
-      if (!toAccountId || toAccountId === accountId || !accounts.find(a => a.id === toAccountId)) {
-        const otherAcc = accounts.find(a => a.id !== (accountId || accounts[0].id));
+      if (!toAccountId || toAccountId === accountId || !accounts.find((a) => a.id === toAccountId)) {
+        const otherAcc = accounts.find((a) => a.id !== (accountId || accounts[0].id));
         if (otherAcc) setToAccountId(otherAcc.id);
       }
     }
@@ -59,7 +59,7 @@ export const NewMovementModal = () => {
       return;
     }
     if (availableCategories.length > 0) {
-      if (!categoryId || !availableCategories.find(c => c.id === categoryId)) {
+      if (!categoryId || !availableCategories.find((c) => c.id === categoryId)) {
         setCategoryId(availableCategories[0].id);
       }
     } else {
@@ -74,7 +74,8 @@ export const NewMovementModal = () => {
   // Transfer accounts & currency conversion helpers
   const fromAccount = accounts.find((a) => a.id === accountId);
   const toAccount = accounts.find((a) => a.id === toAccountId);
-  const isMultiCurrencyTransfer = type === 'transfer' && fromAccount && toAccount && fromAccount.currency !== toAccount.currency;
+  const isMultiCurrencyTransfer =
+    type === 'transfer' && fromAccount && toAccount && fromAccount.currency !== toAccount.currency;
 
   // Auto-calculated converted preview amount
   const parsedAmount = parseFloat(amount) || 0;
@@ -94,109 +95,86 @@ export const NewMovementModal = () => {
   };
 
   const handleQuickAddAmount = (addVal) => {
-    const current = parseFloat(amount) || 0;
-    setAmount((current + addVal).toString());
+    const currentVal = parseFloat(amount) || 0;
+    setAmount((currentVal + addVal).toString());
   };
 
-  // Date helper presets & friendly formatter
   const todayStr = new Date().toISOString().split('T')[0];
-  const yesterdayObj = new Date();
-  yesterdayObj.setDate(yesterdayObj.getDate() - 1);
-  const yesterdayStr = yesterdayObj.toISOString().split('T')[0];
-
-  const formatHumanDate = (dateVal) => {
-    if (!dateVal) return '';
-    if (dateVal === todayStr) return 'Hoy';
-    if (dateVal === yesterdayStr) return 'Ayer';
-    try {
-      const [y, m, d] = dateVal.split('-').map(Number);
-      const dt = new Date(y, m - 1, d);
-      return dt.toLocaleDateString('es-MX', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-      });
-    } catch {
-      return dateVal;
-    }
-  };
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
 
   if (!isNewMovementModalOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!amount || parseFloat(amount) <= 0) {
-      setErrorMsg('Ingresa un monto válido mayor a 0.');
+
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      setErrorMsg('Ingresa un monto válido mayor a 0');
+      return;
+    }
+
+    if (type !== 'transfer' && !concept.trim()) {
+      setErrorMsg('Ingresa un concepto o comercio');
+      return;
+    }
+
+    if (type === 'transfer' && accountId === toAccountId) {
+      setErrorMsg('Selecciona dos cuentas diferentes para transferir');
       return;
     }
 
     setErrorMsg('');
     setSaving(true);
 
+    let res;
     if (type === 'transfer') {
-      if (!accountId || !toAccountId) {
-        setErrorMsg('Selecciona la cuenta de salida y la de llegada.');
-        setSaving(false);
-        return;
-      }
-      if (accountId === toAccountId) {
-        setErrorMsg('La cuenta de salida y llegada no pueden ser la misma.');
-        setSaving(false);
-        return;
-      }
+      const finalDestAmount =
+        isMultiCurrencyTransfer && customConvertedAmount && parseFloat(customConvertedAmount) > 0
+          ? parseFloat(customConvertedAmount)
+          : autoCalculatedDestAmount;
 
-      const transferConcept = concept.trim() || `Paso de dinero: ${fromAccount?.name || 'Origen'} a ${toAccount?.name || 'Destino'}`;
-      const finalDestAmount = customConvertedAmount && parseFloat(customConvertedAmount) > 0
-        ? parseFloat(customConvertedAmount)
-        : autoCalculatedDestAmount;
-
-      const res = await addTransfer({
+      res = await addTransfer({
         fromAccountId: accountId,
-        toAccountId,
-        amount: parsedAmount,
-        convertedAmount: isMultiCurrencyTransfer ? finalDestAmount : null,
-        concept: transferConcept,
-        notes,
-        date: date || new Date().toISOString().split('T')[0],
+        toAccountId: toAccountId,
+        amount: numericAmount,
+        destinationAmount: finalDestAmount,
+        date: date || todayStr,
+        concept: concept.trim() || `Transferencia: ${fromAccount?.name} ➔ ${toAccount?.name}`,
+        notes: notes.trim() || null,
+        tagIds: selectedTagIds,
       });
-
-      setSaving(false);
-      if (res.error) {
-        setErrorMsg('Error al transferir: ' + res.error);
-        return;
-      }
-      showToast('¡Listo! Transferencia guardada correctamente.');
     } else {
-      if (!concept.trim()) {
-        setErrorMsg(type === 'expense' ? '¿En qué lo gastaste? Escribe un concepto.' : '¿De qué es este dinero? Escribe un concepto.');
-        setSaving(false);
-        return;
-      }
-
-      const res = await addTransaction({
-        concept: concept.trim(),
-        amount: parsedAmount,
+      res = await addTransaction({
         type,
+        concept: concept.trim(),
+        amount: numericAmount,
+        date: date || todayStr,
         categoryId: categoryId || null,
         subcategoryId: subcategoryId || null,
-        accountId: accountId || (accounts[0]?.id || null),
-        notes,
+        accountId: accountId || null,
+        notes: notes.trim() || null,
         tagIds: selectedTagIds,
-        date: date || new Date().toISOString().split('T')[0],
       });
-
-      setSaving(false);
-      if (res.error) {
-        setErrorMsg('Error al guardar: ' + res.error);
-        return;
-      }
-      showToast(type === 'expense' ? '¡Gasto guardado con éxito!' : '¡Ingreso guardado con éxito!');
     }
 
-    // Reset and close
-    setConcept('');
+    setSaving(false);
+
+    if (res.error) {
+      setErrorMsg('Error al registrar: ' + res.error);
+      return;
+    }
+
+    showToast(
+      type === 'transfer'
+        ? `Transferencia de $${numericAmount} realizada.`
+        : `${type === 'expense' ? 'Gasto' : 'Ingreso'} de $${numericAmount} registrado.`
+    );
+
+    // Reset fields
     setAmount('');
-    setDate(new Date().toISOString().split('T')[0]);
+    setConcept('');
     setCustomConvertedAmount('');
     setNotes('');
     setSubcategoryId('');
@@ -206,25 +184,21 @@ export const NewMovementModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-on-surface/50 backdrop-blur-sm animate-fade-in">
-      <div className="bg-surface-container-lowest rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-surface-container-high max-h-[92vh] sm:max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-on-surface/50 backdrop-blur-sm animate-fade-in">
+      <div className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-xl sm:max-w-2xl overflow-hidden border border-surface-container-high max-h-[92vh] flex flex-col">
         {/* Color accent line matching type */}
         <div
           className={`h-1.5 transition-colors duration-300 shrink-0 ${
-            type === 'expense'
-              ? 'bg-error'
-              : type === 'income'
-              ? 'bg-secondary'
-              : 'bg-primary'
+            type === 'expense' ? 'bg-error' : type === 'income' ? 'bg-secondary' : 'bg-primary'
           }`}
         />
 
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
               <div
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
                   type === 'expense'
                     ? 'bg-error-container/40 text-error'
                     : type === 'income'
@@ -232,16 +206,16 @@ export const NewMovementModal = () => {
                     : 'bg-primary-fixed text-primary'
                 }`}
               >
-                <span className="material-symbols-outlined text-2xl font-bold">
+                <span className="material-symbols-outlined text-xl sm:text-2xl font-bold">
                   {type === 'expense' ? 'arrow_downward' : type === 'income' ? 'arrow_upward' : 'swap_horiz'}
                 </span>
               </div>
               <div>
-                <h3 className="font-headline-md text-headline-md font-bold text-on-surface">
+                <h3 className="text-base sm:text-headline-md font-bold text-on-surface leading-tight">
                   {type === 'expense' ? 'Anotar un Gasto' : type === 'income' ? 'Anotar un Ingreso' : 'Mover entre Cuentas'}
                 </h3>
-                <p className="text-xs text-on-surface-variant">
-                  {type === 'expense' ? 'Registra lo que pagaste o compraste' : type === 'income' ? 'Registra el dinero que entró' : 'Pasa saldo de una cuenta a otra'}
+                <p className="text-[11px] sm:text-xs text-on-surface-variant">
+                  {type === 'expense' ? 'Registra una salida o compra' : type === 'income' ? 'Registra dinero que entró' : 'Pasa saldo de una cuenta a otra'}
                 </p>
               </div>
             </div>
@@ -255,22 +229,20 @@ export const NewMovementModal = () => {
           </div>
 
           {errorMsg && (
-            <div className="mb-4 p-3 rounded-xl bg-error-container text-on-error-container text-xs sm:text-sm font-medium flex items-center gap-2">
+            <div className="mb-3 p-2.5 rounded-xl bg-error-container text-on-error-container text-xs font-medium flex items-center gap-2">
               <span className="material-symbols-outlined text-base shrink-0">error</span>
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Visual 3-Button Type Switcher */}
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-surface-container-low rounded-2xl">
+            <div className="grid grid-cols-3 gap-1 p-1 bg-surface-container-low rounded-xl">
               <button
                 type="button"
                 onClick={() => setType('expense')}
-                className={`py-2 sm:py-2.5 rounded-xl font-body-md text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
-                  type === 'expense'
-                    ? 'bg-error text-white shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                className={`py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
+                  type === 'expense' ? 'bg-error text-white shadow-xs' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
                 <span className="material-symbols-outlined text-base">remove_circle</span>
@@ -279,10 +251,8 @@ export const NewMovementModal = () => {
               <button
                 type="button"
                 onClick={() => setType('income')}
-                className={`py-2 sm:py-2.5 rounded-xl font-body-md text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
-                  type === 'income'
-                    ? 'bg-secondary text-white shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                className={`py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
+                  type === 'income' ? 'bg-secondary text-white shadow-xs' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
                 <span className="material-symbols-outlined text-base">add_circle</span>
@@ -291,10 +261,8 @@ export const NewMovementModal = () => {
               <button
                 type="button"
                 onClick={() => setType('transfer')}
-                className={`py-2 sm:py-2.5 rounded-xl font-body-md text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
-                  type === 'transfer'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                className={`py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold ${
+                  type === 'transfer' ? 'bg-primary text-white shadow-xs' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
                 <span className="material-symbols-outlined text-base">swap_horiz</span>
@@ -302,15 +270,14 @@ export const NewMovementModal = () => {
               </button>
             </div>
 
-            {/* Giant Hero Amount Input */}
-            <div className="bg-surface-container-low/60 rounded-2xl p-4 border border-surface-container flex flex-col items-center justify-center">
-              <label className="text-[11px] uppercase tracking-wider font-bold text-on-surface-variant mb-1">
-                ¿Cuánto fue? ({fromAccount?.currency || 'MXN'})
-              </label>
-              <div className="flex items-center justify-center w-full">
-                <span className={`text-2xl sm:text-3xl font-extrabold mr-1 ${
-                  type === 'expense' ? 'text-error' : type === 'income' ? 'text-secondary' : 'text-primary'
-                }`}>
+            {/* Compact Amount Input with Quick Add Chips */}
+            <div className="bg-surface-container-low/60 dark:bg-slate-900/40 rounded-xl p-2.5 sm:p-3 border border-surface-container flex flex-col sm:flex-row items-center justify-between gap-2">
+              <div className="flex items-center">
+                <span
+                  className={`text-xl sm:text-2xl font-extrabold mr-1 ${
+                    type === 'expense' ? 'text-error' : type === 'income' ? 'text-secondary' : 'text-primary'
+                  }`}
+                >
                   {type === 'expense' ? '-' : type === 'income' ? '+' : ''}$
                 </span>
                 <input
@@ -322,19 +289,21 @@ export const NewMovementModal = () => {
                   placeholder="0.00"
                   autoFocus
                   required
-                  className="w-48 sm:w-56 text-center text-3xl sm:text-4xl font-extrabold bg-transparent text-on-surface outline-none tabular-nums placeholder:text-on-surface-variant/40"
+                  className="w-36 sm:w-44 text-2xl sm:text-3xl font-extrabold bg-transparent text-on-surface outline-none tabular-nums placeholder:text-on-surface-variant/40"
                 />
+                <span className="text-xs text-on-surface-variant font-bold ml-1">
+                  {fromAccount?.currency || 'MXN'}
+                </span>
               </div>
 
-              {/* Quick Add Amount Chips */}
-              <div className="flex items-center gap-1.5 mt-3 flex-wrap justify-center">
-                <span className="text-[10px] text-on-surface-variant mr-1">Rápido:</span>
+              {/* Quick Add Chips */}
+              <div className="flex items-center gap-1 flex-wrap justify-center">
                 {[50, 100, 200, 500, 1000].map((val) => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => handleQuickAddAmount(val)}
-                    className="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold tabular-nums transition-colors cursor-pointer border border-outline-variant/30 active:scale-95"
+                    className="px-2 py-0.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-[11px] font-semibold tabular-nums transition-colors cursor-pointer border border-outline-variant/30 active:scale-95"
                   >
                     +${val}
                   </button>
@@ -342,152 +311,34 @@ export const NewMovementModal = () => {
               </div>
             </div>
 
-            {/* Concept / Description */}
-            <div>
-              <label className="block text-xs font-bold text-on-surface mb-1">
-                {type === 'transfer' ? '¿Para qué es esta transferencia?' : type === 'expense' ? '¿En qué lo gastaste?' : '¿De qué es este ingreso?'}
-              </label>
-              <input
-                type="text"
-                value={concept}
-                onChange={(e) => setConcept(e.target.value)}
-                placeholder={
-                  type === 'transfer'
-                    ? 'ej. Pago de tarjeta, Guardar en ahorro...'
-                    : type === 'expense'
-                    ? 'ej. Oxxo, Tacos, Súper, Netflix...'
-                    : 'ej. Nómina, Venta, Pago que me debían...'
-                }
-                required={type !== 'transfer'}
-                className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-xl text-sm border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-              />
-            </div>
-
-            {/* Date Selection: Clean & Premium (no outer container box) */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-sm text-primary">event</span>
-                  <span>Fecha del movimiento</span>
-                </label>
-
-                {/* Quick Presets: Hoy / Ayer */}
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setDate(todayStr)}
-                    className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      date === todayStr
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
-                    }`}
-                  >
-                    Hoy
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDate(yesterdayStr)}
-                    className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      date === yesterdayStr
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
-                    }`}
-                  >
-                    Ayer
-                  </button>
-                </div>
-              </div>
-
-              {/* Custom floating DatePicker popup component */}
-              <CustomDatePicker
-                value={date}
-                onChange={(newVal) => setDate(newVal)}
-                maxDate={todayStr}
-              />
-
-              {date && date !== todayStr && (
-                <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 flex items-center justify-between text-xs animate-fade-in">
-                  <div className="flex items-center gap-1.5 text-primary font-medium">
-                    <span className="material-symbols-outlined text-sm">history</span>
-                    <span>Registrando con fecha retroactiva: <strong>{date === yesterdayStr ? 'Ayer' : date}</strong></span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setDate(todayStr)}
-                    className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
-                  >
-                    Volver a Hoy
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Account Selector (or Dual Account for Transfer) */}
-            {type === 'transfer' ? (
-              <div className="space-y-3 pt-1">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-on-surface mb-1 flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-error"></span>
-                      <span>De esta cuenta (sale):</span>
-                    </label>
-                    <CustomSelect
-                      value={accountId}
-                      onChange={(val) => setAccountId(val)}
-                      options={accounts.map((acc) => ({
-                        value: acc.id,
-                        label: `${acc.name} - Saldo: $${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`,
-                        color: acc.color,
-                      }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-on-surface mb-1 flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-secondary"></span>
-                      <span>A esta cuenta (entra):</span>
-                    </label>
-                    <CustomSelect
-                      value={toAccountId}
-                      onChange={(val) => setToAccountId(val)}
-                      options={accounts.map((acc) => ({
-                        value: acc.id,
-                        label: acc.id === accountId ? `${acc.name} (Misma cuenta)` : acc.name,
-                        disabled: acc.id === accountId,
-                        color: acc.color,
-                      }))}
-                    />
-                  </div>
+            {/* Main Fields in a Responsive 2-Column Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Left Column: Concept / Origin */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-on-surface mb-1">
+                    {type === 'transfer' ? 'Motivo de la transferencia' : 'Concepto o Comercio'}
+                  </label>
+                  <input
+                    type="text"
+                    value={concept}
+                    onChange={(e) => setConcept(e.target.value)}
+                    placeholder={
+                      type === 'transfer'
+                        ? 'ej. Pago de tarjeta, Ahorro...'
+                        : type === 'expense'
+                        ? 'ej. Súper, Netflix, Gasolina...'
+                        : 'ej. Nómina, Venta, Honorarios...'
+                    }
+                    required={type !== 'transfer'}
+                    className="w-full h-10 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/60 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
+                  />
                 </div>
 
-                {isMultiCurrencyTransfer && (
-                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary space-y-1.5">
-                    <div className="flex items-center justify-between font-bold">
-                      <span>Conversión de divisa ({fromAccount?.currency} ➔ {toAccount?.currency})</span>
-                      <span>1 USD ≈ ${exchangeRate.toFixed(2)} MXN</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>Recibe aprox:</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={customConvertedAmount}
-                        placeholder={autoCalculatedDestAmount > 0 ? autoCalculatedDestAmount.toFixed(2) : '0.00'}
-                        onChange={(e) => setCustomConvertedAmount(e.target.value)}
-                        className="w-28 h-8 px-2 bg-surface-container-lowest rounded-lg border border-primary/40 text-on-surface font-bold text-xs"
-                      />
-                      <span>{toAccount?.currency}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Account */}
                 <div>
                   <div className="flex items-center justify-between mb-1 gap-2 whitespace-nowrap">
                     <label className="text-xs font-bold text-on-surface truncate">
-                      ¿Con qué cuenta o tarjeta?
+                      {type === 'transfer' ? 'Cuenta Origen (sale):' : 'Cuenta / Tarjeta'}
                     </label>
                     {accounts.length === 0 && (
                       <button
@@ -505,92 +356,189 @@ export const NewMovementModal = () => {
                   <CustomSelect
                     value={accountId}
                     onChange={(val) => setAccountId(val)}
-                    options={accounts.length > 0 ? accounts.map((acc) => ({
-                      value: acc.id,
-                      label: `${acc.name} ($${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 0 })} ${acc.currency})`,
-                      color: acc.color,
-                    })) : [{ value: '', label: 'Efectivo / General' }]}
+                    options={
+                      accounts.length > 0
+                        ? accounts.map((acc) => ({
+                            value: acc.id,
+                            label: `${acc.name} ($${Number(acc.balance).toLocaleString('es-MX', { minimumFractionDigits: 0 })} ${acc.currency})`,
+                            color: acc.color,
+                          }))
+                        : [{ value: '', label: 'Efectivo / General' }]
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Right Column: Date / Category or Destination */}
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-on-surface flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm text-primary">event</span>
+                      <span>Fecha</span>
+                    </label>
+
+                    {/* Quick Presets: Hoy / Ayer */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setDate(todayStr)}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                          date === todayStr
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
+                        }`}
+                      >
+                        Hoy
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDate(yesterdayStr)}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                          date === yesterdayStr
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
+                        }`}
+                      >
+                        Ayer
+                      </button>
+                    </div>
+                  </div>
+
+                  <CustomDatePicker
+                    value={date}
+                    onChange={(newVal) => setDate(newVal)}
+                    maxDate={todayStr}
                   />
                 </div>
 
-                {/* Category */}
-                <div>
-                  <label className="block text-xs font-bold text-on-surface mb-1">
-                    Categoría
-                  </label>
-                  <CustomSelect
-                    value={categoryId}
-                    onChange={(val) => {
-                      setCategoryId(val);
-                      setSubcategoryId('');
-                    }}
-                    options={availableCategories.length > 0 ? availableCategories.map((cat) => ({
-                      value: cat.id,
-                      label: cat.name,
-                      icon: cat.icon || 'category',
-                    })) : [{ value: '', label: 'General' }]}
+                {type === 'transfer' ? (
+                  <div>
+                    <label className="block text-xs font-bold text-on-surface mb-1">
+                      Cuenta Destino (entra):
+                    </label>
+                    <CustomSelect
+                      value={toAccountId}
+                      onChange={(val) => setToAccountId(val)}
+                      options={accounts.map((acc) => ({
+                        value: acc.id,
+                        label: acc.id === accountId ? `${acc.name} (Misma cuenta)` : acc.name,
+                        disabled: acc.id === accountId,
+                        color: acc.color,
+                      }))}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs font-bold text-on-surface mb-1">
+                      Categoría
+                    </label>
+                    <CustomSelect
+                      value={categoryId}
+                      onChange={(val) => {
+                        setCategoryId(val);
+                        setSubcategoryId('');
+                      }}
+                      options={
+                        availableCategories.length > 0
+                          ? availableCategories.map((cat) => ({
+                              value: cat.id,
+                              label: cat.name,
+                              icon: cat.icon || 'category',
+                              color: cat.color,
+                            }))
+                          : [{ value: '', label: 'General' }]
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Currency conversion preview if multi-currency transfer */}
+            {isMultiCurrencyTransfer && (
+              <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary flex items-center justify-between gap-2 flex-wrap">
+                <div className="font-bold">
+                  Conversión ({fromAccount?.currency} ➔ {toAccount?.currency}): 1 USD ≈ ${exchangeRate.toFixed(2)} MXN
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span>Recibe:</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={customConvertedAmount}
+                    placeholder={autoCalculatedDestAmount > 0 ? autoCalculatedDestAmount.toFixed(2) : '0.00'}
+                    onChange={(e) => setCustomConvertedAmount(e.target.value)}
+                    className="w-24 h-7 px-2 bg-surface-container-lowest rounded-lg border border-primary/40 text-on-surface font-bold text-xs"
                   />
+                  <span>{toAccount?.currency}</span>
                 </div>
               </div>
             )}
 
-            {/* Toggle for optional extra details (keeps modal super clean for everyday use) */}
-            <div className="pt-1">
+            {/* Optional details expandable: Subcategory, Notes, Tags */}
+            <div className="pt-0.5">
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer py-1"
+                className="flex items-center gap-1 text-xs font-bold text-primary hover:underline cursor-pointer py-0.5"
               >
-                <span className="material-symbols-outlined text-base">
+                <span className="material-symbols-outlined text-sm">
                   {showAdvanced ? 'expand_less' : 'tune'}
                 </span>
-                <span>{showAdvanced ? 'Ocultar detalles opcionales' : '+ Agregar nota, etiqueta o subcategoría (opcional)'}</span>
+                <span>
+                  {showAdvanced
+                    ? 'Ocultar detalles opcionales'
+                    : '+ Subcategoría, nota o etiquetas (#)'}
+                </span>
               </button>
 
               {showAdvanced && (
-                <div className="mt-3 p-3.5 bg-surface-container-low rounded-2xl border border-surface-container space-y-3 animate-fade-in">
-                  {/* Subcategory if available */}
-                  {type !== 'transfer' && availableSubcategories.length > 0 && (
-                    <div>
+                <div className="mt-2 p-3 bg-surface-container-low rounded-xl border border-surface-container space-y-2.5 animate-fade-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Subcategory */}
+                    {type !== 'transfer' && availableSubcategories.length > 0 && (
+                      <div>
+                        <label className="block text-xs font-medium text-on-surface-variant mb-1">
+                          Subcategoría
+                        </label>
+                        <CustomSelect
+                          value={subcategoryId}
+                          onChange={(val) => setSubcategoryId(val)}
+                          placeholder="-- Sin subcategoría --"
+                          options={[
+                            { value: '', label: '-- Sin subcategoría --' },
+                            ...availableSubcategories.map((sub) => ({
+                              value: sub.id,
+                              label: sub.name,
+                            })),
+                          ]}
+                        />
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    <div className={type === 'transfer' || availableSubcategories.length === 0 ? 'sm:col-span-2' : ''}>
                       <label className="block text-xs font-medium text-on-surface-variant mb-1">
-                        Subcategoría
+                        Nota o comentario personal
                       </label>
-                      <CustomSelect
-                        value={subcategoryId}
-                        onChange={(val) => setSubcategoryId(val)}
-                        placeholder="-- Sin subcategoría --"
-                        options={[
-                          { value: '', label: '-- Sin subcategoría --' },
-                          ...availableSubcategories.map((sub) => ({
-                            value: sub.id,
-                            label: sub.name,
-                          })),
-                        ]}
+                      <input
+                        type="text"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="ej. Factura #12, compra compartida..."
+                        className="w-full h-8 px-2.5 bg-surface-container-lowest text-on-surface rounded-lg text-xs border border-outline-variant/60 focus:border-primary outline-none"
                       />
                     </div>
-                  )}
-
-                  {/* Notes */}
-                  <div>
-                    <label className="block text-xs font-medium text-on-surface-variant mb-1">
-                      Nota o comentario personal
-                    </label>
-                    <input
-                      type="text"
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="ej. Pagado a medias con Carlos, factura #12..."
-                      className="w-full h-9 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-xs border border-outline-variant/60 focus:border-primary outline-none"
-                    />
                   </div>
 
                   {/* Tags */}
                   {tags.length > 0 && (
                     <div>
-                      <label className="block text-xs font-medium text-on-surface-variant mb-1.5">
+                      <label className="block text-xs font-medium text-on-surface-variant mb-1">
                         Etiquetas (#)
                       </label>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1">
                         {tags.map((t) => {
                           const isSelected = selectedTagIds.includes(t.id);
                           return (
@@ -600,10 +548,10 @@ export const NewMovementModal = () => {
                               onClick={() => toggleTag(t.id)}
                               style={{
                                 borderColor: t.color || '#4338ca',
-                                backgroundColor: isSelected ? (t.color || '#4338ca') : 'transparent',
+                                backgroundColor: isSelected ? t.color || '#4338ca' : 'transparent',
                                 color: isSelected ? '#ffffff' : 'inherit',
                               }}
-                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${
                                 isSelected ? 'shadow-xs' : 'text-on-surface hover:bg-surface-container'
                               }`}
                             >
@@ -619,11 +567,11 @@ export const NewMovementModal = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-container">
+            <div className="flex items-center justify-end gap-2 pt-2.5 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setIsNewMovementModalOpen(false)}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
                 disabled={saving}
               >
                 Cancelar
@@ -631,7 +579,7 @@ export const NewMovementModal = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className={`flex-1 sm:flex-initial px-6 py-2.5 rounded-xl text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                className={`px-5 py-2 rounded-xl text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'expense'
                     ? 'bg-error hover:bg-red-700'
                     : type === 'income'
@@ -639,8 +587,18 @@ export const NewMovementModal = () => {
                     : 'bg-primary hover:bg-primary-container'
                 }`}
               >
-                {saving && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
-                <span>{saving ? 'Guardando...' : type === 'expense' ? 'Guardar Gasto' : type === 'income' ? 'Guardar Ingreso' : 'Guardar Transferencia'}</span>
+                {saving && (
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                <span>
+                  {saving
+                    ? 'Guardando...'
+                    : type === 'expense'
+                    ? 'Guardar Gasto'
+                    : type === 'income'
+                    ? 'Guardar Ingreso'
+                    : 'Guardar Transferencia'}
+                </span>
               </button>
             </div>
           </form>

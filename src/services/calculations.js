@@ -107,20 +107,25 @@ export const calculatePeriodMetrics = ({
   const savingsRate = monthlyIncome > 0 ? Number(((netBalance / monthlyIncome) * 100).toFixed(1)) : 0;
   const prevSavingsRate = prevMonthIncome > 0 ? Number(((prevNetBalance / prevMonthIncome) * 100).toFixed(1)) : 0;
 
-  // Expense comparison vs previous month
-  const expenseDifference = monthlyExpenses - prevMonthExpenses;
-  const expenseChangePct = prevMonthExpenses > 0
+  // Check if there is actual historical data from the previous month
+  const hasPrevMonthData = prevMonthExpenses > 0 || prevMonthIncome > 0;
+
+  // Expense comparison vs previous month (suppressed if first month)
+  const expenseDifference = hasPrevMonthData ? monthlyExpenses - prevMonthExpenses : 0;
+  const expenseChangePct = hasPrevMonthData && prevMonthExpenses > 0
     ? Number(((expenseDifference / prevMonthExpenses) * 100).toFixed(1))
-    : (monthlyExpenses > 0 ? 100 : 0);
+    : 0;
 
-  const savingsDifference = netBalance - prevNetBalance;
+  const savingsDifference = hasPrevMonthData ? netBalance - prevNetBalance : 0;
 
-  let comparisonStatus = 'neutral';
-  if (prevMonthExpenses > 0 || monthlyExpenses > 0) {
+  let comparisonStatus = 'first_month';
+  if (hasPrevMonthData) {
     if (expenseDifference < 0) {
       comparisonStatus = 'saved_more';
     } else if (expenseDifference > 0) {
       comparisonStatus = 'spent_more';
+    } else {
+      comparisonStatus = 'neutral';
     }
   }
 
@@ -197,9 +202,33 @@ export const calculatePeriodMetrics = ({
       }
     });
 
+  // Minimum Balance alerts
+  accounts.forEach((acc) => {
+    if (
+      acc.type !== 'credito' &&
+      acc.min_balance !== null &&
+      acc.min_balance !== undefined &&
+      acc.min_balance !== ''
+    ) {
+      const minVal = Number(acc.min_balance);
+      const bal = Number(acc.balance) || 0;
+      if (bal < minVal) {
+        smartNotifications.push({
+          id: `min-balance-${acc.id}`,
+          type: 'warning',
+          title: `Saldo bajo en ${acc.name}`,
+          message: `El saldo actual ($${bal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}) está por debajo de tu saldo mínimo fijado ($${minVal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}).`,
+          time: 'Alerta de cuenta',
+          icon: 'warning',
+        });
+      }
+    }
+  });
+
   const kpis = {
     netWorth,
     netWorthGrowth: 0.0,
+    hasPrevMonthData,
     monthlyIncome,
     prevMonthIncome,
     monthlyExpenses,

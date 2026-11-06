@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { EditMovementModal } from '../modals/EditMovementModal';
 import { ConfirmModal } from '../common/ConfirmModal';
 import { CustomSelect } from '../common/CustomSelect';
+import { Pagination } from '../common/Pagination';
 import { exportMovementsToCSV } from '../../services/exportService';
 
 export const MovementsView = () => {
@@ -23,12 +24,19 @@ export const MovementsView = () => {
   const [filterTag, setFilterTag] = useState('all');
   const [selectedIds, setSelectedIds] = useState([]);
   const [movementToEdit, setMovementToEdit] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
   const [deleteModalState, setDeleteModalState] = useState({
     isOpen: false,
     movement: null,
     isBulk: false,
     isLoading: false,
   });
+
+  // Reset to page 1 when any filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType, filterCategory, filterTag]);
 
   // Filter transactions
   const filtered = transactions.filter((m) => {
@@ -51,6 +59,9 @@ export const MovementsView = () => {
     return true;
   });
 
+  // Paginated slice
+  const paginatedMovements = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -58,10 +69,12 @@ export const MovementsView = () => {
   };
 
   const selectAll = () => {
-    if (selectedIds.length === filtered.length) {
-      setSelectedIds([]);
+    const pageIds = paginatedMovements.map((m) => m.id);
+    const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+    if (allPageSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
     } else {
-      setSelectedIds(filtered.map((m) => m.id));
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
     }
   };
 
@@ -341,14 +354,18 @@ export const MovementsView = () => {
       {/* Primary Transactions Table */}
       <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-high/60 overflow-hidden flex flex-col">
         {filtered.length > 0 ? (
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse">
+          <>
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
                   <th className="py-3 px-4 w-12 text-center">
                     <input
                       type="checkbox"
-                      checked={selectedIds.length > 0 && selectedIds.length === filtered.length}
+                      checked={
+                        paginatedMovements.length > 0 &&
+                        paginatedMovements.every((m) => selectedIds.includes(m.id))
+                      }
                       onChange={selectAll}
                       className="w-4 h-4 rounded bg-surface-container text-primary focus:ring-0 cursor-pointer"
                     />
@@ -364,7 +381,7 @@ export const MovementsView = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
-                {filtered.map((m) => {
+                {paginatedMovements.map((m) => {
                   const isSelected = selectedIds.includes(m.id);
                   return (
                     <tr
@@ -492,7 +509,25 @@ export const MovementsView = () => {
               </tbody>
             </table>
           </div>
-        ) : (
+
+          {/* Pagination Controls */}
+          {filtered.length > 0 && (
+            <div className="p-4 bg-surface-container-lowest">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={filtered.length}
+                pageSize={pageSize}
+                pageSizeOptions={[10, 15, 25, 50]}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          )}
+        </>
+      ) : (
           <div className="py-16 flex flex-col items-center justify-center text-center p-6">
             <div className="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-3">
               <span className="material-symbols-outlined text-3xl">receipt_long</span>

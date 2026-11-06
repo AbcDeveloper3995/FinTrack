@@ -3,7 +3,7 @@ import { useFinance } from '../../context/FinanceContext';
 import { CustomSelect } from '../common/CustomSelect';
 
 export const NewAccountModal = () => {
-  const { isNewAccountModalOpen, setIsNewAccountModalOpen, addAccount, exchangeRate, showToast } = useFinance();
+  const { isNewAccountModalOpen, setIsNewAccountModalOpen, addAccount, showToast } = useFinance();
 
   const [name, setName] = useState('');
   const [institution, setInstitution] = useState('');
@@ -11,6 +11,7 @@ export const NewAccountModal = () => {
   const [currency, setCurrency] = useState('MXN'); // 'MXN' | 'USD'
   const [balance, setBalance] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
+  const [minBalance, setMinBalance] = useState('');
   const [last4, setLast4] = useState('');
   const [color, setColor] = useState('#4338ca');
   const [saving, setSaving] = useState(false);
@@ -26,12 +27,13 @@ export const NewAccountModal = () => {
     setSaving(true);
 
     const res = await addAccount({
-      name,
-      institution: institution || 'Bancaria',
+      name: name.trim(),
+      institution: institution.trim() || 'Bancaria',
       type,
       currency,
-      balance: balance || 0,
-      credit_limit: type === 'credito' ? creditLimit : null,
+      balance: balance === '' ? 0 : balance,
+      credit_limit: type === 'credito' && creditLimit !== '' ? creditLimit : null,
+      min_balance: type !== 'credito' && minBalance !== '' ? minBalance : null,
       last4: last4.trim() ? last4.trim().slice(-4) : null,
       color,
     });
@@ -43,57 +45,58 @@ export const NewAccountModal = () => {
       return;
     }
 
-    showToast(`Cuenta "${name}" agregada correctamente.`);
+    showToast(`Cuenta "${name.trim()}" agregada correctamente.`);
     setName('');
     setInstitution('');
     setBalance('');
     setCreditLimit('');
+    setMinBalance('');
     setLast4('');
     setCurrency('MXN');
     setIsNewAccountModalOpen(false);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-surface-container-high">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-on-surface/40 backdrop-blur-sm animate-fade-in">
+      <div className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-surface-container-high max-h-[92vh] flex flex-col">
         {/* Header Ribbon */}
-        <div className="h-1.5 bg-gradient-to-r from-primary via-primary-container to-secondary"></div>
+        <div className="h-1.5 bg-gradient-to-r from-primary via-primary-container to-secondary shrink-0"></div>
 
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-5">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-primary-container/10 text-primary flex items-center justify-center">
-                <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary-container/10 text-primary flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
               </div>
               <div>
-                <h3 className="font-headline-md text-headline-md font-bold text-on-surface">
+                <h3 className="font-headline-md text-base sm:text-headline-md font-bold text-on-surface">
                   Registrar Nueva Cuenta
                 </h3>
                 <p className="text-xs text-on-surface-variant">
-                  Agrega cuentas bancarias, tarjetas o efectivo en MXN o USD.
+                  Agrega cuentas bancarias, tarjetas, efectivo o inversiones.
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setIsNewAccountModalOpen(false)}
-              className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition-colors"
+              className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
           </div>
 
           {errorMsg && (
-            <div className="mb-4 p-3 rounded-lg bg-error-container text-on-error-container text-sm font-medium">
+            <div className="mb-3 p-2.5 rounded-lg bg-error-container text-on-error-container text-xs sm:text-sm font-medium">
               {errorMsg}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             {/* Quick Bank Presets */}
             <div>
-              <label className="block text-xs font-bold text-on-surface mb-1.5">
-                Bancos y cuentas populares (un clic para autocompletar)
+              <label className="block text-xs font-bold text-on-surface mb-1">
+                Bancos y cuentas populares
               </label>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {[
@@ -113,7 +116,7 @@ export const NewAccountModal = () => {
                       setColor(b.color);
                       setType(b.type);
                     }}
-                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="px-2 py-0.5 rounded-lg text-xs font-semibold bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }}></span>
                     <span>{b.label}</span>
@@ -122,21 +125,21 @@ export const NewAccountModal = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                Nombre de la cuenta
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="ej. BBVA Nómina, Nu Moradita, Efectivo billetera..."
-                required
-                className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-              />
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                  Nombre de la cuenta
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="ej. BBVA Nómina, Efectivo..."
+                  required
+                  className="w-full h-10 px-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
+                />
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                   Institución o Emisor
@@ -145,11 +148,13 @@ export const NewAccountModal = () => {
                   type="text"
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
-                  placeholder="ej. BBVA, Nu, Santander, Efectivo"
-                  className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none"
+                  placeholder="ej. BBVA, Nu, Efectivo"
+                  className="w-full h-10 px-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
                 />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                   Tipo de Cuenta
@@ -167,54 +172,45 @@ export const NewAccountModal = () => {
                   placeholder="Selecciona tipo de cuenta"
                 />
               </div>
-            </div>
 
-            {/* Currency Selector */}
-            <div>
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                Moneda de la Cuenta
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setCurrency('MXN')}
-                  className={`py-2.5 px-4 rounded-xl border text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
-                    currency === 'MXN'
-                      ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20'
-                      : 'border-outline-variant/60 bg-surface-container-lowest text-on-surface hover:bg-surface-container'
-                  }`}
-                >
-                  <span>🇲🇽 Pesos Mexicanos (MXN)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrency('USD')}
-                  className={`py-2.5 px-4 rounded-xl border text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
-                    currency === 'USD'
-                      ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20'
-                      : 'border-outline-variant/60 bg-surface-container-lowest text-on-surface hover:bg-surface-container'
-                  }`}
-                >
-                  <span>🇺🇸 Dólares (USD)</span>
-                </button>
+              <div>
+                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                  Moneda
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCurrency('MXN')}
+                    className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      currency === 'MXN'
+                        ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20'
+                        : 'border-outline-variant/60 bg-surface-container-lowest text-on-surface hover:bg-surface-container'
+                    }`}
+                  >
+                    <span>🇲🇽 MXN</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrency('USD')}
+                    className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      currency === 'USD'
+                        ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20'
+                        : 'border-outline-variant/60 bg-surface-container-lowest text-on-surface hover:bg-surface-container'
+                    }`}
+                  >
+                    <span>🇺🇸 USD</span>
+                  </button>
+                </div>
               </div>
-              {currency === 'USD' && (
-                <p className="text-xs text-primary font-medium mt-1.5 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">currency_exchange</span>
-                  <span>
-                    Conversión en vivo: 1 USD ≈ ${exchangeRate.toFixed(2)} MXN
-                  </span>
-                </p>
-              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
                   {type === 'credito' ? `Saldo Deudor (${currency})` : `Saldo Actual (${currency})`}
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-2.5 text-on-surface-variant font-bold">
+                  <span className="absolute left-3 top-2 text-on-surface-variant font-bold text-sm">
                     {currency === 'USD' ? 'US$' : '$'}
                   </span>
                   <input
@@ -224,7 +220,7 @@ export const NewAccountModal = () => {
                     onChange={(e) => setBalance(e.target.value)}
                     placeholder="0.00"
                     required
-                    className="w-full h-11 pl-10 pr-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none"
+                    className="w-full h-10 pl-9 pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
                   />
                 </div>
               </div>
@@ -235,7 +231,7 @@ export const NewAccountModal = () => {
                     Límite de Crédito ({currency})
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-2.5 text-on-surface-variant font-bold">
+                    <span className="absolute left-3 top-2 text-on-surface-variant font-bold text-sm">
                       {currency === 'USD' ? 'US$' : '$'}
                     </span>
                     <input
@@ -244,53 +240,74 @@ export const NewAccountModal = () => {
                       value={creditLimit}
                       onChange={(e) => setCreditLimit(e.target.value)}
                       placeholder="0.00"
-                      className="w-full h-11 pl-10 pr-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none"
+                      className="w-full h-10 pl-9 pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
                     />
                   </div>
                 </div>
               ) : (
                 <div>
                   <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                    Últimos 4 dígitos <span className="text-xs text-on-surface-variant/70 font-normal">(opcional)</span>
+                    Saldo Mínimo Alerta <span className="text-[11px] text-on-surface-variant/70 font-normal">(opcional)</span>
                   </label>
-                  <input
-                    type="text"
-                    maxLength={4}
-                    value={last4}
-                    onChange={(e) => setLast4(e.target.value)}
-                    placeholder="ej. 4829"
-                    className="w-full h-11 px-3.5 bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md border border-outline-variant/60 focus:border-primary outline-none"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-on-surface-variant font-bold text-sm">
+                      {currency === 'USD' ? 'US$' : '$'}
+                    </span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={minBalance}
+                      onChange={(e) => setMinBalance(e.target.value)}
+                      placeholder="ej. 1000.00"
+                      className="w-full h-10 pl-9 pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
+                    />
+                  </div>
                 </div>
               )}
             </div>
 
-            <div>
-              <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                Color identificador
-              </label>
-              <div className="flex items-center gap-3">
-                {[
-                  '#4338ca', '#006c4a', '#0284c7', '#7e22ce', '#be123c', '#d97706', '#334155'
-                ].map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    style={{ backgroundColor: c }}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                      color === c ? 'scale-125 border-on-surface' : 'border-transparent hover:scale-110'
-                    }`}
-                  />
-                ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+              <div>
+                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                  Últimos 4 dígitos <span className="text-[11px] text-on-surface-variant/70 font-normal">(tarjetas)</span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  value={last4}
+                  onChange={(e) => setLast4(e.target.value)}
+                  placeholder="ej. 4829"
+                  className="w-full h-10 px-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
+                  Color de la tarjeta
+                </label>
+                <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                  {[
+                    '#4338ca', '#006c4a', '#0284c7', '#7e22ce', '#be123c', '#d97706', '#334155'
+                  ].map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setColor(c)}
+                      style={{ backgroundColor: c }}
+                      className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
+                        color === c ? 'scale-125 border-on-surface ring-2 ring-primary/30' : 'border-transparent hover:scale-110'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface-container">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-container">
               <button
                 type="button"
                 onClick={() => setIsNewAccountModalOpen(false)}
-                className="px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-body-md font-medium transition-colors"
+                className="px-4 py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-sm font-medium transition-colors cursor-pointer"
                 disabled={saving}
               >
                 Cancelar
@@ -298,7 +315,7 @@ export const NewAccountModal = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold shadow-md hover:shadow transition-all flex items-center gap-2"
+                className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary text-sm font-semibold shadow-md hover:shadow transition-all flex items-center gap-2 cursor-pointer"
               >
                 {saving && <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>}
                 <span>{saving ? 'Guardando...' : 'Crear Cuenta'}</span>

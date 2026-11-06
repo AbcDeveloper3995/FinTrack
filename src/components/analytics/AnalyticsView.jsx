@@ -422,7 +422,11 @@ export const AnalyticsView = () => {
 
               <div className="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-xs text-on-surface-variant">
                 <span>Mes en curso: <strong>${kpis.monthlyExpenses?.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</strong> gastos</span>
-                <span>Mes previo: <strong>${kpis.prevMonthExpenses?.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</strong> gastos</span>
+                <span>{kpis.prevMonthExpenses > 0 ? (
+                  <>Mes previo: <strong>${kpis.prevMonthExpenses?.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</strong> gastos</>
+                ) : (
+                  <span className="italic text-on-surface-variant/70">Primer mes de registro</span>
+                )}</span>
               </div>
             </div>
           </div>

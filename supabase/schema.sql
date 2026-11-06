@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS public.accounts (
   type TEXT NOT NULL CHECK (type IN ('debito', 'credito', 'inversion', 'efectivo', 'ahorro')),
   balance NUMERIC(14, 2) NOT NULL DEFAULT 0.00,
   credit_limit NUMERIC(14, 2) DEFAULT NULL,
+  min_balance NUMERIC(14, 2) DEFAULT NULL,
   last4 TEXT DEFAULT NULL,
   currency TEXT DEFAULT 'MXN',
   color TEXT DEFAULT '#4338ca',
