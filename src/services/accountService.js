@@ -21,6 +21,7 @@ export const accountService = {
   async addAccount(userId, { name, institution, type, currency = 'MXN', balance, credit_limit, min_balance, last4, color }) {
     if (!userId) throw new Error('No user authenticated');
 
+    const hasMinBalance = min_balance !== undefined && min_balance !== '' && min_balance !== null;
     const insertPayload = {
       user_id: userId,
       name,
@@ -29,24 +30,44 @@ export const accountService = {
       currency: currency || 'MXN',
       balance: parseFloat(balance) || 0,
       credit_limit: credit_limit ? parseFloat(credit_limit) : null,
-      min_balance: min_balance !== undefined && min_balance !== '' && min_balance !== null ? parseFloat(min_balance) : null,
       last4: last4 || null,
       color: color || '#4338ca',
     };
 
-    const { data, error } = await supabase
-      .from('accounts')
-      .insert([insertPayload])
-      .select()
-      .single();
+    if (hasMinBalance) {
+      insertPayload.min_balance = parseFloat(min_balance);
+    }
 
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase
+        .from('accounts')
+        .insert([insertPayload])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      // Fallback: If min_balance does not exist in Supabase schema cache yet, retry without it
+      if (err?.message?.includes('min_balance') && 'min_balance' in insertPayload) {
+        console.warn('La columna min_balance no existe en la tabla accounts de Supabase. Reintentando guardado sin min_balance...');
+        delete insertPayload.min_balance;
+        const { data, error } = await supabase
+          .from('accounts')
+          .insert([insertPayload])
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
+      throw err;
+    }
   },
 
   async updateAccount(userId, id, { name, institution, type, currency, balance, credit_limit, min_balance, last4, color }) {
     if (!userId) throw new Error('No user authenticated');
 
+    const hasMinBalance = min_balance !== undefined && min_balance !== '' && min_balance !== null;
     const updatePayload = {
       name,
       institution,
@@ -54,22 +75,43 @@ export const accountService = {
       currency,
       balance: parseFloat(balance) || 0,
       credit_limit: type === 'credito' && credit_limit ? parseFloat(credit_limit) : null,
-      min_balance: min_balance !== undefined && min_balance !== '' && min_balance !== null ? parseFloat(min_balance) : null,
       last4: last4 ? String(last4).slice(-4) : null,
       color: color || '#4338ca',
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabase
-      .from('accounts')
-      .update(updatePayload)
-      .eq('id', id)
-      .eq('user_id', userId)
-      .select()
-      .single();
+    if (hasMinBalance) {
+      updatePayload.min_balance = parseFloat(min_balance);
+    }
 
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase
+        .from('accounts')
+        .update(updatePayload)
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      // Fallback: If min_balance does not exist in Supabase schema cache yet, retry without it
+      if (err?.message?.includes('min_balance')) {
+        console.warn('La columna min_balance no existe en la tabla accounts de Supabase. Reintentando guardado sin min_balance...');
+        delete updatePayload.min_balance;
+        const { data, error } = await supabase
+          .from('accounts')
+          .update(updatePayload)
+          .eq('id', id)
+          .eq('user_id', userId)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
+      throw err;
+    }
   },
 
   async deleteAccount(userId, id) {

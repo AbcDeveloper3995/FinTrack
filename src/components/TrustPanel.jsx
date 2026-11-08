@@ -5,7 +5,7 @@ export const TrustPanel = ({ mode }) => {
     return (
       <div className="flex flex-col gap-6">
         {/* Main Benefits Card */}
-        <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-2xl shadow-md border border-surface-container-high/60 relative overflow-hidden">
+        <div className="bg-surface-container-lowest p-5 sm:p-8 rounded-2xl shadow-md border border-surface-container-high/60 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
 
           <div className="flex items-center gap-3 mb-4">
@@ -26,27 +26,50 @@ export const TrustPanel = ({ mode }) => {
             Registra tus ingresos y gastos diarios, supervisa tus cuentas de débito o crédito y mantén un orden claro de tu dinero en cualquier momento.
           </p>
 
-          <div className="space-y-3 pt-2 border-t border-surface-container">
-            <div className="flex items-center justify-between text-body-md">
-              <span className="text-on-surface-variant flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary text-[18px]">account_balance_wallet</span>
-                Gestión de cuentas y tarjetas
+          <div className="space-y-3 pt-3 border-t border-surface-container">
+            {/* Cuentas y tarjetas */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="material-symbols-outlined text-primary text-[20px] shrink-0">
+                  account_balance_wallet
+                </span>
+                <span className="text-xs sm:text-body-md text-on-surface font-medium">
+                  Gestión de cuentas y tarjetas
+                </span>
+              </div>
+              <span className="self-start sm:self-auto ml-7.5 sm:ml-0 px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 shrink-0">
+                Efectivo y bancos
               </span>
-              <span className="font-semibold text-secondary">Efectivo y bancos</span>
             </div>
-            <div className="flex items-center justify-between text-body-md">
-              <span className="text-on-surface-variant flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary text-[18px]">category</span>
-                Categorías y presupuestos
+
+            {/* Categorías */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="material-symbols-outlined text-primary text-[20px] shrink-0">
+                  category
+                </span>
+                <span className="text-xs sm:text-body-md text-on-surface font-medium">
+                  Categorías y presupuestos
+                </span>
+              </div>
+              <span className="self-start sm:self-auto ml-7.5 sm:ml-0 px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 shrink-0">
+                A tu medida
               </span>
-              <span className="font-semibold text-secondary">A tu medida</span>
             </div>
-            <div className="flex items-center justify-between text-body-md">
-              <span className="text-on-surface-variant flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary text-[18px]">wifi_off</span>
-                Funciona sin conexión a internet
+
+            {/* Modo offline */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="material-symbols-outlined text-primary text-[20px] shrink-0">
+                  wifi_off
+                </span>
+                <span className="text-xs sm:text-body-md text-on-surface font-medium">
+                  Funciona sin conexión a internet
+                </span>
+              </div>
+              <span className="self-start sm:self-auto ml-7.5 sm:ml-0 px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-semibold bg-surface-container-high text-on-surface-variant border border-surface-container-highest shrink-0">
+                Modo offline
               </span>
-              <span className="font-semibold text-on-surface">Modo offline</span>
             </div>
           </div>
         </div>
@@ -60,7 +83,7 @@ export const TrustPanel = ({ mode }) => {
               <p className="text-xs text-on-surface-variant">Exporta tus movimientos en Excel y PDF en un clic</p>
             </div>
           </div>
-          <span className="px-2.5 py-1 rounded-md bg-secondary-container/50 text-on-secondary-container text-xs font-semibold">
+          <span className="px-2.5 py-1 rounded-md bg-secondary-container/50 text-on-secondary-container text-xs font-semibold shrink-0">
             Disponible
           </span>
         </div>

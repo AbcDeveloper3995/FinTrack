@@ -96,7 +96,7 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
           }`}
         />
 
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 pb-8 overflow-y-auto flex-1">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
               <div

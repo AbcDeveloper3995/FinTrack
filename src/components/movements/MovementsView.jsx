@@ -250,9 +250,9 @@ export const MovementsView = () => {
           </div>
 
           {/* Bulk Action Strip & New Movement CTA */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             {selectedIds.length > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container text-on-surface font-body-md text-body-md">
+              <div className="flex items-center justify-between sm:justify-start gap-1.5 px-3 py-2 rounded-xl bg-surface-container text-on-surface font-body-md text-body-md">
                 <span className="font-label-md text-xs bg-primary-container text-on-primary px-2 py-0.5 rounded-full font-bold">
                   {selectedIds.length}
                 </span>
@@ -263,7 +263,7 @@ export const MovementsView = () => {
                   title="Eliminar seleccionados"
                 >
                   <span className="material-symbols-outlined text-base">delete</span>
-                  <span className="hidden sm:inline">Eliminar</span>
+                  <span className="text-xs font-semibold">Eliminar</span>
                 </button>
               </div>
             )}
@@ -271,7 +271,7 @@ export const MovementsView = () => {
             <button
               type="button"
               onClick={handleExportCSV}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-body-md font-medium transition-all border border-surface-container-high/60 shadow-xs cursor-pointer shrink-0"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-body-md font-medium transition-all border border-surface-container-high/60 shadow-xs cursor-pointer"
               title="Descargar reporte financiero en formato nativo de Microsoft Excel (.xlsx)"
             >
               <span className="material-symbols-outlined text-lg text-secondary">table_chart</span>
@@ -281,7 +281,7 @@ export const MovementsView = () => {
             <button
               type="button"
               onClick={() => setIsNewMovementModalOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-body-md font-semibold transition-all shadow-sm cursor-pointer"
             >
               <span className="material-symbols-outlined text-lg">add</span>
               <span>Nuevo movimiento</span>

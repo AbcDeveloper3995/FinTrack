@@ -237,9 +237,9 @@ export const DashboardView = ({ onNavigate }) => {
                           <div className="font-body-md text-body-md font-semibold text-on-surface flex items-center gap-1.5 flex-wrap">
                             <span className="truncate">{acc.name}</span>
                             <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border inline-flex items-center gap-0.5 shrink-0 ${typeMeta.badgeClass}`}
+                              className={`px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-wide uppercase border inline-flex items-center gap-1 shrink-0 ${typeMeta.badgeClass}`}
                             >
-                              <span className="material-symbols-outlined text-[11px]">{typeMeta.icon}</span>
+                              <span className="material-symbols-outlined text-[12px]">{typeMeta.icon}</span>
                               <span>{typeMeta.label}</span>
                             </span>
                           </div>

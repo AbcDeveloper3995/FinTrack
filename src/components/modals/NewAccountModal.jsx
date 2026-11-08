@@ -12,7 +12,6 @@ export const NewAccountModal = () => {
   const [balance, setBalance] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
   const [minBalance, setMinBalance] = useState('');
-  const [last4, setLast4] = useState('');
   const [color, setColor] = useState('#4338ca');
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -34,7 +33,7 @@ export const NewAccountModal = () => {
       balance: balance === '' ? 0 : balance,
       credit_limit: type === 'credito' && creditLimit !== '' ? creditLimit : null,
       min_balance: type !== 'credito' && minBalance !== '' ? minBalance : null,
-      last4: last4.trim() ? last4.trim().slice(-4) : null,
+      last4: null,
       color,
     });
 
@@ -51,7 +50,6 @@ export const NewAccountModal = () => {
     setBalance('');
     setCreditLimit('');
     setMinBalance('');
-    setLast4('');
     setCurrency('MXN');
     setIsNewAccountModalOpen(false);
   };
@@ -266,40 +264,24 @@ export const NewAccountModal = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-              <div>
-                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                  Últimos 4 dígitos <span className="text-[11px] text-on-surface-variant/70 font-normal">(tarjetas)</span>
-                </label>
-                <input
-                  type="text"
-                  maxLength={4}
-                  value={last4}
-                  onChange={(e) => setLast4(e.target.value)}
-                  placeholder="ej. 4829"
-                  className="w-full h-10 px-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-label-md font-label-md text-on-surface-variant mb-1">
-                  Color de la tarjeta
-                </label>
-                <div className="flex items-center gap-2 flex-wrap pt-0.5">
-                  {[
-                    '#4338ca', '#006c4a', '#0284c7', '#7e22ce', '#be123c', '#d97706', '#334155'
-                  ].map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setColor(c)}
-                      style={{ backgroundColor: c }}
-                      className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
-                        color === c ? 'scale-125 border-on-surface ring-2 ring-primary/30' : 'border-transparent hover:scale-110'
-                      }`}
-                    />
-                  ))}
-                </div>
+            <div>
+              <label className="block text-label-md font-label-md text-on-surface-variant mb-1.5">
+                Color de la tarjeta
+              </label>
+              <div className="flex items-center gap-2.5 flex-wrap pt-0.5">
+                {[
+                  '#4338ca', '#006c4a', '#0284c7', '#7e22ce', '#be123c', '#d97706', '#334155'
+                ].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    style={{ backgroundColor: c }}
+                    className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
+                      color === c ? 'scale-125 border-on-surface ring-2 ring-primary/30' : 'border-transparent hover:scale-110'
+                    }`}
+                  />
+                ))}
               </div>
             </div>
 

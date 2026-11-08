@@ -100,9 +100,6 @@ export const NewMovementModal = () => {
   };
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
 
   if (!isNewMovementModalOpen) return null;
 
@@ -193,7 +190,7 @@ export const NewMovementModal = () => {
           }`}
         />
 
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 pb-8 overflow-y-auto flex-1">
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
@@ -372,38 +369,10 @@ export const NewMovementModal = () => {
               {/* Right Column: Date / Category or Destination */}
               <div className="space-y-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-on-surface flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm text-primary">event</span>
-                      <span>Fecha</span>
-                    </label>
-
-                    {/* Quick Presets: Hoy / Ayer */}
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setDate(todayStr)}
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                          date === todayStr
-                            ? 'bg-primary text-white shadow-xs'
-                            : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
-                        }`}
-                      >
-                        Hoy
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDate(yesterdayStr)}
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                          date === yesterdayStr
-                            ? 'bg-primary text-white shadow-xs'
-                            : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
-                        }`}
-                      >
-                        Ayer
-                      </button>
-                    </div>
-                  </div>
+                  <label className="text-xs font-bold text-on-surface flex items-center gap-1 mb-1">
+                    <span className="material-symbols-outlined text-sm text-primary">event</span>
+                    <span>Fecha</span>
+                  </label>
 
                   <CustomDatePicker
                     value={date}

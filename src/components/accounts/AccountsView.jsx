@@ -291,16 +291,13 @@ export const AccountsView = () => {
                   {(() => {
                     const typeMeta = getAccountTypeMeta(selectedAccount.type);
                     return (
-                      <span className={`px-2 py-0.5 rounded-md font-label-md text-xs font-bold border inline-flex items-center gap-1 ${typeMeta.badgeClass}`}>
-                        <span className="material-symbols-outlined text-[13px]">{typeMeta.icon}</span>
+                      <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold tracking-wide uppercase border inline-flex items-center gap-1.5 shrink-0 ${typeMeta.badgeClass}`}>
+                        <span className="material-symbols-outlined text-[14px]">{typeMeta.icon}</span>
                         <span>{typeMeta.label}</span>
                       </span>
                     );
                   })()}
-                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full font-label-md text-label-md font-semibold bg-surface-container text-on-surface-variant shrink-0">
-                    •••• {selectedAccount.last4 || '0000'}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full font-label-md text-xs font-bold bg-primary/10 text-primary shrink-0">
+                  <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold tracking-wide uppercase bg-primary/10 text-primary border border-primary/20 shrink-0">
                     {selectedAccount.currency || 'MXN'}
                   </span>
                 </div>

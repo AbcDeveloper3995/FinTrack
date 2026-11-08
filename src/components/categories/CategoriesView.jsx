@@ -485,7 +485,14 @@ export const CategoriesView = () => {
                           </span>
                         </button>
 
-                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-primary">
+                        <div
+                          style={{
+                            backgroundColor: `${cat.color || '#4338ca'}18`,
+                            color: cat.color || '#4338ca',
+                            borderColor: `${cat.color || '#4338ca'}30`,
+                          }}
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl border flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover:scale-105"
+                        >
                           <span className="material-symbols-outlined text-xl sm:text-2xl">{cat.icon || 'category'}</span>
                         </div>
 
@@ -521,7 +528,7 @@ export const CategoriesView = () => {
                           <button
                             type="button"
                             onClick={() => openNewSubModal(cat.id)}
-                            className="p-1.5 sm:p-2 rounded-lg text-secondary hover:bg-secondary-fixed/30 transition-colors cursor-pointer"
+                            className="p-1.5 sm:p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors cursor-pointer"
                             title="Agregar subcategoría"
                           >
                             <span className="material-symbols-outlined text-xl">add_circle</span>
@@ -564,33 +571,46 @@ export const CategoriesView = () => {
                         </div>
 
                         {subcats.length > 0 ? (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                            {subcats.map((sub) => (
-                              <div
-                                key={sub.id}
-                                className="p-2.5 sm:p-3 rounded-xl bg-surface-container-lowest border border-surface-container flex items-center justify-between text-body-md shadow-xs group"
-                              >
-                                <span className="font-medium text-sm text-on-surface truncate mr-2">{sub.name}</span>
-                                <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100">
-                                  <button
-                                    type="button"
-                                    onClick={() => openEditSubModal(sub)}
-                                    className="p-1 text-on-surface-variant hover:text-primary rounded cursor-pointer"
-                                    title="Editar subcategoría"
-                                  >
-                                    <span className="material-symbols-outlined text-base">edit</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteSubcategory(sub)}
-                                    className="p-1 text-on-surface-variant hover:text-error rounded cursor-pointer"
-                                    title="Eliminar subcategoría"
-                                  >
-                                    <span className="material-symbols-outlined text-base">delete</span>
-                                  </button>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {subcats.map((sub) => {
+                              const catColor = cat.color || '#4338ca';
+                              return (
+                                <div
+                                  key={sub.id}
+                                  style={{
+                                    backgroundColor: `${catColor}14`,
+                                    borderColor: `${catColor}40`,
+                                  }}
+                                  className="group inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl border shadow-xs hover:shadow-sm transition-all duration-200 select-none hover:brightness-105"
+                                >
+                                  <span
+                                    style={{ backgroundColor: catColor }}
+                                    className="w-1.5 h-1.5 rounded-full shrink-0 shadow-xs"
+                                  />
+                                  <span className="font-semibold text-xs text-on-surface truncate max-w-[190px]">
+                                    {sub.name}
+                                  </span>
+                                  <div className="flex items-center gap-0.5 ml-1 pl-1.5 border-l border-on-surface-variant/20 opacity-70 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      type="button"
+                                      onClick={() => openEditSubModal(sub)}
+                                      className="p-0.5 text-on-surface-variant hover:text-primary rounded cursor-pointer transition-colors"
+                                      title="Editar subcategoría"
+                                    >
+                                      <span className="material-symbols-outlined text-[15px]">edit</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteSubcategory(sub)}
+                                      className="p-0.5 text-on-surface-variant hover:text-error rounded cursor-pointer transition-colors"
+                                      title="Eliminar subcategoría"
+                                    >
+                                      <span className="material-symbols-outlined text-[15px]">delete</span>
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         ) : (
                           <div className="py-2.5 text-center text-xs text-on-surface-variant italic">
@@ -834,7 +854,7 @@ export const CategoriesView = () => {
       {subModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/40 backdrop-blur-sm animate-fade-in">
           <div className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-surface-container-high">
-            <div className="h-1.5 bg-gradient-to-r from-secondary to-primary"></div>
+            <div className="h-1.5 bg-gradient-to-r from-primary to-primary-container"></div>
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-headline-md font-bold text-on-surface">
@@ -876,7 +896,7 @@ export const CategoriesView = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2.5 rounded-lg bg-secondary hover:bg-secondary/90 text-on-secondary font-semibold shadow-sm"
+                    className="px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-semibold shadow-sm cursor-pointer"
                   >
                     {saving ? 'Guardando...' : (editingSubcategory ? 'Guardar Cambios' : 'Crear Subcategoría')}
                   </button>
