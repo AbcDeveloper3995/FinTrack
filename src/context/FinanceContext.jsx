@@ -19,7 +19,14 @@ export const FinanceProvider = ({ children }) => {
   const { theme, setTheme, toggleTheme, isDark } = useTheme();
 
   // Modular Hook: Exchange Rate USD/MXN
-  const { exchangeRate, exchangeRateLastUpdated, fetchExchangeRate } = useExchangeRate(17.85);
+  const {
+    exchangeRate,
+    exchangeRateLastUpdated,
+    fetchExchangeRate,
+    customRate,
+    setCustomRate,
+    isCustomRate,
+  } = useExchangeRate(18.52);
 
   // Modular Hook: Network Connectivity
   const isOnline = useOnlineStatus();
@@ -258,6 +265,9 @@ export const FinanceProvider = ({ children }) => {
     exchangeRate,
     exchangeRateLastUpdated,
     fetchExchangeRate,
+    customRate,
+    setCustomRate,
+    isCustomRate,
     kpis,
     accounts,
     categories,
@@ -291,6 +301,9 @@ export const FinanceProvider = ({ children }) => {
     exchangeRate,
     exchangeRateLastUpdated,
     fetchExchangeRate,
+    customRate,
+    setCustomRate,
+    isCustomRate,
     kpis,
     accounts,
     categories,

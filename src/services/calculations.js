@@ -65,7 +65,7 @@ export const calculatePeriodMetrics = ({
   transactions.forEach((tx) => {
     if (!tx.date) return;
     const rateMultiplier = tx.currency === 'USD' ? exchangeRate : 1;
-    const valInMXN = Math.abs(tx.amount) * rateMultiplier;
+    const valInMXN = tx.amountMXN ? Math.abs(tx.amountMXN) : Math.abs(tx.amount) * rateMultiplier;
     const txMonthKey = tx.date.slice(0, 7);
 
     // Current Month
@@ -176,7 +176,8 @@ export const calculatePeriodMetrics = ({
         .filter((t) => (t.categoryId === c.id || t.category === c.name) && t.type === 'expense' && t.date?.startsWith(currentMonthKey))
         .reduce((sum, t) => {
           const mult = t.currency === 'USD' ? exchangeRate : 1;
-          return sum + Math.abs(t.amount) * mult;
+          const valInMXN = t.amountMXN ? Math.abs(t.amountMXN) : Math.abs(t.amount) * mult;
+          return sum + valInMXN;
         }, 0);
 
       const pct = (catSpent / limit) * 100;

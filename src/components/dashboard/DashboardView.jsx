@@ -3,6 +3,7 @@ import { useFinance } from '../../context/FinanceContext';
 import { MonthComparisonBanner } from '../charts/MonthComparisonBanner';
 import { MonthPeaceOfMindCard } from './MonthPeaceOfMindCard';
 import { getAccountTypeMeta } from '../../lib/accountTypes';
+import { formatDisplayDate } from '../../lib/dateUtils';
 
 export const DashboardView = ({ onNavigate }) => {
   const {
@@ -237,9 +238,9 @@ export const DashboardView = ({ onNavigate }) => {
                           <div className="font-body-md text-body-md font-semibold text-on-surface flex items-center gap-1.5 flex-wrap">
                             <span className="truncate">{acc.name}</span>
                             <span
-                              className={`px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-wide uppercase border inline-flex items-center gap-1 shrink-0 ${typeMeta.badgeClass}`}
+                              className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase border inline-flex items-center gap-1 shrink-0 ${typeMeta.badgeClass}`}
                             >
-                              <span className="material-symbols-outlined text-[12px]">{typeMeta.icon}</span>
+                              <span className="material-symbols-outlined text-[11px]">{typeMeta.icon}</span>
                               <span>{typeMeta.label}</span>
                             </span>
                           </div>
@@ -454,7 +455,7 @@ export const DashboardView = ({ onNavigate }) => {
                           <span className="text-on-surface font-medium">{tx.account}</span>
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-on-surface-variant tabular-nums">{tx.date}</td>
+                      <td className="py-3 px-3 text-on-surface-variant tabular-nums">{formatDisplayDate(tx.date)}</td>
                       <td className={`py-3 px-3 text-right font-bold tabular-nums ${
                         tx.type === 'transfer'
                           ? 'text-on-surface'

@@ -17,6 +17,7 @@ export const Pagination = ({
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50],
   className = '',
+  accentColor = null,
 }) => {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
@@ -111,9 +112,10 @@ export const Pagination = ({
                 key={p}
                 type="button"
                 onClick={() => onPageChange(p)}
+                style={isCurrent && accentColor ? { backgroundColor: accentColor, color: '#ffffff' } : undefined}
                 className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   isCurrent
-                    ? 'bg-primary text-white shadow-xs dark:bg-indigo-600'
+                    ? (accentColor ? 'shadow-xs' : 'bg-primary text-white shadow-xs dark:bg-indigo-600')
                     : 'text-on-surface hover:bg-surface-container text-on-surface-variant'
                 }`}
               >

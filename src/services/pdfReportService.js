@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatDisplayDate } from '../lib/dateUtils';
 
 // Format currency in MXN
 const formatCurrency = (val) => {
@@ -581,6 +582,168 @@ export const generateComparisonReportPDF = ({
   }
 
   const filename = `FinTrack_Comparativo_Meses_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(filename);
+  return { success: true, filename };
+};
+
+/**
+ * ------------------------------------------------------------------
+ * REPORTE 3: Estado de Cuenta por Periodo / Semana
+ * ------------------------------------------------------------------
+ */
+export const generateAccountStatementPDF = ({
+  account,
+  movements = [],
+  periodLabel = 'Esta Semana',
+  dateRangeStr = '',
+  openingBalance = 0,
+  closingBalance = 0,
+  totalIncome = 0,
+  totalExpense = 0,
+  userName = 'Titular FinTrack',
+  currency = 'MXN',
+}) => {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  const currencySymbol = currency === 'USD' ? 'US$' : '$';
+  const formatAmt = (val) =>
+    `${currencySymbol}${Number(val || 0).toLocaleString('es-MX', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} ${currency}`;
+
+  drawHeader(
+    doc,
+    `Estado de Cuenta • ${account?.name || 'Cuenta'}`,
+    `Periodo: ${periodLabel} ${dateRangeStr ? `(${dateRangeStr})` : ''}`,
+    userName
+  );
+
+  let currentY = 40;
+
+  // Account Header Info Card
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(14, currentY, 182, 22, 2, 2, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(30, 27, 75);
+  doc.text(`${account?.name || 'Cuenta'} • ${account?.institution || 'Bancaria'}`, 18, currentY + 7);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  doc.text(
+    `Tipo: ${account?.type ? account.type.toUpperCase() : 'CUENTA'} | Divisa: ${currency} | Movimientos registrados: ${movements.length}`,
+    18,
+    currentY + 14
+  );
+
+  currentY += 28;
+
+  // 4 KPI Summary Cards (Opening, Income, Expense, Closing)
+  const cardWidth = 43;
+  const cardHeight = 18;
+  const cardGap = 3.3;
+
+  const kpis = [
+    { label: 'Saldo Inicial', value: formatAmt(openingBalance), color: [71, 85, 105] },
+    { label: 'Depósitos (+)', value: `+${formatAmt(totalIncome)}`, color: [5, 150, 105] },
+    { label: 'Cargos (-)', value: `-${formatAmt(totalExpense)}`, color: [225, 29, 72] },
+    { label: 'Saldo Cierre', value: formatAmt(closingBalance), color: [30, 27, 75] },
+  ];
+
+  kpis.forEach((kpi, idx) => {
+    const x = 14 + idx * (cardWidth + cardGap);
+    doc.setFillColor(241, 245, 249);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(x, currentY, cardWidth, cardHeight, 1.5, 1.5, 'FD');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text(kpi.label.toUpperCase(), x + 3, currentY + 5.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(kpi.color[0], kpi.color[1], kpi.color[2]);
+    doc.text(kpi.value, x + 3, currentY + 12.5);
+  });
+
+  currentY += cardHeight + 8;
+
+  // Movements Table
+  const tableRows = movements.map((tx) => {
+    const dateFormatted = formatDisplayDate(tx.date);
+    const isIncome = tx.type === 'income' || (tx.type !== 'expense' && tx.amount > 0);
+    const sign = isIncome ? '+' : '-';
+    const amtStr = `${sign}${currencySymbol}${Math.abs(tx.amount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+
+    return [
+      dateFormatted,
+      tx.concept || 'Sin descripción',
+      tx.category || 'General',
+      tx.type === 'transfer' ? 'Transferencia' : isIncome ? 'Depósito / Abono' : 'Cargo / Retiro',
+      amtStr,
+    ];
+  });
+
+  if (tableRows.length > 0) {
+    autoTable(doc, {
+      startY: currentY,
+      head: [['Fecha', 'Concepto / Descripción', 'Categoría', 'Tipo', 'Monto']],
+      body: tableRows,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [30, 27, 75],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8.5,
+        cellPadding: 2.5,
+      },
+      bodyStyles: {
+        fontSize: 8,
+        cellPadding: 2,
+        textColor: [51, 65, 85],
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 24 },
+        1: { fontStyle: 'bold', textColor: [30, 27, 75] },
+        2: { cellWidth: 32 },
+        3: { halign: 'center', cellWidth: 30 },
+        4: { halign: 'right', fontStyle: 'bold', cellWidth: 32 },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4) {
+          const rawText = String(data.cell.raw || '');
+          if (rawText.startsWith('+')) {
+            data.cell.styles.textColor = [5, 150, 105];
+          } else {
+            data.cell.styles.textColor = [225, 29, 72];
+          }
+        }
+      },
+    });
+  } else {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text('No se registraron movimientos en este periodo.', 14, currentY + 10);
+  }
+
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    drawFooter(doc, i, totalPages);
+  }
+
+  const cleanAccName = (account?.name || 'Cuenta').replace(/[^a-zA-Z0-9]/g, '_');
+  const filename = `FinTrack_Estado_Cuenta_${cleanAccName}_${periodLabel.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(filename);
   return { success: true, filename };
 };

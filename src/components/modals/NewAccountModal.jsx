@@ -208,7 +208,7 @@ export const NewAccountModal = () => {
                   {type === 'credito' ? `Saldo Deudor (${currency})` : `Saldo Actual (${currency})`}
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2 text-on-surface-variant font-bold text-sm">
+                  <span className="absolute left-3 top-2.5 text-on-surface-variant font-bold text-sm pointer-events-none select-none">
                     {currency === 'USD' ? 'US$' : '$'}
                   </span>
                   <input
@@ -218,7 +218,7 @@ export const NewAccountModal = () => {
                     onChange={(e) => setBalance(e.target.value)}
                     placeholder="0.00"
                     required
-                    className="w-full h-10 pl-9 pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
+                    className={`w-full h-10 ${currency === 'USD' ? 'pl-14' : 'pl-8'} pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none transition-all`}
                   />
                 </div>
               </div>
@@ -229,7 +229,7 @@ export const NewAccountModal = () => {
                     Límite de Crédito ({currency})
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2 text-on-surface-variant font-bold text-sm">
+                    <span className="absolute left-3 top-2.5 text-on-surface-variant font-bold text-sm pointer-events-none select-none">
                       {currency === 'USD' ? 'US$' : '$'}
                     </span>
                     <input
@@ -238,7 +238,7 @@ export const NewAccountModal = () => {
                       value={creditLimit}
                       onChange={(e) => setCreditLimit(e.target.value)}
                       placeholder="0.00"
-                      className="w-full h-10 pl-9 pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
+                      className={`w-full h-10 ${currency === 'USD' ? 'pl-14' : 'pl-8'} pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none transition-all`}
                     />
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export const NewAccountModal = () => {
                     Saldo Mínimo Alerta <span className="text-[11px] text-on-surface-variant/70 font-normal">(opcional)</span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2 text-on-surface-variant font-bold text-sm">
+                    <span className="absolute left-3 top-2.5 text-on-surface-variant font-bold text-sm pointer-events-none select-none">
                       {currency === 'USD' ? 'US$' : '$'}
                     </span>
                     <input
@@ -257,7 +257,7 @@ export const NewAccountModal = () => {
                       value={minBalance}
                       onChange={(e) => setMinBalance(e.target.value)}
                       placeholder="ej. 1000.00"
-                      className="w-full h-10 pl-9 pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none"
+                      className={`w-full h-10 ${currency === 'USD' ? 'pl-14' : 'pl-8'} pr-3 bg-surface-container-lowest text-on-surface rounded-lg text-sm border border-outline-variant/60 focus:border-primary outline-none transition-all`}
                     />
                   </div>
                 </div>

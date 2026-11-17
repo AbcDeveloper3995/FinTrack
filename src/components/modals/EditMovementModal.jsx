@@ -4,7 +4,7 @@ import { CustomSelect } from '../common/CustomSelect';
 import { CustomDatePicker } from '../common/CustomDatePicker';
 
 export const EditMovementModal = ({ movement, isOpen, onClose }) => {
-  const { updateTransaction, accounts, categories, tags, showToast } = useFinance();
+  const { updateTransaction, accounts, categories, tags, showToast, exchangeRate } = useFinance();
 
   const [concept, setConcept] = useState('');
   const [amount, setAmount] = useState('');
@@ -13,6 +13,8 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
   const [categoryId, setCategoryId] = useState('');
   const [subcategoryId, setSubcategoryId] = useState('');
   const [accountId, setAccountId] = useState('');
+  const [customUsdToMxnAmount, setCustomUsdToMxnAmount] = useState('');
+  const [isUsdConversionManuallyEdited, setIsUsdConversionManuallyEdited] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState([]);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
@@ -30,11 +32,34 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
       setAccountId(movement.accountId || '');
       setNotes(movement.notes || '');
       setSelectedTagIds(movement.tags ? movement.tags.map((t) => t.id) : []);
+      if (movement.amountMXN) {
+        setCustomUsdToMxnAmount(movement.amountMXN.toString());
+        setIsUsdConversionManuallyEdited(true);
+      } else {
+        setCustomUsdToMxnAmount('');
+        setIsUsdConversionManuallyEdited(false);
+      }
       setErrorMsg('');
     }
   }, [movement, isOpen]);
 
   if (!isOpen || !movement) return null;
+
+  const selectedAccount = accounts.find((a) => a.id === accountId);
+  const isUsdMovement = type !== 'transfer' && selectedAccount?.currency === 'USD';
+  const parsedAmount = parseFloat(amount) || 0;
+  const autoCalculatedMxnAmount = isUsdMovement && parsedAmount > 0
+    ? parsedAmount * (exchangeRate || 1)
+    : 0;
+
+  const handleResetUsdToMxn = () => {
+    setIsUsdConversionManuallyEdited(false);
+    if (parsedAmount > 0) {
+      setCustomUsdToMxnAmount(autoCalculatedMxnAmount.toFixed(2));
+    } else {
+      setCustomUsdToMxnAmount('');
+    }
+  };
 
   // Filter categories by type
   const availableCategories = categories.filter((c) => c.type === type);
@@ -63,9 +88,16 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
     setErrorMsg('');
     setSaving(true);
 
+    const finalAmountMXN = isUsdMovement
+      ? (customUsdToMxnAmount && parseFloat(customUsdToMxnAmount) > 0
+          ? parseFloat(customUsdToMxnAmount)
+          : autoCalculatedMxnAmount)
+      : null;
+
     const res = await updateTransaction(movement.id, {
       concept: concept.trim(),
       amount: numericAmount,
+      amountMXN: finalAmountMXN,
       type,
       date,
       categoryId: categoryId || null,
@@ -136,40 +168,52 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {/* Type Switcher */}
-            <div className="flex p-1 bg-surface-container-low rounded-xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setType('expense');
-                  setCategoryId('');
-                  setSubcategoryId('');
-                }}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  type === 'expense'
-                    ? 'bg-error text-white shadow-xs'
-                    : 'text-on-surface-variant hover:text-on-surface'
-                }`}
-              >
-                <span className="material-symbols-outlined text-base">arrow_downward</span>
-                <span>Gasto</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setType('income');
-                  setCategoryId('');
-                  setSubcategoryId('');
-                }}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  type === 'income'
-                    ? 'bg-secondary text-white shadow-xs'
-                    : 'text-on-surface-variant hover:text-on-surface'
-                }`}
-              >
-                <span className="material-symbols-outlined text-base">arrow_upward</span>
-                <span>Ingreso</span>
-              </button>
-            </div>
+            {movement.type === 'transfer' ? (
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-lg">swap_horiz</span>
+                  <span>Transferencia entre cuentas</span>
+                </div>
+                <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold uppercase">
+                  {movement.amount > 0 ? 'Entrada (Destino)' : 'Salida (Origen)'}
+                </span>
+              </div>
+            ) : (
+              <div className="flex p-1 bg-surface-container-low rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setType('expense');
+                    setCategoryId('');
+                    setSubcategoryId('');
+                  }}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    type === 'expense'
+                      ? 'bg-error text-white shadow-xs'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base">arrow_downward</span>
+                  <span>Gasto</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setType('income');
+                    setCategoryId('');
+                    setSubcategoryId('');
+                  }}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    type === 'income'
+                      ? 'bg-secondary text-white shadow-xs'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base">arrow_upward</span>
+                  <span>Ingreso</span>
+                </button>
+              </div>
+            )}
 
             {/* Concept */}
             <div>
@@ -218,61 +262,64 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Grid 2 Cols: Category & Subcategory */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-on-surface mb-1">
-                  Categoría
-                </label>
-                <CustomSelect
-                  value={categoryId}
-                  onChange={(val) => {
-                    setCategoryId(val);
-                    setSubcategoryId('');
-                  }}
-                  options={[
-                    { value: '', label: '-- Sin categoría --' },
-                    ...availableCategories.map((cat) => ({
-                      value: cat.id,
-                      label: cat.name,
-                      color: cat.color,
-                      icon: cat.icon,
-                    })),
-                  ]}
-                  placeholder="Selecciona una categoría"
-                />
-              </div>
+            {/* Grid 2 Cols: Category & Subcategory (hidden for transfers) */}
+            {movement.type !== 'transfer' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-on-surface mb-1">
+                    Categoría
+                  </label>
+                  <CustomSelect
+                    value={categoryId}
+                    onChange={(val) => {
+                      setCategoryId(val);
+                      setSubcategoryId('');
+                    }}
+                    options={[
+                      { value: '', label: '-- Sin categoría --' },
+                      ...availableCategories.map((cat) => ({
+                        value: cat.id,
+                        label: cat.name,
+                        color: cat.color,
+                        icon: cat.icon,
+                      })),
+                    ]}
+                    placeholder="Selecciona una categoría"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs font-bold text-on-surface mb-1">
-                  Subcategoría <span className="text-[11px] text-on-surface-variant/70 font-normal">(opcional)</span>
-                </label>
-                <CustomSelect
-                  value={subcategoryId}
-                  onChange={(val) => setSubcategoryId(val)}
-                  disabled={availableSubcategories.length === 0}
-                  options={[
-                    { value: '', label: '-- Ninguna --' },
-                    ...availableSubcategories.map((sub) => ({
-                      value: sub.id,
-                      label: sub.name,
-                      color: sub.color,
-                    })),
-                  ]}
-                  placeholder="Selecciona subcategoría"
-                />
+                <div>
+                  <label className="block text-xs font-bold text-on-surface mb-1">
+                    Subcategoría <span className="text-[11px] text-on-surface-variant/70 font-normal">(opcional)</span>
+                  </label>
+                  <CustomSelect
+                    value={subcategoryId}
+                    onChange={(val) => setSubcategoryId(val)}
+                    disabled={availableSubcategories.length === 0}
+                    options={[
+                      { value: '', label: '-- Ninguna --' },
+                      ...availableSubcategories.map((sub) => ({
+                        value: sub.id,
+                        label: sub.name,
+                        color: sub.color,
+                      })),
+                    ]}
+                    placeholder="Selecciona subcategoría"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Grid 2 Cols: Account & Notes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-on-surface mb-1">
-                  Cuenta / Tarjeta
+                  Cuenta / Tarjeta {movement.type === 'transfer' && <span className="text-[10px] text-on-surface-variant font-normal">(fija)</span>}
                 </label>
                 <CustomSelect
                   value={accountId}
                   onChange={(val) => setAccountId(val)}
+                  disabled={movement.type === 'transfer'}
                   options={[
                     { value: '', label: '-- Sin cuenta vinculada (Efectivo/General) --' },
                     ...accounts.map((acc) => ({
@@ -300,6 +347,66 @@ export const EditMovementModal = ({ movement, isOpen, onClose }) => {
                 />
               </div>
             </div>
+
+            {/* Currency conversion preview & MXN equivalent input for USD expense/income */}
+            {isUsdMovement && (
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-surface-container-low border border-primary/25 space-y-2 animate-fade-in">
+                <div className="flex items-center justify-between gap-2 text-xs flex-wrap">
+                  <div className="flex items-center gap-1.5 font-bold text-primary">
+                    <span className="material-symbols-outlined text-base">currency_exchange</span>
+                    <span>Equivalente en Pesos Mexicanos (MXN)</span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-md">
+                    1 USD ≈ ${exchangeRate.toFixed(4)} MXN
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                  <div className="text-xs text-on-surface-variant">
+                    <span className="font-semibold text-on-surface">Total en MXN para tus presupuestos y balance:</span>
+                    <p className="text-[11px] text-on-surface-variant/80 mt-0.5">
+                      {isUsdConversionManuallyEdited ? (
+                        <span className="text-primary font-medium">✏️ Monto en MXN personalizado por ti</span>
+                      ) : (
+                        <span>⚡ Calculado según tipo de cambio actual</span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-bold text-xs text-on-surface-variant">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={customUsdToMxnAmount}
+                        onChange={(e) => {
+                          setCustomUsdToMxnAmount(e.target.value);
+                          setIsUsdConversionManuallyEdited(true);
+                        }}
+                        placeholder={autoCalculatedMxnAmount > 0 ? autoCalculatedMxnAmount.toFixed(2) : '0.00'}
+                        className="w-32 sm:w-36 h-9 pl-7 pr-2.5 bg-surface-container-lowest rounded-xl border border-primary/40 focus:border-primary text-on-surface font-bold text-xs sm:text-sm outline-none transition-all shadow-xs"
+                      />
+                    </div>
+                    <span className="font-bold text-xs text-primary">MXN</span>
+                    {isUsdConversionManuallyEdited && (
+                      <button
+                        type="button"
+                        onClick={handleResetUsdToMxn}
+                        className="text-[11px] text-primary hover:underline font-semibold cursor-pointer shrink-0 ml-0.5 flex items-center gap-0.5"
+                        title="Restablecer al cálculo automático según tipo de cambio"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">restart_alt</span>
+                        <span>Recalcular</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Tags Selection */}
             {tags.length > 0 && (

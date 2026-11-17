@@ -26,6 +26,9 @@ export const NewMovementModal = () => {
   const [accountId, setAccountId] = useState('');
   const [toAccountId, setToAccountId] = useState('');
   const [customConvertedAmount, setCustomConvertedAmount] = useState('');
+  const [isConvertedManuallyEdited, setIsConvertedManuallyEdited] = useState(false);
+  const [customUsdToMxnAmount, setCustomUsdToMxnAmount] = useState('');
+  const [isUsdConversionManuallyEdited, setIsUsdConversionManuallyEdited] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState([]);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
@@ -77,7 +80,7 @@ export const NewMovementModal = () => {
   const isMultiCurrencyTransfer =
     type === 'transfer' && fromAccount && toAccount && fromAccount.currency !== toAccount.currency;
 
-  // Auto-calculated converted preview amount
+  // Auto-calculated converted preview amount based on live exchange rate
   const parsedAmount = parseFloat(amount) || 0;
   let autoCalculatedDestAmount = parsedAmount;
   if (isMultiCurrencyTransfer && parsedAmount > 0) {
@@ -87,6 +90,61 @@ export const NewMovementModal = () => {
       autoCalculatedDestAmount = parsedAmount * (exchangeRate || 1);
     }
   }
+
+  // Keep customConvertedAmount populated with the real-time calculated amount unless the user manually edits it
+  useEffect(() => {
+    if (isMultiCurrencyTransfer) {
+      if (!isConvertedManuallyEdited) {
+        if (parsedAmount > 0) {
+          setCustomConvertedAmount(autoCalculatedDestAmount.toFixed(2));
+        } else {
+          setCustomConvertedAmount('');
+        }
+      }
+    } else {
+      setCustomConvertedAmount('');
+      setIsConvertedManuallyEdited(false);
+    }
+  }, [isMultiCurrencyTransfer, parsedAmount, autoCalculatedDestAmount, isConvertedManuallyEdited]);
+
+  const handleResetToAutoCalculated = () => {
+    setIsConvertedManuallyEdited(false);
+    if (parsedAmount > 0) {
+      setCustomConvertedAmount(autoCalculatedDestAmount.toFixed(2));
+    } else {
+      setCustomConvertedAmount('');
+    }
+  };
+
+  // USD Movement (expense/income) conversion helper
+  const isUsdMovement = type !== 'transfer' && fromAccount?.currency === 'USD';
+  const autoCalculatedMxnAmount = isUsdMovement && parsedAmount > 0
+    ? parsedAmount * (exchangeRate || 1)
+    : 0;
+
+  useEffect(() => {
+    if (isUsdMovement) {
+      if (!isUsdConversionManuallyEdited) {
+        if (parsedAmount > 0) {
+          setCustomUsdToMxnAmount(autoCalculatedMxnAmount.toFixed(2));
+        } else {
+          setCustomUsdToMxnAmount('');
+        }
+      }
+    } else {
+      setCustomUsdToMxnAmount('');
+      setIsUsdConversionManuallyEdited(false);
+    }
+  }, [isUsdMovement, parsedAmount, autoCalculatedMxnAmount, isUsdConversionManuallyEdited]);
+
+  const handleResetUsdToMxn = () => {
+    setIsUsdConversionManuallyEdited(false);
+    if (parsedAmount > 0) {
+      setCustomUsdToMxnAmount(autoCalculatedMxnAmount.toFixed(2));
+    } else {
+      setCustomUsdToMxnAmount('');
+    }
+  };
 
   const toggleTag = (tagId) => {
     setSelectedTagIds((prev) =>
@@ -137,16 +195,24 @@ export const NewMovementModal = () => {
         toAccountId: toAccountId,
         amount: numericAmount,
         destinationAmount: finalDestAmount,
+        convertedAmount: finalDestAmount,
         date: date || todayStr,
         concept: concept.trim() || `Transferencia: ${fromAccount?.name} ➔ ${toAccount?.name}`,
         notes: notes.trim() || null,
         tagIds: selectedTagIds,
       });
     } else {
+      const finalAmountMXN = isUsdMovement
+        ? (customUsdToMxnAmount && parseFloat(customUsdToMxnAmount) > 0
+            ? parseFloat(customUsdToMxnAmount)
+            : autoCalculatedMxnAmount)
+        : null;
+
       res = await addTransaction({
         type,
         concept: concept.trim(),
         amount: numericAmount,
+        amountMXN: finalAmountMXN,
         date: date || todayStr,
         categoryId: categoryId || null,
         subcategoryId: subcategoryId || null,
@@ -163,9 +229,24 @@ export const NewMovementModal = () => {
       return;
     }
 
+    const finalDestAmount =
+      isMultiCurrencyTransfer && customConvertedAmount && parseFloat(customConvertedAmount) > 0
+        ? parseFloat(customConvertedAmount)
+        : autoCalculatedDestAmount;
+
+    const finalAmountMXN = isUsdMovement
+      ? (customUsdToMxnAmount && parseFloat(customUsdToMxnAmount) > 0
+          ? parseFloat(customUsdToMxnAmount)
+          : autoCalculatedMxnAmount)
+      : null;
+
     showToast(
       type === 'transfer'
-        ? `Transferencia de $${numericAmount} realizada.`
+        ? isMultiCurrencyTransfer
+          ? `Transferencia de $${numericAmount} ${fromAccount?.currency || ''} realizada. Destino recibe $${finalDestAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })} ${toAccount?.currency || ''}.`
+          : `Transferencia de $${numericAmount} realizada.`
+        : isUsdMovement && finalAmountMXN
+        ? `${type === 'expense' ? 'Gasto' : 'Ingreso'} de $${numericAmount} USD registrado (≈ $${finalAmountMXN.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN).`
         : `${type === 'expense' ? 'Gasto' : 'Ingreso'} de $${numericAmount} registrado.`
     );
 
@@ -173,6 +254,9 @@ export const NewMovementModal = () => {
     setAmount('');
     setConcept('');
     setCustomConvertedAmount('');
+    setIsConvertedManuallyEdited(false);
+    setCustomUsdToMxnAmount('');
+    setIsUsdConversionManuallyEdited(false);
     setNotes('');
     setSubcategoryId('');
     setSelectedTagIds([]);
@@ -424,23 +508,122 @@ export const NewMovementModal = () => {
               </div>
             </div>
 
-            {/* Currency conversion preview if multi-currency transfer */}
+            {/* Currency conversion preview & destination amount input */}
             {isMultiCurrencyTransfer && (
-              <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary flex items-center justify-between gap-2 flex-wrap">
-                <div className="font-bold">
-                  Conversión ({fromAccount?.currency} ➔ {toAccount?.currency}): 1 USD ≈ ${exchangeRate.toFixed(2)} MXN
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-surface-container-low border border-primary/25 space-y-2 animate-fade-in">
+                <div className="flex items-center justify-between gap-2 text-xs flex-wrap">
+                  <div className="flex items-center gap-1.5 font-bold text-primary">
+                    <span className="material-symbols-outlined text-base">currency_exchange</span>
+                    <span>Conversión ({fromAccount?.currency} ➔ {toAccount?.currency})</span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-md">
+                    1 USD ≈ ${exchangeRate.toFixed(4)} MXN
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span>Recibe:</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={customConvertedAmount}
-                    placeholder={autoCalculatedDestAmount > 0 ? autoCalculatedDestAmount.toFixed(2) : '0.00'}
-                    onChange={(e) => setCustomConvertedAmount(e.target.value)}
-                    className="w-24 h-7 px-2 bg-surface-container-lowest rounded-lg border border-primary/40 text-on-surface font-bold text-xs"
-                  />
-                  <span>{toAccount?.currency}</span>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                  <div className="text-xs text-on-surface-variant">
+                    <span className="font-semibold text-on-surface">Monto que recibe {toAccount?.name}:</span>
+                    <p className="text-[11px] text-on-surface-variant/80 mt-0.5">
+                      {isConvertedManuallyEdited ? (
+                        <span className="text-primary font-medium">✏️ Monto personalizado por ti</span>
+                      ) : (
+                        <span>⚡ Calculado según tipo de cambio actual</span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-bold text-xs text-on-surface-variant">
+                        {toAccount?.currency === 'USD' ? 'US$' : '$'}
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={customConvertedAmount}
+                        onChange={(e) => {
+                          setCustomConvertedAmount(e.target.value);
+                          setIsConvertedManuallyEdited(true);
+                        }}
+                        placeholder={autoCalculatedDestAmount > 0 ? autoCalculatedDestAmount.toFixed(2) : '0.00'}
+                        className={`w-32 sm:w-36 h-9 ${toAccount?.currency === 'USD' ? 'pl-11' : 'pl-7'} pr-2.5 bg-surface-container-lowest rounded-xl border border-primary/40 focus:border-primary text-on-surface font-bold text-xs sm:text-sm outline-none transition-all shadow-xs`}
+                      />
+                    </div>
+                    <span className="font-bold text-xs text-primary">{toAccount?.currency}</span>
+                    {isConvertedManuallyEdited && (
+                      <button
+                        type="button"
+                        onClick={handleResetToAutoCalculated}
+                        className="text-[11px] text-primary hover:underline font-semibold cursor-pointer shrink-0 ml-0.5 flex items-center gap-0.5"
+                        title="Restablecer al cálculo automático según tipo de cambio"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">restart_alt</span>
+                        <span>Recalcular</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Currency conversion preview & MXN equivalent input for USD expense/income */}
+            {isUsdMovement && (
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-surface-container-low border border-primary/25 space-y-2 animate-fade-in">
+                <div className="flex items-center justify-between gap-2 text-xs flex-wrap">
+                  <div className="flex items-center gap-1.5 font-bold text-primary">
+                    <span className="material-symbols-outlined text-base">currency_exchange</span>
+                    <span>Equivalente en Pesos Mexicanos (MXN)</span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-md">
+                    1 USD ≈ ${exchangeRate.toFixed(4)} MXN
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                  <div className="text-xs text-on-surface-variant">
+                    <span className="font-semibold text-on-surface">Total en MXN para tus presupuestos y balance:</span>
+                    <p className="text-[11px] text-on-surface-variant/80 mt-0.5">
+                      {isUsdConversionManuallyEdited ? (
+                        <span className="text-primary font-medium">✏️ Monto en MXN personalizado por ti</span>
+                      ) : (
+                        <span>⚡ Calculado según tipo de cambio actual</span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-bold text-xs text-on-surface-variant">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={customUsdToMxnAmount}
+                        onChange={(e) => {
+                          setCustomUsdToMxnAmount(e.target.value);
+                          setIsUsdConversionManuallyEdited(true);
+                        }}
+                        placeholder={autoCalculatedMxnAmount > 0 ? autoCalculatedMxnAmount.toFixed(2) : '0.00'}
+                        className="w-32 sm:w-36 h-9 pl-7 pr-2.5 bg-surface-container-lowest rounded-xl border border-primary/40 focus:border-primary text-on-surface font-bold text-xs sm:text-sm outline-none transition-all shadow-xs"
+                      />
+                    </div>
+                    <span className="font-bold text-xs text-primary">MXN</span>
+                    {isUsdConversionManuallyEdited && (
+                      <button
+                        type="button"
+                        onClick={handleResetUsdToMxn}
+                        className="text-[11px] text-primary hover:underline font-semibold cursor-pointer shrink-0 ml-0.5 flex items-center gap-0.5"
+                        title="Restablecer al cálculo automático según tipo de cambio"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">restart_alt</span>
+                        <span>Recalcular</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

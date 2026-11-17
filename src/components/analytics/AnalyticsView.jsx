@@ -40,15 +40,15 @@ export const AnalyticsView = () => {
   const totalFilteredExpense = filteredTransactions
     .filter((t) => t.type === 'expense')
     .reduce((sum, t) => {
-      const mult = t.currency === 'USD' ? exchangeRate : 1;
-      return sum + Math.abs(t.amount) * mult;
+      const val = t.amountMXN ? Math.abs(t.amountMXN) : Math.abs(t.amount) * (t.currency === 'USD' ? exchangeRate : 1);
+      return sum + val;
     }, 0);
 
   const totalFilteredIncome = filteredTransactions
     .filter((t) => t.type === 'income')
     .reduce((sum, t) => {
-      const mult = t.currency === 'USD' ? exchangeRate : 1;
-      return sum + Math.abs(t.amount) * mult;
+      const val = t.amountMXN ? Math.abs(t.amountMXN) : Math.abs(t.amount) * (t.currency === 'USD' ? exchangeRate : 1);
+      return sum + val;
     }, 0);
 
   // Breakdown of expenses by category with subcategory detail for Pie / Donut & Drill-down
@@ -60,16 +60,15 @@ export const AnalyticsView = () => {
       );
 
       const spent = catTransactions.reduce((sum, t) => {
-        const mult = t.currency === 'USD' ? exchangeRate : 1;
-        return sum + Math.abs(t.amount) * mult;
+        const val = t.amountMXN ? Math.abs(t.amountMXN) : Math.abs(t.amount) * (t.currency === 'USD' ? exchangeRate : 1);
+        return sum + val;
       }, 0);
 
       // Subcategories breakdown
       const subMap = {};
       catTransactions.forEach((t) => {
         const subName = t.subcategory || 'General / Sin subcategoría';
-        const mult = t.currency === 'USD' ? exchangeRate : 1;
-        const val = Math.abs(t.amount) * mult;
+        const val = t.amountMXN ? Math.abs(t.amountMXN) : Math.abs(t.amount) * (t.currency === 'USD' ? exchangeRate : 1);
         if (!subMap[subName]) {
           subMap[subName] = { name: subName, amount: 0, count: 0 };
         }
@@ -122,8 +121,8 @@ export const AnalyticsView = () => {
       const amount = filteredTransactions
         .filter((t) => (t.categoryId === c.id || t.category === c.name) && t.type === 'income')
         .reduce((sum, t) => {
-          const mult = t.currency === 'USD' ? exchangeRate : 1;
-          return sum + Math.abs(t.amount) * mult;
+          const val = t.amountMXN ? Math.abs(t.amountMXN) : Math.abs(t.amount) * (t.currency === 'USD' ? exchangeRate : 1);
+          return sum + val;
         }, 0);
 
       return {

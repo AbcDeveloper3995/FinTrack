@@ -31,7 +31,7 @@ export const BankCard = ({
       ? Number(account.min_balance)
       : null;
   const isBelowMin = !isCredit && minBalance !== null && bal < minBalance;
-  const last4 = account.last4 || '8842';
+  const last4 = account.last4 || '';
   const typeMeta = getAccountTypeMeta(account.type);
 
   // Base hex color chosen by user
@@ -58,9 +58,9 @@ export const BankCard = ({
             <span className="text-[11px] sm:text-xs font-semibold tracking-widest uppercase text-white/80 font-mono">
               {account.institution || 'BANCARIA'}
             </span>
-            {/* Specific Account Type Badge */}
-            <span className="px-2 py-0.5 text-[9px] font-bold rounded bg-white/20 text-white tracking-wider uppercase border border-white/20 flex items-center gap-1 shadow-xs backdrop-blur-xs">
-              <span className="material-symbols-outlined text-[11px]">{typeMeta.icon}</span>
+            {/* Specific Account Type Badge (Micro Pill) */}
+            <span className="px-2 py-0.5 text-[8.5px] font-bold rounded-full bg-white/20 text-white tracking-wider uppercase border border-white/20 flex items-center gap-1 shadow-xs backdrop-blur-xs">
+              <span className="material-symbols-outlined text-[10px]">{typeMeta.icon}</span>
               <span>{typeMeta.label}</span>
             </span>
           </div>
@@ -134,7 +134,7 @@ export const BankCard = ({
           <span>••••</span>
           <span>••••</span>
           <span>••••</span>
-          <span className="text-white font-bold">{last4}</span>
+          <span className="text-white font-bold">{last4 ? last4 : '••••'}</span>
         </div>
       </div>
 

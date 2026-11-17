@@ -3,6 +3,23 @@ import { supabase } from '../lib/supabase';
 /**
  * Transaction & Transfer CRUD operations against Supabase
  */
+/**
+ * Calculates updated balance based on signed transaction amount:
+ * - Positive amount (> 0) means money entered the account (income / incoming transfer).
+ * - Negative amount (< 0) means money left the account (expense / outgoing transfer).
+ * For credit cards: spending (negative) increases debt (+), income/payments (positive) reduce debt (-).
+ * For debit/cash/investments/savings: positive increases balance, negative decreases balance.
+ */
+export const calculateUpdatedBalance = (currentBalance, signedAmount, accountType) => {
+  const current = Number(currentBalance) || 0;
+  const num = Number(signedAmount) || 0;
+  const isCredit = accountType === 'credito';
+  if (isCredit) {
+    return current - num;
+  }
+  return current + num;
+};
+
 export const transactionService = {
   async fetchCategories(userId) {
     const { data, error } = await supabase
@@ -62,6 +79,11 @@ export const transactionService = {
       const isTransfer = tx.type === 'transfer';
       const isIncome = tx.type === 'income';
 
+      // Parse custom MXN conversion tag if stored in notes (e.g. [MXN: 375.50])
+      const mxnMatch = tx.notes?.match(/\[MXN:\s*\$?([\d,.]+)\]/);
+      const parsedAmountMXN = mxnMatch ? parseFloat(mxnMatch[1].replace(/,/g, '')) : null;
+      const cleanNotes = tx.notes ? tx.notes.replace(/\s*\|?\s*\[MXN:\s*\$?[\d,.]+\]/g, '').trim() : '';
+
       let icon = tx.categories?.icon;
       if (!icon) {
         if (isTransfer) icon = 'swap_horiz';
@@ -80,6 +102,7 @@ export const transactionService = {
         id: tx.id,
         concept: tx.description,
         amount: Number(tx.amount),
+        amountMXN: parsedAmountMXN,
         date: tx.transaction_date,
         createdAt: tx.created_at,
         type: tx.type,
@@ -94,18 +117,26 @@ export const transactionService = {
         accountColor: tx.accounts?.color || '#4338ca',
         accountId: tx.account_id,
         tags: txTags,
-        notes: tx.notes || '',
+        notes: cleanNotes,
+        rawNotes: tx.notes || '',
         icon,
         iconBg,
       };
     });
   },
 
-  async addTransaction(userId, accounts, { concept, amount, type, categoryId, subcategoryId, accountId, date, notes, tagIds = [] }) {
+  async addTransaction(userId, accounts, { concept, amount, type, categoryId, subcategoryId, accountId, date, notes, tagIds = [], amountMXN = null }) {
     if (!userId) throw new Error('No user authenticated');
 
     const numAmount = parseFloat(amount);
     const finalAmount = type === 'expense' ? -Math.abs(numAmount) : Math.abs(numAmount);
+
+    let finalNotes = notes || '';
+    if (amountMXN !== null && !isNaN(parseFloat(amountMXN)) && parseFloat(amountMXN) > 0) {
+      finalNotes = finalNotes.replace(/\s*\|?\s*\[MXN:\s*\$?[\d,.]+\]/g, '').trim();
+      const tag = `[MXN: ${parseFloat(amountMXN).toFixed(2)}]`;
+      finalNotes = finalNotes ? `${finalNotes} | ${tag}` : tag;
+    }
 
     const { data: newTx, error } = await supabase
       .from('transactions')
@@ -119,7 +150,7 @@ export const transactionService = {
           subcategory_id: subcategoryId || null,
           account_id: accountId || null,
           transaction_date: date || new Date().toISOString().split('T')[0],
-          notes: notes || '',
+          notes: finalNotes,
         },
       ])
       .select()
@@ -136,15 +167,16 @@ export const transactionService = {
       await supabase.from('transaction_tags').insert(tagRelations);
     }
 
-    // Adjust account balance if accountId is present
+    // Adjust account balance if accountId is present with fresh database balance
     if (accountId) {
-      const targetAcc = accounts.find((a) => a.id === accountId);
-      if (targetAcc) {
-        const currentBal = Number(targetAcc.balance) || 0;
-        const updatedBal = targetAcc.type === 'credito'
-          ? (type === 'expense' ? currentBal + Math.abs(numAmount) : currentBal - Math.abs(numAmount))
-          : (type === 'income' ? currentBal + Math.abs(numAmount) : currentBal - Math.abs(numAmount));
+      const { data: freshAcc } = await supabase
+        .from('accounts')
+        .select('id, balance, type')
+        .eq('id', accountId)
+        .single();
 
+      if (freshAcc) {
+        const updatedBal = calculateUpdatedBalance(freshAcc.balance, finalAmount, freshAcc.type);
         await supabase
           .from('accounts')
           .update({ balance: updatedBal })
@@ -160,6 +192,7 @@ export const transactionService = {
     toAccountId,
     amount,
     convertedAmount = null,
+    destinationAmount = null,
     concept = 'Transferencia entre cuentas',
     notes = '',
     date = null,
@@ -177,10 +210,11 @@ export const transactionService = {
 
     const txDate = date || new Date().toISOString().split('T')[0];
 
-    // Calculate amount received by destination account
+    // Calculate amount received by destination account (respect custom user input if provided)
+    const targetConverted = destinationAmount ?? convertedAmount;
     let destAmount = numAmount;
-    if (convertedAmount && !isNaN(parseFloat(convertedAmount)) && parseFloat(convertedAmount) > 0) {
-      destAmount = parseFloat(convertedAmount);
+    if (targetConverted !== null && !isNaN(parseFloat(targetConverted)) && parseFloat(targetConverted) > 0) {
+      destAmount = parseFloat(targetConverted);
     } else if (fromAcc.currency !== toAcc.currency) {
       if (fromAcc.currency === 'MXN' && toAcc.currency === 'USD') {
         destAmount = exchangeRate > 0 ? numAmount / exchangeRate : numAmount;
@@ -234,27 +268,35 @@ export const transactionService = {
 
     if (inError) throw inError;
 
-    // 3. Update From Account Balance
-    const fromCurrentBal = Number(fromAcc.balance) || 0;
-    const fromUpdatedBal = fromAcc.type === 'credito'
-      ? fromCurrentBal + numAmount
-      : fromCurrentBal - numAmount;
-
-    await supabase
+    // 3. Update From Account Balance (outgoing transfer: -numAmount)
+    const { data: freshFrom } = await supabase
       .from('accounts')
-      .update({ balance: fromUpdatedBal })
-      .eq('id', fromAccountId);
+      .select('id, balance, type')
+      .eq('id', fromAccountId)
+      .single();
 
-    // 4. Update To Account Balance
-    const toCurrentBal = Number(toAcc.balance) || 0;
-    const toUpdatedBal = toAcc.type === 'credito'
-      ? toCurrentBal - destAmount
-      : toCurrentBal + destAmount;
+    if (freshFrom) {
+      const fromUpdatedBal = calculateUpdatedBalance(freshFrom.balance, -Math.abs(numAmount), freshFrom.type);
+      await supabase
+        .from('accounts')
+        .update({ balance: fromUpdatedBal })
+        .eq('id', fromAccountId);
+    }
 
-    await supabase
+    // 4. Update To Account Balance (incoming transfer: +destAmount)
+    const { data: freshTo } = await supabase
       .from('accounts')
-      .update({ balance: toUpdatedBal })
-      .eq('id', toAccountId);
+      .select('id, balance, type')
+      .eq('id', toAccountId)
+      .single();
+
+    if (freshTo) {
+      const toUpdatedBal = calculateUpdatedBalance(freshTo.balance, +Math.abs(destAmount), freshTo.type);
+      await supabase
+        .from('accounts')
+        .update({ balance: toUpdatedBal })
+        .eq('id', toAccountId);
+    }
 
     return { outTx, inTx };
   },
@@ -267,21 +309,19 @@ export const transactionService = {
       const txsToDelete = transactions.filter((t) => ids.includes(t.id));
       for (const tx of txsToDelete) {
         if (tx.accountId) {
-          const acc = accounts.find((a) => a.id === tx.accountId);
-          if (acc) {
-            const currentBal = Number(acc.balance) || 0;
-            const absAmount = Math.abs(tx.amount);
-            let revertedBal = currentBal;
-            if (acc.type === 'credito') {
-              revertedBal = tx.type === 'expense' ? currentBal - absAmount : currentBal + absAmount;
-            } else {
-              revertedBal = tx.type === 'expense' ? currentBal + absAmount : currentBal - absAmount;
-            }
+          const { data: freshAcc } = await supabase
+            .from('accounts')
+            .select('id, balance, type')
+            .eq('id', tx.accountId)
+            .single();
 
+          if (freshAcc) {
+            // To revert, apply the opposite of tx.amount: -Number(tx.amount)
+            const revertedBal = calculateUpdatedBalance(freshAcc.balance, -Number(tx.amount), freshAcc.type);
             await supabase
               .from('accounts')
               .update({ balance: revertedBal })
-              .eq('id', acc.id);
+              .eq('id', freshAcc.id);
           }
         }
       }
@@ -297,49 +337,104 @@ export const transactionService = {
     return true;
   },
 
-  async updateTransaction(userId, transactions, accounts, id, { concept, amount, type, categoryId, subcategoryId, accountId, date, notes, tagIds = [] }) {
+  async updateTransaction(userId, transactions, accounts, id, { concept, amount, type, categoryId, subcategoryId, accountId, date, notes, tagIds = [], amountMXN = null }) {
     if (!userId) throw new Error('No user authenticated');
 
     const numAmount = parseFloat(amount);
-    const finalAmount = type === 'expense' ? -Math.abs(numAmount) : Math.abs(numAmount);
-
     const oldTx = transactions.find((t) => t.id === id);
 
-    // 1. Revert old transaction balance impact
-    if (oldTx && oldTx.accountId) {
-      const oldAcc = accounts.find((a) => a.id === oldTx.accountId);
-      if (oldAcc) {
-        const oldBal = Number(oldAcc.balance) || 0;
-        const oldAbs = Math.abs(oldTx.amount);
-        const revertedBal = oldAcc.type === 'credito'
-          ? (oldTx.type === 'expense' ? oldBal - oldAbs : oldBal + oldAbs)
-          : (oldTx.type === 'expense' ? oldBal + oldAbs : oldBal - oldAbs);
+    const isNegative = type === 'expense' || (type === 'transfer' && oldTx && Number(oldTx.amount) < 0);
+    const finalAmount = isNegative ? -Math.abs(numAmount) : Math.abs(numAmount);
 
-        await supabase
+    let finalNotes = notes || '';
+    if (amountMXN !== null && !isNaN(parseFloat(amountMXN)) && parseFloat(amountMXN) > 0) {
+      finalNotes = finalNotes.replace(/\s*\|?\s*\[MXN:\s*\$?[\d,.]+\]/g, '').trim();
+      const tag = `[MXN: ${parseFloat(amountMXN).toFixed(2)}]`;
+      finalNotes = finalNotes ? `${finalNotes} | ${tag}` : tag;
+    } else {
+      finalNotes = finalNotes.replace(/\s*\|?\s*\[MXN:\s*\$?[\d,.]+\]/g, '').trim();
+    }
+
+    // Determine if balance impact actually changed:
+    // If user only edited the date, concept, category, notes, or tags, balance impact has NOT changed.
+    // In that case, we MUST NOT touch account balances to prevent accidental recalculations or race conditions.
+    const oldAmount = oldTx ? Number(oldTx.amount) : null;
+    const oldAccountId = oldTx ? oldTx.accountId : null;
+    const oldType = oldTx ? oldTx.type : null;
+
+    const balanceImpactChanged = (
+      oldAmount !== finalAmount ||
+      oldAccountId !== accountId ||
+      oldType !== type
+    );
+
+    if (balanceImpactChanged) {
+      if (oldAccountId === accountId && accountId) {
+        // Same account: apply the difference (delta = finalAmount - oldAmount) in ONE atomic step
+        const { data: freshAcc } = await supabase
           .from('accounts')
-          .update({ balance: revertedBal })
-          .eq('id', oldAcc.id);
+          .select('id, balance, type')
+          .eq('id', accountId)
+          .single();
+
+        if (freshAcc) {
+          const delta = finalAmount - (oldAmount || 0);
+          const updatedBal = calculateUpdatedBalance(freshAcc.balance, delta, freshAcc.type);
+          await supabase
+            .from('accounts')
+            .update({ balance: updatedBal })
+            .eq('id', accountId);
+        }
+      } else {
+        // Different accounts: revert old account balance and apply to new account
+        if (oldTx && oldAccountId) {
+          const { data: freshOldAcc } = await supabase
+            .from('accounts')
+            .select('id, balance, type')
+            .eq('id', oldAccountId)
+            .single();
+
+          if (freshOldAcc) {
+            const revertedBal = calculateUpdatedBalance(freshOldAcc.balance, -(oldAmount || 0), freshOldAcc.type);
+            await supabase
+              .from('accounts')
+              .update({ balance: revertedBal })
+              .eq('id', oldAccountId);
+          }
+        }
+
+        if (accountId) {
+          const { data: freshNewAcc } = await supabase
+            .from('accounts')
+            .select('id, balance, type')
+            .eq('id', accountId)
+            .single();
+
+          if (freshNewAcc) {
+            const updatedBal = calculateUpdatedBalance(freshNewAcc.balance, finalAmount, freshNewAcc.type);
+            await supabase
+              .from('accounts')
+              .update({ balance: updatedBal })
+              .eq('id', accountId);
+          }
+        }
       }
     }
 
-    // 2. Apply new transaction balance impact
-    if (accountId) {
-      const { data: freshAcc } = await supabase
-        .from('accounts')
-        .select('id, balance, type')
-        .eq('id', accountId)
-        .single();
+    // If it's a transfer and the date changed, automatically sync the date on the paired transfer leg!
+    if (oldTx && oldTx.type === 'transfer' && date && date !== oldTx.date) {
+      const pairedTx = transactions.find((t) =>
+        t.id !== id &&
+        t.type === 'transfer' &&
+        t.date === oldTx.date &&
+        Math.sign(Number(t.amount)) !== Math.sign(Number(oldTx.amount))
+      );
 
-      if (freshAcc) {
-        const currentBal = Number(freshAcc.balance) || 0;
-        const updatedBal = freshAcc.type === 'credito'
-          ? (type === 'expense' ? currentBal + Math.abs(numAmount) : currentBal - Math.abs(numAmount))
-          : (type === 'income' ? currentBal + Math.abs(numAmount) : currentBal - Math.abs(numAmount));
-
+      if (pairedTx) {
         await supabase
-          .from('accounts')
-          .update({ balance: updatedBal })
-          .eq('id', accountId);
+          .from('transactions')
+          .update({ transaction_date: date })
+          .eq('id', pairedTx.id);
       }
     }
 
@@ -354,7 +449,7 @@ export const transactionService = {
         subcategory_id: subcategoryId || null,
         account_id: accountId || null,
         transaction_date: date || new Date().toISOString().split('T')[0],
-        notes: notes || '',
+        notes: finalNotes,
       })
       .eq('id', id)
       .eq('user_id', userId)
